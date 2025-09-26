@@ -37,13 +37,14 @@
 
     body {
       font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      /* Gradiente de fundo do index.html */
+      /* PADRÃO VISUAL: Gradiente de fundo do index.html */
       background: linear-gradient(135deg, #2980b9, #6dd5fa, #74ebd5);
       background-attachment: fixed;
       color: var(--text-primary);
       margin: 0;
       min-height: 100vh;
-      padding: 20px 15px 80px 15px;
+      /* CORREÇÃO: Aumentado padding inferior para evitar sobreposição do rodapé */
+      padding: 20px 15px 100px 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -59,7 +60,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 40px 40px;
       animation: float 25s ease-in-out infinite;
       pointer-events: none;
@@ -444,7 +445,8 @@
     /* Responsividade */
     @media (max-width: 480px) {
       body {
-        padding: 15px 10px 80px 10px;
+        /* CORREÇÃO: Aumentado padding inferior para mobile */
+        padding: 15px 10px 100px 10px;
       }
 
       .form-card, .empresa-card {
@@ -756,105 +758,4 @@
             console.error('Erro ao adicionar obra:', error);
             showToast('Erro ao adicionar obra', 'error');
         } finally {
-            setLoadingState(document.getElementById('btnSalvarObra'), false);
-        }
-    }
-
-    async function excluirObra(empresaId, obraId, nomeEmpresa, nomeObra) {
-        if (!confirm(`Tem certeza que deseja excluir a obra "${nomeObra}" da empresa "${nomeEmpresa}"?`)) return;
-
-        try {
-            await remove(ref(db, `empresas/${empresaId}/obras/${obraId}`));
-            showToast(`Obra "${nomeObra}" excluída com sucesso!`);
-            carregarEmpresas();
-        } catch (error) {
-            console.error('Erro ao excluir obra:', error);
-            showToast('Erro ao excluir obra', 'error');
-        }
-    }
-    
-    // --- Montar Lista de UI ---
-
-    function montarLista() {
-      listaEmpresasDiv.innerHTML = '';
-      
-      const empresasOrdenadas = Object.entries(empresasCache)
-        .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
-
-      if (empresasOrdenadas.length === 0) {
-        listaEmpresasDiv.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">🏢</div>
-            <p>Nenhuma empresa cadastrada ainda.</p>
-            <p>Use o formulário ao lado para começar.</p>
-          </div>
-        `;
-        return;
-      }
-
-      for (const [empresaId, empresa] of empresasOrdenadas) {
-        const obras = empresa.obras ? Object.entries(empresa.obras) : [];
-        const card = document.createElement('div');
-        card.className = 'empresa-card';
-        
-        let obrasHtml = '';
-        if (obras.length > 0) {
-            obrasHtml = `<div class="obras-list-title">Obras Cadastradas (${obras.length})</div>`;
-            
-            obras.sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }))
-                .forEach(([obraId, obra]) => {
-                    obrasHtml += `
-                        <div class="obra-item">
-                            <span>• ${obra.nome}</span>
-                            <div class="obra-actions">
-                                <button class="btn-delete" onclick="excluirObra('${empresaId}', '${obraId}', '${empresa.nome}', '${obra.nome}')">Excluir</button>
-                            </div>
-                        </div>
-                    `;
-                });
-        } else {
-            obrasHtml = '<p style="font-size: 0.9rem; margin-top: 15px; color: var(--warning);">Nenhuma obra cadastrada.</p>';
-        }
-
-        card.innerHTML = `
-          <div class="empresa-info">
-            <span class="empresa-icon">🏢</span>
-            <div>
-                <div class="empresa-nome">${empresa.nome}</div>
-                <div style="font-size: 0.9rem;">CNPJ: ${empresa.cnpj || '-'}</div>
-            </div>
-          </div>
-          
-          <div class="funcionario-actions" style="margin-bottom: 10px;">
-            <button class="btn-secondary" onclick="editarEmpresa('${empresaId}')">Editar Dados</button>
-            <button class="btn-delete" onclick="excluirEmpresa('${empresaId}', '${empresa.nome}')">Excluir Empresa</button>
-          </div>
-          
-          ${obrasHtml}
-        `;
-        
-        listaEmpresasDiv.appendChild(card);
-      }
-    }
-
-    // --- Event Listeners ---
-    
-    formEmpresa.addEventListener('submit', salvarEmpresa);
-    formAdicionarObra.addEventListener('submit', adicionarObra);
-    
-    document.getElementById('cnpjEmpresa').addEventListener('input', e => {
-      e.target.value = formatarCNPJ(e.target.value);
-    });
-    
-    btnLimparForm.addEventListener('click', limparFormulario);
-
-    // Tornar funções globais para onclick no HTML gerado
-    window.editarEmpresa = editarEmpresa;
-    window.excluirEmpresa = excluirEmpresa;
-    window.excluirObra = excluirObra;
-
-    // --- Inicialização ---
-    carregarEmpresas();
-  </script>
-</body>
-</html>
+            setLoadingState(document
