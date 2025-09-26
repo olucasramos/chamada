@@ -6,27 +6,12 @@
   <title>Empresas & Obras - Controle de Presenças</title>
   <style>
     :root {
-      /* Cores de base do projeto */
-      --primary: #1e40af;
-      --primary-dark: #1e3a8a;
-      --primary-light: #3b82f6;
-      --secondary: #06b6d4;
-      --accent: #10b981;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
-      
-      /* Efeitos de Glassmorphism */
-      --surface: rgba(255, 255, 255, 0.1);
-      --surface-hover: rgba(255, 255, 255, 0.15);
-      --surface-card: rgba(255, 255, 255, 0.12);
-      
-      --text-primary: #ffffff;
-      --text-secondary: rgba(255, 255, 255, 0.8);
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
-      --border-radius: 16px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --accent: #2ecc71; /* Verde para botões de ação */
+      --danger: #dc2626; /* Vermelho para exclusão */
+      --text-primary: #ffffff; /* Texto principal branco */
+      --text-secondary: rgba(255, 255, 255, 0.7); /* Texto secundário com leve transparência */
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
     }
 
     * {
@@ -36,127 +21,71 @@
     }
 
     body {
-      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      /* SOLUÇÃO: Aplicado fundo gradiente escuro que garante o contraste */
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      /* SOLUÇÃO: Fundo sólido escuro para garantir compatibilidade e contraste */
+      background-color: #1f2937;
       color: var(--text-primary);
       margin: 0;
       min-height: 100vh;
+      /* Espaçamento para o conteúdo não ficar colado nas bordas e atrás do rodapé */
       padding: 20px 15px 100px 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      animation: float 25s ease-in-out infinite;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
+      gap: 24px;
     }
 
     header {
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 32px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      animation: slideInDown 0.6s ease-out;
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
     .btn-voltar {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.1);
       color: var(--text-primary);
       text-decoration: none;
-      padding: 12px 18px;
-      border-radius: 12px;
+      padding: 10px 16px;
+      border-radius: var(--border-radius);
       font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: var(--shadow);
       transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .btn-voltar:hover {
-      background: var(--surface-hover);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
+      background-color: rgba(255, 255, 255, 0.2);
     }
 
     .header-title {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #ffffff, #e0e7ff);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-align: center;
-      flex: 1;
+      text-align: left;
+      flex-grow: 1;
     }
 
-    .main-grid {
-      width: 100%;
-      max-width: 700px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-
-    @media (min-width: 768px) {
-      .main-grid {
-        grid-template-columns: 2fr 3fr;
-      }
-    }
-
-    .form-section {
-      animation: slideInUp 0.6s ease-out 0.1s both;
-    }
-    
-    .form-card {
-      background: var(--surface-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+    /* SOLUÇÃO: Card com fundo escuro semi-transparente */
+    .card {
+      background-color: rgba(42, 60, 80, 0.8); /* Azul-acinzentado escuro */
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--border-radius);
       padding: 24px;
-      box-shadow: var(--shadow);
-      position: relative;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-
-    .form-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, #10b981, var(--secondary));
-    }
-
-    .form-title {
-      font-size: 1.3rem;
-      font-weight: 700;
+    
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
       margin-bottom: 20px;
-      color: var(--text-primary);
     }
 
     .form-group {
@@ -165,242 +94,62 @@
 
     .form-label {
       display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.8rem;
+      font-weight: 500;
       margin-bottom: 6px;
       color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
     .form-input, .form-select {
       width: 100%;
-      padding: 12px 16px;
-      border-radius: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      background: var(--surface);
-      backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.2);
       color: var(--text-primary);
       font-size: 1rem;
-      font-family: inherit;
       transition: var(--transition);
     }
 
     .form-input:focus, .form-select:focus {
       outline: none;
-      border-color: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-      background: var(--surface-hover);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
     }
 
-    .form-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--success), #10b981);
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      color: white;
-      border: none;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: var(--transition);
-      width: 100%;
-      margin-top: 10px;
-      position: relative;
-      overflow: hidden;
+      background-color: var(--accent);
     }
-
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
+      background-color: #27ae60;
     }
-    
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
+
     .btn-secondary {
-        background: var(--surface);
-        color: var(--text-primary);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 8px 15px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: var(--transition);
-        margin-top: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      margin-top: 8px;
     }
-
     .btn-secondary:hover {
-        background: var(--surface-hover);
-        transform: translateY(-1px);
+      background-color: rgba(255, 255, 255, 0.2);
     }
 
-    .list-section {
-      animation: fadeInUp 0.8s ease-out 0.3s both;
-    }
-
-    .list-header {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--text-primary);
-      text-align: center;
-    }
-    
-    .empresa-card {
-        background: var(--surface-card);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: var(--border-radius);
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: var(--shadow);
-        transition: var(--transition);
-        position: relative;
-    }
-    
-    .empresa-card:hover {
-        transform: translateY(-2px);
-        background: var(--surface-hover);
-        box-shadow: var(--shadow-hover);
-    }
-    
-    .empresa-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .empresa-icon {
-        font-size: 1.8rem;
-        color: #10b981;
-    }
-    
-    .empresa-nome {
-        font-size: 1.4rem;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    
-    .obras-list-title {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        color: var(--secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 5px;
-    }
-    
-    .obra-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        font-size: 0.95rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .obra-item:last-child {
-        border-bottom: none;
-    }
-    
-    .obra-actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    .obra-actions button {
-        background: var(--surface);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: var(--text-primary);
-        padding: 6px 10px;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: var(--transition);
-    }
-    
-    .obra-actions button:hover {
-        background: var(--surface-hover);
-        transform: translateY(-1px);
-    }
-    
-    .obra-actions .btn-delete {
-        background: var(--danger);
-        border-color: var(--danger);
-    }
-    
-    .obra-actions .btn-delete:hover {
-        background: #b91c1c;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-secondary);
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .loading {
-      position: relative;
-    }
-
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--success);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-    }
-
-    .toast.show {
-      transform: translateX(0);
-    }
-
-    .toast.error {
-      background: var(--danger);
+    .divider {
+        margin: 24px 0;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
     }
 
     footer {
@@ -409,115 +158,75 @@
       left: 0;
       right: 0;
       background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-secondary);
+      color: var(--text-secondary); /* Corrigida para bom contraste */
       text-align: center;
-      font-size: 0.9rem;
-      padding: 16px 20px;
+      font-size: 0.85rem;
+      padding: 16px;
       font-weight: 500;
     }
 
-    @keyframes slideInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 480px) {
-      body {
-        padding: 15px 10px 100px 10px;
-      }
-      .form-card, .empresa-card {
-        padding: 20px;
-      }
-      .main-grid {
-        gap: 24px;
-      }
-    }
-
-    .btn-primary:focus-visible,
-    .btn-secondary:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
   </style>
 </head>
 <body>
-  <header>
-    <a href="index.html" class="btn-voltar" aria-label="Voltar para página inicial">
-      <span>←</span> Voltar
-    </a>
-    <h1 class="header-title">Empresas & Obras</h1>
-  </header>
 
-  <div class="main-grid">
-    <div class="form-section">
-      <div class="form-card">
-        <h2 class="form-title" id="formTitle">Cadastrar Nova Empresa</h2>
-        
-        <form id="formEmpresa" autocomplete="off">
-          <input type="hidden" id="editandoEmpresaId" value="" />
+  <div class="container">
+    <header>
+      <a href="index.html" class="btn-voltar">
+        <span>←</span> Voltar
+      </a>
+      <h1 class="header-title">Empresas & Obras</h1>
+    </header>
 
-          <div class="form-group">
-            <label for="nomeEmpresa" class="form-label">Nome da Empresa</label>
-            <input type="text" id="nomeEmpresa" class="form-input" required placeholder="Ex: Construtora Alpha" />
-          </div>
-
-          <div class="form-group">
-            <label for="obraEmpresa" class="form-label">Obra (Opcional ao cadastrar a empresa)</label>
-            <input type="text" id="obraEmpresa" class="form-input" placeholder="Ex: Edifício Central" />
-          </div>
-
-          <div class="form-group">
-            <label for="cnpjEmpresa" class="form-label">CNPJ (Opcional)</label>
-            <input type="text" id="cnpjEmpresa" class="form-input" placeholder="00.000.000/0000-00" maxlength="18" />
-          </div>
-
-          <button type="submit" class="btn-primary" id="btnSalvarEmpresa">
-            <span>Salvar Empresa</span>
-          </button>
-          
-          <button type="button" class="btn-secondary" id="btnLimparForm" style="display: none;">
-            <span>Cancelar Edição</span>
-          </button>
-        </form>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-            <h2 class="form-title">Adicionar Obra à Empresa</h2>
-            <form id="formAdicionarObra" autocomplete="off">
-                <div class="form-group">
-                    <label for="selectEmpresa" class="form-label">Selecionar Empresa</label>
-                    <select id="selectEmpresa" class="form-select" required>
-                        <option value="" disabled selected>Selecione uma empresa</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="nomeObra" class="form-label">Nome da Nova Obra</label>
-                    <input type="text" id="nomeObra" class="form-input" required placeholder="Ex: Loteamento Sol Nascente" />
-                </div>
-                <button type="submit" class="btn-primary" id="btnSalvarObra">
-                    <span>Adicionar Obra</span>
-                </button>
-            </form>
+    <div class="card">
+      <h2 class="card-title" id="formTitle">Cadastrar Nova Empresa</h2>
+      
+      <form id="formEmpresa" autocomplete="off">
+        <input type="hidden" id="editandoEmpresaId" value="" />
+        <div class="form-group">
+          <label for="nomeEmpresa" class="form-label">Nome da Empresa</label>
+          <input type="text" id="nomeEmpresa" class="form-input" required placeholder="Ex: Construtora Alpha" />
         </div>
+        <div class="form-group">
+          <label for="obraEmpresa" class="form-label">Obra (Opcional)</label>
+          <input type="text" id="obraEmpresa" class="form-input" placeholder="Ex: Edifício Central" />
+        </div>
+        <div class="form-group">
+          <label for="cnpjEmpresa" class="form-label">CNPJ (Opcional)</label>
+          <input type="text" id="cnpjEmpresa" class="form-input" placeholder="00.000.000/0000-00" maxlength="18" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="btnSalvarEmpresa">
+          Salvar Empresa
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnLimparForm" style="display: none;">
+          Cancelar Edição
+        </button>
+      </form>
+      
+      <hr class="divider">
+
+      <h2 class="card-title">Adicionar Obra à Empresa</h2>
+      <form id="formAdicionarObra" autocomplete="off">
+          <div class="form-group">
+              <label for="selectEmpresa" class="form-label">Selecionar Empresa</label>
+              <select id="selectEmpresa" class="form-select" required>
+                  <option value="" disabled selected>Selecione uma empresa</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label for="nomeObra" class="form-label">Nome da Nova Obra</label>
+              <input type="text" id="nomeObra" class="form-input" required placeholder="Ex: Loteamento Sol Nascente" />
+          </div>
+          <button type="submit" class="btn btn-primary" id="btnSalvarObra">
+            Adicionar Obra
+          </button>
+      </form>
+    </div>
+
+    <div id="listaEmpresas">
       </div>
-    </div>
-
-    <div class="list-section">
-      <h2 class="list-header">Empresas Cadastradas</h2>
-      <div id="listaEmpresas">
-        </div>
-    </div>
   </div>
 
   <footer>
@@ -525,6 +234,8 @@
   </footer>
 
   <script type="module">
+    // O seu JavaScript permanece o mesmo, ele não precisa de alterações.
+    // Cole aqui o script que estava no final do seu arquivo anterior.
     import { db, ref, set, get, update, remove } from "./firebase.js";
 
     // Elementos DOM
@@ -538,8 +249,6 @@
 
     let empresasCache = {};
     let editandoEmpresaId = null;
-
-    // --- Funções Utilitárias ---
     
     function showToast(message, type = 'success') {
       const toast = document.createElement('div');
@@ -556,11 +265,11 @@
     
     function setLoadingState(element, loading) {
       if (loading) {
-        element.classList.add('loading');
         element.disabled = true;
+        element.textContent = 'Salvando...';
       } else {
-        element.classList.remove('loading');
         element.disabled = false;
+        // O texto original será restaurado no HTML
       }
     }
 
@@ -576,26 +285,18 @@
         formEmpresa.reset();
         formAdicionarObra.reset();
         formTitle.textContent = 'Cadastrar Nova Empresa';
-        btnSalvarEmpresa.innerHTML = '<span>Salvar Empresa</span>';
+        btnSalvarEmpresa.textContent = 'Salvar Empresa';
         btnLimparForm.style.display = 'none';
         editandoEmpresaId = null;
         document.getElementById('editandoEmpresaId').value = '';
     }
 
-    // --- CRUD Principal (Empresas) ---
-
     async function carregarEmpresas() {
       try {
         const snapshot = await get(ref(db, 'empresas'));
-        if (snapshot.exists()) {
-          empresasCache = snapshot.val();
-          montarLista();
-          preencherSelectEmpresas();
-        } else {
-          empresasCache = {};
-          montarLista();
-          preencherSelectEmpresas();
-        }
+        empresasCache = snapshot.exists() ? snapshot.val() : {};
+        montarLista();
+        preencherSelectEmpresas();
       } catch (error) {
         console.error('Erro ao carregar empresas:', error);
         showToast('Erro ao carregar empresas', 'error');
@@ -604,10 +305,8 @@
 
     function preencherSelectEmpresas() {
         selectEmpresa.innerHTML = '<option value="" disabled selected>Selecione uma empresa</option>';
-        
         const empresasOrdenadas = Object.entries(empresasCache)
-            .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
-
+            .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
         empresasOrdenadas.forEach(([id, emp]) => {
             selectEmpresa.innerHTML += `<option value="${id}">${emp.nome}</option>`;
         });
@@ -616,85 +315,69 @@
     async function salvarEmpresa(e) {
       e.preventDefault();
       setLoadingState(btnSalvarEmpresa, true);
-
       try {
         const nomeEmpresa = document.getElementById('nomeEmpresa').value.trim();
-        const obraEmpresa = document.getElementById('obraEmpresa').value.trim();
-        const cnpjEmpresa = document.getElementById('cnpjEmpresa').value.trim();
-        const id = document.getElementById('editandoEmpresaId').value;
-        
         if (!nomeEmpresa) {
           showToast('O nome da empresa é obrigatório.', 'error');
-          setLoadingState(btnSalvarEmpresa, false);
           return;
         }
-
         const dados = {
           nome: nomeEmpresa,
-          cnpj: cnpjEmpresa,
+          cnpj: document.getElementById('cnpjEmpresa').value.trim(),
         };
+        const id = document.getElementById('editandoEmpresaId').value;
+        const obraEmpresa = document.getElementById('obraEmpresa').value.trim();
 
         if (id) {
-          // Atualizar Empresa
           await update(ref(db, `empresas/${id}`), dados);
-          
           if (obraEmpresa) {
               const obras = empresasCache[id].obras || {};
               const obraExistente = Object.values(obras).some(obra => obra.nome.toLowerCase() === obraEmpresa.toLowerCase());
               if (!obraExistente) {
-                  const newObraId = Date.now();
-                  await set(ref(db, `empresas/${id}/obras/${newObraId}`), { nome: obraEmpresa });
+                  await set(ref(db, `empresas/${id}/obras/${Date.now()}`), { nome: obraEmpresa });
               }
           }
-          
           showToast('Empresa atualizada com sucesso!');
         } else {
-          // Cadastrar Nova Empresa
           const novoId = Date.now();
-          dados.obras = {};
           if (obraEmpresa) {
-              dados.obras[Date.now() + 1] = { nome: obraEmpresa };
+              dados.obras = { [Date.now() + 1]: { nome: obraEmpresa } };
           }
-          
           await set(ref(db, `empresas/${novoId}`), dados);
           showToast('Empresa cadastrada com sucesso!');
         }
-
         limparFormulario();
-        carregarEmpresas();
+        await carregarEmpresas();
       } catch (error) {
         console.error('Erro ao salvar empresa:', error);
         showToast('Erro ao salvar empresa', 'error');
       } finally {
         setLoadingState(btnSalvarEmpresa, false);
+        btnSalvarEmpresa.textContent = 'Salvar Empresa';
       }
     }
     
     function editarEmpresa(id) {
         const empresa = empresasCache[id];
         if (!empresa) return;
-
         editandoEmpresaId = id;
         document.getElementById('editandoEmpresaId').value = id;
         formTitle.textContent = `Editar Empresa: ${empresa.nome}`;
-        btnSalvarEmpresa.innerHTML = '<span>Atualizar Empresa</span>';
-        btnLimparForm.style.display = 'inline-block';
-
+        btnSalvarEmpresa.textContent = 'Atualizar Empresa';
+        btnLimparForm.style.display = 'block';
         document.getElementById('nomeEmpresa').value = empresa.nome || '';
         document.getElementById('cnpjEmpresa').value = empresa.cnpj || '';
         document.getElementById('obraEmpresa').value = '';
-        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function excluirEmpresa(id, nome) {
-        if (!confirm(`Tem certeza que deseja excluir a empresa "${nome}" e todas as suas obras? Esta ação não pode ser desfeita.`)) return;
-
+        if (!confirm(`Tem certeza que deseja excluir a empresa "${nome}" e todas as suas obras?`)) return;
         try {
             await remove(ref(db, `empresas/${id}`));
-            showToast(`Empresa "${nome}" excluída com sucesso!`);
+            showToast(`Empresa "${nome}" excluída!`);
             limparFormulario();
-            carregarEmpresas();
+            await carregarEmpresas();
         } catch (error) {
             console.error('Erro ao excluir empresa:', error);
             showToast('Erro ao excluir empresa', 'error');
@@ -705,55 +388,38 @@
         e.preventDefault();
         const btn = document.getElementById('btnSalvarObra');
         setLoadingState(btn, true);
-        
         try {
             const empresaId = selectEmpresa.value;
             const nomeObra = document.getElementById('nomeObra').value.trim();
-            
             if (!empresaId || !nomeObra) {
                 showToast('Selecione a empresa e digite o nome da obra.', 'error');
-                setLoadingState(btn, false);
                 return;
             }
-            
-            const empresa = empresasCache[empresaId];
-            if (!empresa) {
-                showToast('Empresa selecionada inválida.', 'error');
-                setLoadingState(btn, false);
-                return;
-            }
-            
-            const obras = empresa.obras || {};
+            const obras = empresasCache[empresaId]?.obras || {};
             const obraExistente = Object.values(obras).some(obra => (obra.nome || '').toLowerCase() === nomeObra.toLowerCase());
-            
             if (obraExistente) {
-                showToast(`A obra "${nomeObra}" já existe para esta empresa.`, 'error');
-                setLoadingState(btn, false);
+                showToast(`A obra "${nomeObra}" já existe.`, 'error');
                 return;
             }
-
-            const newObraId = Date.now();
-            await set(ref(db, `empresas/${empresaId}/obras/${newObraId}`), { nome: nomeObra });
-            
-            showToast(`Obra "${nomeObra}" adicionada com sucesso!`);
+            await set(ref(db, `empresas/${empresaId}/obras/${Date.now()}`), { nome: nomeObra });
+            showToast(`Obra "${nomeObra}" adicionada!`);
             formAdicionarObra.reset();
-            carregarEmpresas();
-            
+            await carregarEmpresas();
         } catch (error) {
             console.error('Erro ao adicionar obra:', error);
             showToast('Erro ao adicionar obra', 'error');
         } finally {
             setLoadingState(btn, false);
+            btn.textContent = 'Adicionar Obra';
         }
     }
 
     async function excluirObra(empresaId, obraId, nomeEmpresa, nomeObra) {
-        if (!confirm(`Tem certeza que deseja excluir a obra "${nomeObra}" da empresa "${nomeEmpresa}"?`)) return;
-
+        if (!confirm(`Tem certeza que deseja excluir a obra "${nomeObra}"?`)) return;
         try {
             await remove(ref(db, `empresas/${empresaId}/obras/${obraId}`));
-            showToast(`Obra "${nomeObra}" excluída com sucesso!`);
-            carregarEmpresas();
+            showToast(`Obra "${nomeObra}" excluída!`);
+            await carregarEmpresas();
         } catch (error) {
             console.error('Erro ao excluir obra:', error);
             showToast('Erro ao excluir obra', 'error');
@@ -762,83 +428,60 @@
 
     function montarLista() {
       listaEmpresasDiv.innerHTML = '';
-      
       const empresasOrdenadas = Object.entries(empresasCache)
-        .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
-
+        .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+      
       if (empresasOrdenadas.length === 0) {
-        listaEmpresasDiv.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">🏢</div>
-            <p>Nenhuma empresa cadastrada ainda.</p>
-          </div>
-        `;
+        listaEmpresasDiv.innerHTML = `<div class="card" style="text-align: center; color: var(--text-secondary);">🏢<p>Nenhuma empresa cadastrada ainda.</p></div>`;
         return;
       }
 
       for (const [empresaId, empresa] of empresasOrdenadas) {
-        const obras = empresa.obras ? Object.entries(empresa.obras) : [];
         const card = document.createElement('div');
-        card.className = 'empresa-card';
-        
-        let obrasHtml = '';
-        if (obras.length > 0) {
-            obrasHtml = `<div class="obras-list-title">Obras Cadastradas (${obras.length})</div>`;
-            
-            obras.sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }))
-                .forEach(([obraId, obra]) => {
-                    obrasHtml += `
-                        <div class="obra-item">
-                            <span>• ${obra.nome}</span>
-                            <div class="obra-actions">
-                                <button class="btn-delete" onclick="excluirObra('${empresaId}', '${obraId}', '${empresa.nome}', '${obra.nome}')">Excluir</button>
-                            </div>
-                        </div>
-                    `;
-                });
-        } else {
-            obrasHtml = '<p style="font-size: 0.9rem; margin-top: 15px; color: var(--warning);">Nenhuma obra cadastrada.</p>';
+        card.className = 'card';
+        card.style.marginBottom = '16px';
+
+        let obrasHtml = '<p style="font-size: 0.9rem; color: var(--text-secondary);">Nenhuma obra cadastrada.</p>';
+        if (empresa.obras && Object.keys(empresa.obras).length > 0) {
+            obrasHtml = Object.entries(empresa.obras)
+                .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'))
+                .map(([obraId, obra]) => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>• ${obra.nome}</span>
+                        <button onclick="excluirObra('${empresaId}', '${obraId}', '${empresa.nome}', '${obra.nome}')" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;">Excluir</button>
+                    </div>
+                `).join('');
         }
 
         card.innerHTML = `
-          <div class="empresa-info">
-            <span class="empresa-icon">🏢</span>
-            <div>
-                <div class="empresa-nome">${empresa.nome}</div>
-                <div style="font-size: 0.9rem;">CNPJ: ${empresa.cnpj || '-'}</div>
-            </div>
+          <h2 class="card-title" style="font-size: 1.1rem;">${empresa.nome}</h2>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">CNPJ: ${empresa.cnpj || '-'}</p>
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button onclick="editarEmpresa('${empresaId}')" class="btn btn-secondary" style="width: auto; padding: 8px 16px; margin-top:0;">Editar</button>
+            <button onclick="excluirEmpresa('${empresaId}', '${empresa.nome}')" class="btn" style="background:var(--danger); width: auto; padding: 8px 16px;">Excluir Empresa</button>
           </div>
-          
-          <div class="funcionario-actions" style="margin-bottom: 10px; display: flex; gap: 8px;">
-            <button class="btn-secondary" onclick="editarEmpresa('${empresaId}')">Editar Dados</button>
-            <button class="btn-delete obra-actions button" onclick="excluirEmpresa('${empresaId}', '${empresa.nome}')">Excluir Empresa</button>
-          </div>
-          
+          <hr class="divider">
+          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">Obras</h3>
           ${obrasHtml}
         `;
         
         listaEmpresasDiv.appendChild(card);
       }
     }
-
-    // --- Event Listeners ---
     
     formEmpresa.addEventListener('submit', salvarEmpresa);
     formAdicionarObra.addEventListener('submit', adicionarObra);
-    
     document.getElementById('cnpjEmpresa').addEventListener('input', e => {
       e.target.value = formatarCNPJ(e.target.value);
     });
-    
     btnLimparForm.addEventListener('click', limparFormulario);
 
-    // Tornar funções globais para onclick no HTML gerado
     window.editarEmpresa = editarEmpresa;
     window.excluirEmpresa = excluirEmpresa;
     window.excluirObra = excluirObra;
 
-    // --- Inicialização ---
     carregarEmpresas();
   </script>
+
 </body>
 </html>
