@@ -1,914 +1,368 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hora Extra - Controle de Presenças</title>
-<style>
-  /* Mantendo as variáveis existentes para compatibilidade, mas alterando o gradiente principal */
-  :root {
-    --primary: #1e40af;
-    --primary-dark: #1e3a8a;
-    --primary-light: #3b82f6;
-    --secondary: #06b6d4;
-    /* Alterando cores de destaque para combinar mais com o tema index.html */
-    --accent: #2ecc71; /* Um verde mais vibrante */
-    --success: #27ae60;
-    --warning: #f1c40f; /* Amarelo para warning */
-    --danger: #dc2626;
-    --surface: rgba(255, 255, 255, 0.1);
-    --surface-hover: rgba(255, 255, 255, 0.15);
-    --surface-card: rgba(255, 255, 255, 0.12);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.8);
-    --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
-    --border-radius: 16px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    /* NOVO: Gradiente de fundo do index.html */
-    background: linear-gradient(135deg, #2980b9, #6dd5fa, #74ebd5);
-    background-attachment: fixed;
-    color: var(--text-primary);
-    margin: 0;
-    min-height: 100vh;
-    padding: 20px 15px 80px 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  /* Elementos decorativos - MANTIDO o do horaextra.html, mas poderia ser o do index.html */
-  body::before {
-    content: '';
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: float 25s ease-in-out infinite;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(3deg); }
-  }
-
-  header {
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    animation: slideInDown 0.6s ease-out;
-  }
-
-  .btn-voltar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(21, 67, 96, 0.9); /* NOVO: Cor de botão do index.html */
-    backdrop-filter: blur(10px); /* NOVO: Blur do index.html */
-    border: 1px solid rgba(255, 255, 255, 0.1); /* NOVO: Borda do index.html */
-    color: var(--text-primary);
-    text-decoration: none;
-    padding: 12px 18px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4); /* NOVO: Sombra mais escura */
-    transition: var(--transition);
-  }
-
-  .btn-voltar:hover {
-    background: rgba(14, 42, 72, 0.95); /* NOVO: Hover do index.html */
-    transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6); /* NOVO: Sombra hover mais profunda */
-  }
-
-  .header-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    /* Mantendo o gradiente de texto para contraste */
-    background: linear-gradient(135deg, #ffffff, #e0e7ff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-    flex: 1;
-  }
-
-  .date-section {
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 32px;
-    animation: slideInUp 0.6s ease-out 0.1s both;
-  }
-
-  .date-label {
-    display: block;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text-secondary);
-    text-align: center;
-  }
-
-  #dataSelecionada {
-    width: 100%;
-    padding: 16px 20px;
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: var(--surface);
-    backdrop-filter: blur(20px);
-    color: var(--text-primary);
-    font-size: 1.1rem;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: var(--shadow);
-  }
-
-  #dataSelecionada:hover {
-    background: var(--surface-hover);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-  }
-
-  #dataSelecionada:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3); /* NOVO: Sombra de foco com var(--accent) */
-  }
-
-  .funcionarios-container {
-    width: 100%;
-    max-width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    animation: fadeInUp 0.8s ease-out 0.3s both;
-  }
-
-  .funcionario-card {
-    background: var(--surface-card);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: var(--border-radius);
-    padding: 24px;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .funcionario-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    /* NOVO: Gradiente de cor de destaque com o novo warning/accent */
-    background: linear-gradient(45deg, var(--warning), var(--accent));
-    border-radius: 0 4px 4px 0;
-  }
-
-  .funcionario-card:hover {
-    transform: translateY(-2px);
-    background: var(--surface-hover);
-    box-shadow: var(--shadow-hover);
-  }
-
-  .funcionario-card.active {
-    border-color: var(--accent);
-    background: rgba(46, 204, 113, 0.1); /* NOVO: Cor de fundo ativo com o novo accent */
-  }
-
-  .funcionario-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    cursor: pointer;
-  }
-
-  .funcionario-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    /* NOVO: Gradiente de avatar com o novo warning/accent */
-    background: linear-gradient(135deg, var(--warning), var(--accent));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: white;
-    text-transform: uppercase;
-  }
-
-  .funcionario-info {
-    flex: 1;
-  }
-
-  .funcionario-nome {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .funcionario-tipo {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .hora-extra-toggle {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    position: relative;
-    cursor: pointer;
-    transition: var(--transition);
-    flex-shrink: 0;
-  }
-
-  .hora-extra-toggle.checked {
-    border-color: var(--accent);
-    background: var(--accent);
-    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3); /* NOVO: Sombra de checked com o novo accent */
-  }
-
-  .hora-extra-toggle.checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 700;
-  }
-
-  .options-group {
-    margin-top: 16px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border-left: 4px solid var(--warning);
-    display: none;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  .options-group.show {
-    display: block;
-  }
-
-  .option-section {
-    margin-bottom: 16px;
-  }
-
-  .option-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--warning);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .option-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .option-button {
-    background: var(--surface);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    user-select: none;
-  }
-
-  .option-button:hover {
-    background: var(--surface-hover);
-    transform: translateY(-1px);
-  }
-
-  .option-button.selected {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); /* NOVO: Sombra de selecionado com o novo accent */
-  }
-
-  .hours-section {
-    display: none;
-  }
-
-  .hours-section.show {
-    display: block;
-  }
-
-  .hours-select {
-    width: 100%;
-    max-width: 150px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: var(--surface);
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .hours-select:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3); /* NOVO: Sombra de foco com o novo accent */
-  }
-
-  /* NOVO ESTILO: Botão Salvar com a estética do index.html */
-  .btn-salvar {
-    background: rgba(21, 67, 96, 0.9); /* Cor de fundo do index.html */
-    padding: 20px 30px; /* Mais padding para ficar mais parecido com o index.html */
-    border-radius: 16px; /* Mais arredondado */
-    font-size: 1.3rem; /* Fonte maior */
-    font-weight: 700;
-    color: white;
-    border: 1px solid rgba(255,255,255,0.1); /* Borda sutil */
-    box-shadow: 0 8px 25px rgba(21, 67, 96, 0.4), 0 2px 10px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin: 32px auto;
-    max-width: 300px;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-  }
-
-  .btn-salvar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    /* Efeito de brilho ao passar o mouse */
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    transition: left 0.5s;
-  }
-
-  .btn-salvar:hover::before {
-    left: 100%;
-  }
-
-  .btn-salvar:hover {
-    background: rgba(14, 42, 72, 0.95);
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 15px 35px rgba(21, 67, 96, 0.6), 0 5px 20px rgba(0,0,0,0.2);
-  }
-
-  .btn-salvar:active {
-    transform: translateY(-1px) scale(1.01);
-  }
-  
-  /* Mantido */
-  .btn-salvar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none; 
-    background: rgba(21, 67, 96, 0.6);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-secondary);
-  }
-
-  .empty-icon {
-    font-size: 3rem;
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-
-  /* Loading state */
-  .loading {
-    position: relative;
-  }
-
-  .loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  /* Toast notifications - MANTIDO */
-  .toast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--success);
-    color: white;
-    padding: 16px 24px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-  }
-
-  .toast.show {
-    transform: translateX(0);
-  }
-
-  .toast.error {
-    background: var(--danger);
-  }
-
-  footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    /* NOVO: Fundo do footer do index.html */
-    background: rgba(21, 67, 96, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ddd; /* NOVO: Cor de texto do footer do index.html */
-    text-align: center;
-    font-size: 0.9rem;
-    padding: 12px 0; /* NOVO: Padding do footer do index.html */
-    font-weight: 500;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.3); /* NOVO: Sombra do footer do index.html */
-  }
-
-  /* Animações - MANTIDO */
-  @keyframes slideInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hora Extra - Controle de Presenças</title>
+  <style>
+    :root {
+      --accent: #2ecc71;
+      --warning: #f1c40f;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      max-height: 0;
-      padding: 0 16px;
-    }
-    to {
-      opacity: 1;
-      max-height: 300px;
-      padding: 16px;
-    }
-  }
-
-  /* Responsividade - MANTIDO */
-  @media (max-width: 480px) {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      padding: 15px 10px 80px 10px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #1f2937;
+      color: var(--text-primary);
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px 15px 150px 15px;
     }
-
-    .funcionario-card {
-      padding: 20px 16px;
-    }
-
-    .option-buttons {
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 24px;
     }
-
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .btn-voltar {
+      display: flex; align-items: center; gap: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary); text-decoration: none;
+      padding: 10px 16px; border-radius: var(--border-radius);
+      font-weight: 600; transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-voltar:hover { background-color: rgba(255, 255, 255, 0.2); }
+    .header-title { font-size: 1.5rem; font-weight: 700; text-align: left; flex-grow: 1; }
+    .card {
+      background-color: rgba(42, 60, 80, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 0.8rem; font-weight: 500;
+      margin-bottom: 6px; color: var(--text-secondary); text-transform: uppercase;
+    }
+    .form-input, .form-select {
+      width: 100%; padding: 12px 14px; border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-primary); font-size: 1rem;
+      transition: var(--transition);
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
+    }
+    .funcionario-card {
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .funcionario-card:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+    .funcionario-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; cursor: pointer; }
+    .funcionario-info h3 { font-size: 1.1rem; margin-bottom: 4px; }
+    .funcionario-info p { font-size: 0.85rem; color: var(--text-secondary); }
+    .options-group {
+        margin-top: 12px; padding-left: 12px;
+        border-left: 3px solid var(--warning);
+        display: none;
+    }
+    .options-group.show { display: block; }
+    .option-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 8px; color: var(--warning); }
+    .option-buttons { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn-salvar-container {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 15px;
+      background: linear-gradient(to top, #1f2937, rgba(31, 41, 55, 0));
+      display: flex;
+      justify-content: center;
+    }
     .btn-salvar {
-      font-size: 1.2rem; /* Ajustado para 1.2rem */
-      padding: 18px 25px; /* Ajustado o padding */
+      width: 100%; max-width: 570px;
+      padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: 600;
+      color: white; border: none; cursor: pointer; transition: var(--transition);
+      background-color: var(--accent);
     }
-  }
-
-  /* Estados de foco */
-  .btn-salvar:focus-visible,
-  .option-button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-</style>
+    .btn-salvar:hover { background-color: #27ae60; }
+    .btn-salvar:disabled { background-color: #555; cursor: not-allowed; }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="btn-voltar">
+        <span>←</span> Voltar
+      </a>
+      <h1 class="header-title">Hora Extra</h1>
+    </header>
 
-<header>
-  <a href="index.html" class="btn-voltar" aria-label="Voltar para página inicial">
-    <span>←</span> Voltar
-  </a>
-  <h1 class="header-title">Hora Extra</h1>
-</header>
+    <div class="card">
+      <h2 class="card-title">1. Selecione a Data e o Local</h2>
+      <div class="form-group">
+        <label for="dataSelecionada" class="form-label">Data</label>
+        <input type="date" id="dataSelecionada" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="selectEmpresa" class="form-label">Empresa</label>
+        <select id="selectEmpresa" class="form-select">
+          <option value="">Selecione a empresa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="selectObra" class="form-label">Obra</label>
+        <select id="selectObra" class="form-select" disabled>
+          <option value="">Selecione uma empresa primeiro</option>
+        </select>
+      </div>
+    </div>
 
-<div class="date-section">
-  <label for="dataSelecionada" class="date-label">Data das Horas Extras</label>
-  <input type="date" id="dataSelecionada" />
-</div>
-
-<div class="funcionarios-container" id="listaFuncionarios">
+    <div class="card" id="horaExtraCard" style="display: none;">
+      <h2 class="card-title">2. Lançar Horas Extras</h2>
+      <div id="listaFuncionarios">
+        </div>
+    </div>
   </div>
 
-<button class="btn-salvar" id="btnSalvar">
-  <span>Salvar Horas Extras</span>
-</button>
-
-<footer>
-  <p>Desenvolvido por Lucas Ramos Aragão</p>
-</footer>
-
-<script type="module">
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-import { app } from "./firebase.js";
-
-const db = getDatabase(app);
-const listaFuncionarios = document.getElementById("listaFuncionarios");
-const dataSelecionadaInput = document.getElementById("dataSelecionada");
-const btnSalvar = document.getElementById("btnSalvar");
-
-let funcionarioData = {};
-
-// Funções utilitárias
-function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
+  <div class="btn-salvar-container">
+    <button class="btn-salvar" id="btnSalvar" disabled>Salvar Horas Extras</button>
+  </div>
   
-  setTimeout(() => toast.classList.add('show'), 100);
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => document.body.removeChild(toast), 300);
-  }, 3000);
-}
+  <script type="module">
+    import { db, ref, get, set } from "./firebase.js";
 
-function setLoadingState(element, loading) {
-  if (loading) {
-    element.classList.add('loading');
-    element.disabled = true;
-  } else {
-    element.classList.remove('loading');
-    element.disabled = false;
-  }
-}
+    const dataSelecionadaInput = document.getElementById("dataSelecionada");
+    const selectEmpresa = document.getElementById("selectEmpresa");
+    const selectObra = document.getElementById("selectObra");
+    const horaExtraCard = document.getElementById("horaExtraCard");
+    const listaFuncionariosDiv = document.getElementById("listaFuncionarios");
+    const btnSalvar = document.getElementById("btnSalvar");
 
-function getInitials(nome) {
-  return nome.split(' ').map(n => n[0]).join('').substring(0, 2);
-}
+    let funcionariosCache = {};
+    let empresasCache = {};
 
-// Data de hoje
-function definirDataHoje() {
-  const hoje = new Date();
-  const yyyy = hoje.getFullYear();
-  const mm = String(hoje.getMonth() + 1).padStart(2,'0');
-  const dd = String(hoje.getDate()).padStart(2,'0');
-  dataSelecionadaInput.value = `${yyyy}-${mm}-${dd}`;
-}
-
-// Carregar funcionários
-async function carregarFuncionarios() {
-  setLoadingState(btnSalvar, true);
-  
-  try {
-    const snapshot = await get(ref(db, 'funcionarios'));
-    if (snapshot.exists()) {
-      const funcionarios = snapshot.val();
-      montarCards(funcionarios);
-    } else {
-      listaFuncionarios.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">👥</div>
-          <p>Nenhum funcionário encontrado.</p>
-        </div>
-      `;
+    function definirDataHoje() {
+      const hoje = new Date();
+      const yyyy = hoje.getFullYear();
+      const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoje.getDate()).padStart(2, '0');
+      dataSelecionadaInput.value = `${yyyy}-${mm}-${dd}`;
     }
-  } catch (error) {
-    console.error('Erro ao carregar funcionários:', error);
-    showToast('Erro ao carregar funcionários', 'error');
-    listaFuncionarios.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">❌</div>
-        <p>Erro ao carregar funcionários.</p>
-      </div>
-    `;
-  } finally {
-    setLoadingState(btnSalvar, false);
-  }
-}
 
-// Montar cards
-function montarCards(funcionarios) {
-  listaFuncionarios.innerHTML = '';
-  funcionarioData = {};
-  
-  const listaOrdenada = Object.entries(funcionarios)
-    .filter(([, f]) => f.tipo && f.tipo.toLowerCase() === 'funcionario')
-    .sort(([, a], [, b]) => a.nome.localeCompare(b.nome, 'pt-BR', {sensitivity:'base'}));
+    async function carregarDadosIniciais() {
+        try {
+            const [empresasSnap, funcionariosSnap] = await Promise.all([
+                get(ref(db, 'empresas')),
+                get(ref(db, 'funcionarios'))
+            ]);
+            empresasCache = empresasSnap.exists() ? empresasSnap.val() : {};
+            funcionariosCache = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
+            preencherSelectEmpresas();
+        } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            alert("Não foi possível carregar os dados. Verifique a conexão.");
+        }
+    }
 
-  if (listaOrdenada.length === 0) {
-    listaFuncionarios.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⏰</div>
-        <p>Nenhum funcionário elegível para hora extra encontrado.</p>
-      </div>
-    `;
-    return;
-  }
+    function preencherSelectEmpresas() {
+        selectEmpresa.innerHTML = '<option value="">Selecione a empresa</option>';
+        for (const id in empresasCache) {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = empresasCache[id].nome;
+            selectEmpresa.appendChild(option);
+        }
+    }
 
-  for (const [id, f] of listaOrdenada) {
-    funcionarioData[id] = {
-      nome: f.nome,
-      ativo: false,
-      percentual: null,
-      horas: 1
-    };
+    function atualizarSelectObras() {
+        const empresaId = selectEmpresa.value;
+        selectObra.innerHTML = '';
+        selectObra.disabled = true;
+        if (!empresaId || !empresasCache[empresaId]?.obras) {
+            selectObra.innerHTML = `<option value="">${empresaId ? "Nenhuma obra" : "Selecione uma empresa"}</option>`;
+            return;
+        }
+        selectObra.disabled = false;
+        selectObra.innerHTML = '<option value="">Selecione a obra</option>';
+        const obras = empresasCache[empresaId].obras;
+        for (const obraId in obras) {
+            const option = document.createElement('option');
+            option.value = obras[obraId].nome;
+            option.textContent = obras[obraId].nome;
+            selectObra.appendChild(option);
+        }
+    }
 
-    const card = document.createElement('div');
-    card.classList.add('funcionario-card');
-    card.dataset.id = id;
+    async function atualizarInterfaceHoraExtra() {
+        const data = dataSelecionadaInput.value;
+        const empresaId = selectEmpresa.value;
+        const obraNome = selectObra.value;
 
-    card.innerHTML = `
-      <div class="funcionario-header" onclick="toggleFuncionario('${id}')">
-        <div class="funcionario-avatar">${getInitials(f.nome)}</div>
-        <div class="funcionario-info">
-          <div class="funcionario-nome">
-            ${f.nome}
-            <div class="hora-extra-toggle" id="toggle_${id}"></div>
-          </div>
-          <div class="funcionario-tipo">Funcionário</div>
-        </div>
-      </div>
-      
-      <div class="options-group" id="options_${id}">
-        <div class="option-section">
-          <div class="option-title">Percentual de Hora Extra</div>
-          <div class="option-buttons">
-            <button class="option-button" onclick="selecionarPercentual('${id}', '100')">100%</button>
-            <button class="option-button" onclick="selecionarPercentual('${id}', '50')">50%</button>
-          </div>
-        </div>
+        if (!data || !empresaId || !obraNome) {
+            horaExtraCard.style.display = 'none';
+            btnSalvar.disabled = true;
+            return;
+        }
         
-        <div class="option-section hours-section" id="hours_${id}">
-          <div class="option-title">Quantidade de Horas</div>
-          <select class="hours-select" onchange="selecionarHoras('${id}', this.value)">
-            ${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${i === 0 ? 'selected' : ''}>${i+1}h</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    `;
+        horaExtraCard.style.display = 'block';
+        btnSalvar.disabled = false;
 
-    listaFuncionarios.appendChild(card);
-  }
-}
+        // Filtra apenas funcionários (não diaristas)
+        const funcionariosFiltrados = Object.entries(funcionariosCache).filter(([id, f]) => 
+            f.empresaId === empresaId && f.obra === obraNome && f.tipo === 'funcionario'
+        );
 
-// Funções de controle
-function toggleFuncionario(id) {
-  const toggle = document.getElementById(`toggle_${id}`);
-  const options = document.getElementById(`options_${id}`);
-  const card = document.querySelector(`[data-id="${id}"]`);
-  
-  funcionarioData[id].ativo = !funcionarioData[id].ativo;
-  
-  if (funcionarioData[id].ativo) {
-    toggle.classList.add('checked');
-    options.classList.add('show');
-    card.classList.add('active');
-  } else {
-    toggle.classList.remove('checked');
-    options.classList.remove('show');
-    card.classList.remove('active');
+        montarCards(funcionariosFiltrados);
+        await carregarHorasExtrasSalvas(data, empresaId, obraNome);
+    }
+
+    function montarCards(funcionarios) {
+        listaFuncionariosDiv.innerHTML = '';
+        if (funcionarios.length === 0) {
+            listaFuncionariosDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Nenhum funcionário (não diarista) encontrado para esta obra.</p>';
+            return;
+        }
+        funcionarios.forEach(([id, f]) => {
+            const card = document.createElement('div');
+            card.className = 'funcionario-card';
+            card.dataset.id = id;
+            card.innerHTML = `
+                <div class="funcionario-header">
+                    <div class="funcionario-info">
+                        <h3>${f.nome}</h3>
+                        <p>${f.funcao || 'N/A'}</p>
+                    </div>
+                    <input type="checkbox" name="ativo_${id}" style="transform: scale(1.5);">
+                </div>
+                <div class="options-group" id="options-group-${id}">
+                    <div class="option-title">Percentual</div>
+                    <div class="option-buttons">
+                        <label><input type="radio" name="percentual_${id}" value="50"> 50%</label>
+                        <label><input type="radio" name="percentual_${id}" value="100"> 100%</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="option-title" for="horas_${id}">Quantidade de Horas</label>
+                        <select class="form-select" id="horas_${id}">
+                            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}">${i+1}h</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+            `;
+            listaFuncionariosDiv.appendChild(card);
+
+            card.querySelector(`input[name="ativo_${id}"]`).addEventListener('change', (e) => {
+                const optionsGroup = document.getElementById(`options-group-${id}`);
+                optionsGroup.classList.toggle('show', e.target.checked);
+            });
+        });
+    }
     
-    // Reset selections
-    funcionarioData[id].percentual = null;
-    funcionarioData[id].horas = 1;
-    
-    // Clear UI
-    const buttons = options.querySelectorAll('.option-button');
-    buttons.forEach(btn => btn.classList.remove('selected'));
-    
-    const hoursSection = document.getElementById(`hours_${id}`);
-    hoursSection.classList.remove('show');
-  }
-}
-
-function selecionarPercentual(id, percentual) {
-  const options = document.getElementById(`options_${id}`);
-  const buttons = options.querySelectorAll('.option-button');
-  const hoursSection = document.getElementById(`hours_${id}`);
-  
-  // Clear previous selections
-  buttons.forEach(btn => btn.classList.remove('selected'));
-  
-  // Select new option
-  const selectedButton = Array.from(buttons).find(btn => btn.textContent === `${percentual}%`);
-  if (selectedButton) {
-    selectedButton.classList.add('selected');
-    funcionarioData[id].percentual = percentual;
-    hoursSection.classList.add('show');
-  }
-}
-
-function selecionarHoras(id, horas) {
-  funcionarioData[id].horas = parseInt(horas, 10);
-}
-
-// Carregar dados salvos
-async function carregarHorasExtrasData(data) {
-  if (!data) return;
-
-  try {
-    const snapshot = await get(ref(db, `horaextra/${data}`));
-    if (snapshot.exists()) {
-      const horasExtrasDoDia = snapshot.val();
-      
-      for (const id in funcionarioData) {
-        // Reset antes de carregar
-        toggleFuncionario(id); // Desativa primeiro para resetar
-        
-        if (horasExtrasDoDia[id]) {
-          const dados = horasExtrasDoDia[id];
-          
-          // Ativar funcionário
-          toggleFuncionario(id); // Ativa para carregar
-          
-          // Selecionar percentual
-          if (dados.percentual) {
-            selecionarPercentual(id, dados.percentual);
-          }
-          
-          // Selecionar horas
-          if (dados.quantidadeHoras) {
-            const select = document.querySelector(`[data-id="${id}"] .hours-select`);
-            if (select) {
-              select.value = dados.quantidadeHoras;
-              selecionarHoras(id, dados.quantidadeHoras);
+    async function carregarHorasExtrasSalvas(data, empresaId, obraNome) {
+        const obraNomeCodificado = encodeURIComponent(obraNome);
+        const heRef = ref(db, `horaextra/${data}/${empresaId}/${obraNomeCodificado}`);
+        try {
+            const snapshot = await get(heRef);
+            if (!snapshot.exists()) return;
+            
+            const heDoDia = snapshot.val();
+            for (const id in heDoDia) {
+                const registro = heDoDia[id];
+                const funcCard = document.querySelector(`.funcionario-card[data-id="${id}"]`);
+                if (funcCard) {
+                    const ativoCheckbox = funcCard.querySelector(`input[name="ativo_${id}"]`);
+                    ativoCheckbox.checked = true;
+                    funcCard.querySelector(`#options-group-${id}`).classList.add('show');
+                    
+                    const percentualRadio = funcCard.querySelector(`input[name="percentual_${id}"][value="${registro.percentual}"]`);
+                    if (percentualRadio) percentualRadio.checked = true;
+                    
+                    const horasSelect = funcCard.querySelector(`#horas_${id}`);
+                    if (horasSelect) horasSelect.value = registro.quantidadeHoras;
+                }
             }
-          }
+        } catch (error) {
+            console.error("Erro ao carregar horas extras salvas:", error);
         }
-      }
-    } else {
-       // Resetar todos os cartões se não houver dados para a data
-       for (const id in funcionarioData) {
-          const card = document.querySelector(`[data-id="${id}"]`);
-          if (card && funcionarioData[id].ativo) {
-             toggleFuncionario(id);
-          }
-       }
     }
-  } catch (error) {
-    console.error('Erro ao carregar dados da data:', error);
-    showToast('Erro ao carregar dados da data', 'error');
-  }
-}
 
+    async function salvarHorasExtras() {
+        const data = dataSelecionadaInput.value;
+        const empresaId = selectEmpresa.value;
+        const obraNome = selectObra.value;
 
-// Salvar hora extra
-async function salvarHorasExtras() {
-  const data = dataSelecionadaInput.value;
-  if (!data) {
-    showToast('Selecione uma data', 'error');
-    return;
-  }
+        btnSalvar.disabled = true;
+        btnSalvar.textContent = "Salvando...";
 
-  setLoadingState(btnSalvar, true);
+        const heDoDia = {};
+        const cards = listaFuncionariosDiv.querySelectorAll('.funcionario-card');
+        let formValido = true;
 
-  try {
-    const horasExtrasDoDia = {};
-    let temRegistros = false;
+        cards.forEach(card => {
+            const id = card.dataset.id;
+            const ativo = card.querySelector(`input[name="ativo_${id}"]`).checked;
+            
+            if (ativo) {
+                const percentual = card.querySelector(`input[name="percentual_${id}"]:checked`)?.value;
+                const quantidadeHoras = card.querySelector(`#horas_${id}`).value;
+                
+                if (!percentual) {
+                    alert(`Selecione o percentual para ${funcionariosCache[id].nome}.`);
+                    formValido = false;
+                }
+                heDoDia[id] = { percentual, quantidadeHoras };
+            }
+        });
 
-    for (const id in funcionarioData) {
-      const func = funcionarioData[id];
-      
-      if (func.ativo) {
-        if (!func.percentual) {
-          showToast(`Selecione o percentual para ${func.nome}`, 'error');
-          setLoadingState(btnSalvar, false); // Parar o loading em caso de erro
-          return;
+        if (!formValido) {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar Horas Extras";
+            return;
         }
-        
-        horasExtrasDoDia[id] = {
-          percentual: func.percentual,
-          quantidadeHoras: func.horas
-        };
-        temRegistros = true;
-      }
+
+        try {
+            const obraNomeCodificado = encodeURIComponent(obraNome);
+            const heRef = ref(db, `horaextra/${data}/${empresaId}/${obraNomeCodificado}`);
+            await set(heRef, heDoDia);
+            alert("Horas extras salvas com sucesso!");
+        } catch (error) {
+            console.error("Erro ao salvar:", error);
+            alert("Erro ao salvar horas extras.");
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar Horas Extras";
+        }
     }
 
-    if (!temRegistros) {
-      showToast('Selecione pelo menos um funcionário', 'error');
-      setLoadingState(btnSalvar, false); // Parar o loading em caso de erro
-      return;
-    }
+    // Event Listeners
+    selectEmpresa.addEventListener('change', () => {
+        atualizarSelectObras();
+        atualizarInterfaceHoraExtra();
+    });
+    dataSelecionadaInput.addEventListener('change', atualizarInterfaceHoraExtra);
+    selectObra.addEventListener('change', atualizarInterfaceHoraExtra);
+    btnSalvar.addEventListener('click', salvarHorasExtras);
 
-    await set(ref(db, `horaextra/${data}`), horasExtrasDoDia);
-    showToast('Horas extras salvas com sucesso!');
-  } catch (error) {
-    console.error('Erro ao salvar horas extras:', error);
-    showToast('Erro ao salvar horas extras', 'error');
-  } finally {
-    setLoadingState(btnSalvar, false);
-  }
-}
-
-// Event listeners
-btnSalvar.addEventListener('click', salvarHorasExtras);
-
-dataSelecionadaInput.addEventListener('change', () => {
-  if (Object.keys(funcionarioData).length > 0) {
-    carregarHorasExtrasData(dataSelecionadaInput.value);
-  }
-});
-
-// Tornar funções globais
-window.toggleFuncionario = toggleFuncionario;
-window.selecionarPercentual = selecionarPercentual;
-window.selecionarHoras = selecionarHoras;
-
-// Inicializar
-async function iniciar() {
-  definirDataHoje();
-  await carregarFuncionarios();
-  if (Object.keys(funcionarioData).length > 0) {
-    carregarHorasExtrasData(dataSelecionadaInput.value);
-  }
-}
-
-iniciar();
-</script>
-
+    // Inicialização
+    definirDataHoje();
+    carregarDadosIniciais();
+  </script>
 </body>
 </html>
