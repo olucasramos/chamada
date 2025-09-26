@@ -225,7 +225,6 @@
         horaExtraCard.style.display = 'block';
         btnSalvar.disabled = false;
 
-        // Filtra apenas funcionários (não diaristas)
         const funcionariosFiltrados = Object.entries(funcionariosCache).filter(([id, f]) => 
             f.empresaId === empresaId && f.obra === obraNome && f.tipo === 'funcionario'
         );
@@ -274,29 +273,45 @@
             });
         });
     }
+
+    function processarDadosHE(heDoDia) {
+        for (const id in heDoDia) {
+            const registro = heDoDia[id];
+            const funcCard = document.querySelector(`.funcionario-card[data-id="${id}"]`);
+            if (funcCard) {
+                const ativoCheckbox = funcCard.querySelector(`input[name="ativo_${id}"]`);
+                ativoCheckbox.checked = true;
+                funcCard.querySelector(`#options-group-${id}`).classList.add('show');
+                
+                const percentualRadio = funcCard.querySelector(`input[name="percentual_${id}"][value="${registro.percentual}"]`);
+                if (percentualRadio) percentualRadio.checked = true;
+                
+                const horasSelect = funcCard.querySelector(`#horas_${id}`);
+                if (horasSelect) horasSelect.value = registro.quantidadeHoras;
+            }
+        }
+    }
     
+    // CORREÇÃO: Função agora busca no formato novo e, se não encontrar, busca no formato antigo
     async function carregarHorasExtrasSalvas(data, empresaId, obraNome) {
-        const obraNomeCodificado = encodeURIComponent(obraNome);
-        const heRef = ref(db, `horaextra/${data}/${empresaId}/${obraNomeCodificado}`);
         try {
-            const snapshot = await get(heRef);
-            if (!snapshot.exists()) return;
-            
-            const heDoDia = snapshot.val();
-            for (const id in heDoDia) {
-                const registro = heDoDia[id];
-                const funcCard = document.querySelector(`.funcionario-card[data-id="${id}"]`);
-                if (funcCard) {
-                    const ativoCheckbox = funcCard.querySelector(`input[name="ativo_${id}"]`);
-                    ativoCheckbox.checked = true;
-                    funcCard.querySelector(`#options-group-${id}`).classList.add('show');
-                    
-                    const percentualRadio = funcCard.querySelector(`input[name="percentual_${id}"][value="${registro.percentual}"]`);
-                    if (percentualRadio) percentualRadio.checked = true;
-                    
-                    const horasSelect = funcCard.querySelector(`#horas_${id}`);
-                    if (horasSelect) horasSelect.value = registro.quantidadeHoras;
-                }
+            // 1. Tenta buscar no formato NOVO
+            const obraNomeCodificado = encodeURIComponent(obraNome);
+            const heRefNova = ref(db, `horaextra/${data}/${empresaId}/${obraNomeCodificado}`);
+            const snapshotNova = await get(heRefNova);
+
+            if (snapshotNova.exists()) {
+                processarDadosHE(snapshotNova.val());
+                return;
+            }
+
+            // 2. Se não encontrou, tenta buscar no formato ANTIGO
+            const heRefAntiga = ref(db, `horaextra/${data}`);
+            const snapshotAntiga = await get(heRefAntiga);
+
+            if (snapshotAntiga.exists()) {
+                console.log("Dados de hora extra encontrados no formato antigo. Carregando...");
+                processarDadosHE(snapshotAntiga.val());
             }
         } catch (error) {
             console.error("Erro ao carregar horas extras salvas:", error);
@@ -338,6 +353,7 @@
         }
 
         try {
+            // Sempre salva no formato NOVO
             const obraNomeCodificado = encodeURIComponent(obraNome);
             const heRef = ref(db, `horaextra/${data}/${empresaId}/${obraNomeCodificado}`);
             await set(heRef, heDoDia);
