@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale-1" />
   <title>Empresas & Obras - Controle de Presenças</title>
   <style>
     :root {
@@ -43,7 +43,6 @@
       color: var(--text-primary);
       margin: 0;
       min-height: 100vh;
-      /* CORREÇÃO: Aumentado padding inferior para evitar sobreposição do rodapé */
       padding: 20px 15px 100px 15px;
       display: flex;
       flex-direction: column;
@@ -116,7 +115,6 @@
       flex: 1;
     }
 
-    /* Layout principal para formulário e lista lado a lado em telas maiores */
     .main-grid {
       width: 100%;
       max-width: 700px;
@@ -127,22 +125,22 @@
 
     @media (min-width: 768px) {
       .main-grid {
-        grid-template-columns: 2fr 3fr; /* Formulário menor, lista maior */
+        grid-template-columns: 2fr 3fr;
       }
     }
 
-    /* Formulário de Cadastro */
     .form-section {
       animation: slideInUp 0.6s ease-out 0.1s both;
     }
-
+    
+    /* CORREÇÃO DE CONTRASTE: Aplicando o estilo dos botões do index.html aos cards */
     .form-card {
-      background: var(--surface-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(21, 67, 96, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 25px rgba(21, 67, 96, 0.4), 0 2px 10px rgba(0,0,0,0.1);
       border-radius: var(--border-radius);
       padding: 24px;
-      box-shadow: var(--shadow);
       position: relative;
     }
 
@@ -177,12 +175,13 @@
       letter-spacing: 0.05em;
     }
 
+    /* Inputs agora ficam sobre um fundo escuro, então o estilo de vidro claro deles funciona bem */
     .form-input, .form-select {
       width: 100%;
       padding: 12px 16px;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      background: var(--surface);
+      background: var(--surface); /* Fundo claro transparente que contrasta com o card escuro */
       backdrop-filter: blur(10px);
       color: var(--text-primary);
       font-size: 1rem;
@@ -247,7 +246,6 @@
         transform: translateY(-1px);
     }
 
-    /* Lista de Empresas e Obras */
     .list-section {
       animation: fadeInUp 0.8s ease-out 0.3s both;
     }
@@ -260,22 +258,23 @@
       text-align: center;
     }
     
+    /* CORREÇÃO DE CONTRASTE: Aplicando o estilo dos botões do index.html aos cards */
     .empresa-card {
-        background: var(--surface-card);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(21, 67, 96, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 25px rgba(21, 67, 96, 0.4), 0 2px 10px rgba(0,0,0,0.1);
         border-radius: var(--border-radius);
         padding: 24px;
         margin-bottom: 20px;
-        box-shadow: var(--shadow);
         transition: var(--transition);
         position: relative;
     }
     
     .empresa-card:hover {
-        transform: translateY(-2px);
-        background: var(--surface-hover);
-        box-shadow: var(--shadow-hover);
+        transform: translateY(-3px) scale(1.02);
+        background: rgba(14, 42, 72, 0.95);
+        box-shadow: 0 15px 35px rgba(21, 67, 96, 0.6), 0 5px 20px rgba(0,0,0,0.2);
     }
     
     .empresa-info {
@@ -363,7 +362,6 @@
       opacity: 0.5;
     }
 
-    /* Loading state */
     .loading {
       position: relative;
     }
@@ -387,7 +385,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Toast notifications */
     .toast {
       position: fixed;
       top: 20px;
@@ -426,7 +423,6 @@
       box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
     }
 
-    /* Animações */
     @keyframes slideInDown {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -442,23 +438,18 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Responsividade */
     @media (max-width: 480px) {
       body {
-        /* CORREÇÃO: Aumentado padding inferior para mobile */
         padding: 15px 10px 100px 10px;
       }
-
       .form-card, .empresa-card {
         padding: 20px;
       }
-      
       .main-grid {
         gap: 24px;
       }
     }
 
-    /* Estados de foco */
     .btn-primary:focus-visible,
     .btn-secondary:focus-visible {
       outline: 2px solid var(--accent);
@@ -639,6 +630,7 @@
         
         if (!nomeEmpresa) {
           showToast('O nome da empresa é obrigatório.', 'error');
+          setLoadingState(btnSalvarEmpresa, false);
           return;
         }
 
@@ -651,12 +643,10 @@
           // Atualizar Empresa
           await update(ref(db, `empresas/${id}`), dados);
           
-          // Adicionar a obra se não for vazia e ainda não existir
           if (obraEmpresa) {
               const obras = empresasCache[id].obras || {};
               const obraExistente = Object.values(obras).some(obra => obra.nome.toLowerCase() === obraEmpresa.toLowerCase());
               if (!obraExistente) {
-                  const novoObraRef = ref(db, `empresas/${id}/obras`);
                   const newObraId = Date.now();
                   await set(ref(db, `empresas/${id}/obras/${newObraId}`), { nome: obraEmpresa });
               }
@@ -668,7 +658,6 @@
           const novoId = Date.now();
           dados.obras = {};
           if (obraEmpresa) {
-              // Adicionar a obra inicial
               dados.obras[Date.now() + 1] = { nome: obraEmpresa };
           }
           
@@ -698,7 +687,7 @@
 
         document.getElementById('nomeEmpresa').value = empresa.nome || '';
         document.getElementById('cnpjEmpresa').value = empresa.cnpj || '';
-        document.getElementById('obraEmpresa').value = ''; // Não carregamos obras para edição
+        document.getElementById('obraEmpresa').value = '';
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -717,12 +706,10 @@
         }
     }
 
-
-    // --- CRUD Secundário (Obras) ---
-    
     async function adicionarObra(e) {
         e.preventDefault();
-        setLoadingState(document.getElementById('btnSalvarObra'), true);
+        const btn = document.getElementById('btnSalvarObra');
+        setLoadingState(btn, true);
         
         try {
             const empresaId = selectEmpresa.value;
@@ -758,4 +745,102 @@
             console.error('Erro ao adicionar obra:', error);
             showToast('Erro ao adicionar obra', 'error');
         } finally {
-            setLoadingState(document
+            setLoadingState(btn, false);
+        }
+    }
+
+    async function excluirObra(empresaId, obraId, nomeEmpresa, nomeObra) {
+        if (!confirm(`Tem certeza que deseja excluir a obra "${nomeObra}" da empresa "${nomeEmpresa}"?`)) return;
+
+        try {
+            await remove(ref(db, `empresas/${empresaId}/obras/${obraId}`));
+            showToast(`Obra "${nomeObra}" excluída com sucesso!`);
+            carregarEmpresas();
+        } catch (error) {
+            console.error('Erro ao excluir obra:', error);
+            showToast('Erro ao excluir obra', 'error');
+        }
+    }
+
+    function montarLista() {
+      listaEmpresasDiv.innerHTML = '';
+      
+      const empresasOrdenadas = Object.entries(empresasCache)
+        .sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
+
+      if (empresasOrdenadas.length === 0) {
+        listaEmpresasDiv.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🏢</div>
+            <p>Nenhuma empresa cadastrada ainda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      for (const [empresaId, empresa] of empresasOrdenadas) {
+        const obras = empresa.obras ? Object.entries(empresa.obras) : [];
+        const card = document.createElement('div');
+        card.className = 'empresa-card';
+        
+        let obrasHtml = '';
+        if (obras.length > 0) {
+            obrasHtml = `<div class="obras-list-title">Obras Cadastradas (${obras.length})</div>`;
+            
+            obras.sort(([, a], [, b]) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }))
+                .forEach(([obraId, obra]) => {
+                    obrasHtml += `
+                        <div class="obra-item">
+                            <span>• ${obra.nome}</span>
+                            <div class="obra-actions">
+                                <button class="btn-delete" onclick="excluirObra('${empresaId}', '${obraId}', '${empresa.nome}', '${obra.nome}')">Excluir</button>
+                            </div>
+                        </div>
+                    `;
+                });
+        } else {
+            obrasHtml = '<p style="font-size: 0.9rem; margin-top: 15px; color: var(--warning);">Nenhuma obra cadastrada.</p>';
+        }
+
+        card.innerHTML = `
+          <div class="empresa-info">
+            <span class="empresa-icon">🏢</span>
+            <div>
+                <div class="empresa-nome">${empresa.nome}</div>
+                <div style="font-size: 0.9rem;">CNPJ: ${empresa.cnpj || '-'}</div>
+            </div>
+          </div>
+          
+          <div class="funcionario-actions" style="margin-bottom: 10px; display: flex; gap: 8px;">
+            <button class="btn-secondary" onclick="editarEmpresa('${empresaId}')">Editar Dados</button>
+            <button class="btn-delete obra-actions button" onclick="excluirEmpresa('${empresaId}', '${empresa.nome}')">Excluir Empresa</button>
+          </div>
+          
+          ${obrasHtml}
+        `;
+        
+        listaEmpresasDiv.appendChild(card);
+      }
+    }
+
+    // --- Event Listeners ---
+    
+    formEmpresa.addEventListener('submit', salvarEmpresa);
+    formAdicionarObra.addEventListener('submit', adicionarObra);
+    
+    document.getElementById('cnpjEmpresa').addEventListener('input', e => {
+      e.target.value = formatarCNPJ(e.target.value);
+    });
+    
+    btnLimparForm.addEventListener('click', limparFormulario);
+
+    // Tornar funções globais para onclick no HTML gerado
+    window.editarEmpresa = editarEmpresa;
+    window.excluirEmpresa = excluirEmpresa;
+    window.excluirObra = excluirObra;
+
+    // --- Inicialização ---
+    carregarEmpresas();
+  </script>
+</body>
+</html>
