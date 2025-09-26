@@ -5,100 +5,422 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Controle de Presenças - Início</title>
 <style>
+  :root {
+    --primary: #1e40af;
+    --primary-dark: #1e3a8a;
+    --primary-light: #3b82f6;
+    --secondary: #06b6d4;
+    --accent: #10b981;
+    --surface: rgba(255, 255, 255, 0.1);
+    --surface-hover: rgba(255, 255, 255, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
+    --border-radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   * {
     box-sizing: border-box;
-  }
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #2980b9, #6dd5fa);
-    color: #fff;
     margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 15px 60px 15px; /* espaço extra pra rodapé */
+    padding: 20px 15px 80px 15px;
+    position: relative;
+    overflow-x: hidden;
   }
-  h1 {
-    font-size: 2.6rem;
-    margin-top: 20px;
-    margin-bottom: 35px;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    user-select: none;
-    line-height: 1.2;
+
+  /* Elementos decorativos de fundo */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
   }
-  h1 span {
-    display: block;
-    text-align: center;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
   }
-  h1 span:last-child {
-    font-weight: 700;
-  }
-  .btn-container {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+
+  /* Loading animation */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 320px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.5s ease;
   }
-  a.button {
-    background-color: #154360;
-    padding: 16px 25px;
-    border-radius: 12px;
-    font-size: 1.25rem;
-    font-weight: 600;
+
+  .loading-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  header {
     text-align: center;
-    color: white;
+    margin: 40px 0 60px 0;
+    animation: slideInDown 0.8s ease-out;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff, #e0e7ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  .version-badge {
+    display: inline-block;
+    background: var(--surface);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .menu-container {
+    width: 100%;
+    max-width: 420px;
+    animation: slideInUp 0.8s ease-out 0.2s both;
+  }
+
+  .menu-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .menu-button {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    padding: 24px 28px;
     text-decoration: none;
-    box-shadow: 0 5px 12px rgba(21, 67, 96, 0.6);
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
-    user-select: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
   }
-  a.button:hover {
-    background-color: #0e2a48;
-    box-shadow: 0 7px 18px rgba(14, 42, 72, 0.8);
+
+  .menu-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
   }
+
+  .menu-button:hover::before {
+    left: 100%;
+  }
+
+  .menu-button:hover {
+    transform: translateY(-4px) scale(1.02);
+    background: var(--surface-hover);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .menu-button:active {
+    transform: translateY(-2px) scale(1.01);
+  }
+
+  .menu-icon {
+    font-size: 1.8rem;
+    opacity: 0.9;
+    transition: var(--transition);
+  }
+
+  .menu-button:hover .menu-icon {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  .menu-text {
+    flex: 1;
+    text-align: left;
+  }
+
+  .menu-arrow {
+    font-size: 1.2rem;
+    opacity: 0.6;
+    transition: var(--transition);
+  }
+
+  .menu-button:hover .menu-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
   footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
-    background: rgba(21, 67, 96, 0.9);
-    color: #ddd;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
     text-align: center;
-    font-size: 0.85rem;
-    padding: 8px 0;
-    user-select: none;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
+    font-size: 0.9rem;
+    padding: 16px 20px;
+    font-weight: 500;
   }
-  @media (max-width: 400px) {
-    h1 {
-      font-size: 2rem;
+
+  /* Animações de entrada */
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
     }
-    a.button {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsividade aprimorada */
+  @media (max-width: 480px) {
+    body {
+      padding: 15px 10px 80px 10px;
+    }
+
+    header {
+      margin: 20px 0 40px 0;
+    }
+
+    .menu-button {
+      padding: 20px 24px;
       font-size: 1.1rem;
-      padding: 14px 20px;
+    }
+
+    .menu-icon {
+      font-size: 1.6rem;
+    }
+  }
+
+  @media (min-width: 600px) {
+    .menu-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .menu-container {
+      max-width: 600px;
+    }
+  }
+
+  /* Modo escuro preferido do sistema */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: rgba(255, 255, 255, 0.08);
+      --surface-hover: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  /* Estados de foco para acessibilidade */
+  .menu-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Melhor contraste em dispositivos de alta resolução */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .menu-button {
+      border-width: 0.5px;
     }
   }
 </style>
 </head>
 <body>
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
 
-  <h1>
-    <span>Controle de</span>
-    <span>Presenças</span>
-  </h1>
+  <header>
+    <h1>Controle de Presenças</h1>
+    <p class="subtitle">Sistema de Gestão de Funcionários</p>
+    <div class="version-badge">v2.0</div>
+  </header>
 
-  <div class="btn-container">
-    <a href="chamada.html" class="button">Chamada</a>
-    <a href="horaextra.html" class="button">Hora Extra</a>
-    <a href="funcionarios.html" class="button">Funcionários</a>
-    <a href="relatorios.html" class="button">Relatórios</a>
+  <div class="menu-container">
+    <nav class="menu-grid" role="navigation">
+      <a href="chamada.html" class="menu-button" aria-label="Realizar chamada de presença">
+        <span class="menu-icon">📋</span>
+        <span class="menu-text">Chamada</span>
+        <span class="menu-arrow">→</span>
+      </a>
+
+      <a href="horaextra.html" class="menu-button" aria-label="Registrar horas extras">
+        <span class="menu-icon">⏰</span>
+        <span class="menu-text">Hora Extra</span>
+        <span class="menu-arrow">→</span>
+      </a>
+
+      <a href="funcionarios.html" class="menu-button" aria-label="Gerenciar funcionários">
+        <span class="menu-icon">👥</span>
+        <span class="menu-text">Funcionários</span>
+        <span class="menu-arrow">→</span>
+      </a>
+
+      <a href="relatorios.html" class="menu-button" aria-label="Visualizar relatórios">
+        <span class="menu-icon">📊</span>
+        <span class="menu-text">Relatórios</span>
+        <span class="menu-arrow">→</span>
+      </a>
+    </nav>
   </div>
 
   <footer>
-    Desenvolvido por Lucas Ramos Aragão
+    <p>Desenvolvido por Lucas Ramos Aragão</p>
   </footer>
 
+  <script>
+    // Simular carregamento e remover overlay
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.classList.add('fade-out');
+        setTimeout(() => {
+          overlay.style.display = 'none';
+        }, 500);
+      }, 800);
+    });
+
+    // Adicionar efeitos de hover dinâmicos
+    document.querySelectorAll('.menu-button').forEach(button => {
+      button.addEventListener('mouseenter', (e) => {
+        e.target.style.transform = 'translateY(-4px) scale(1.02)';
+      });
+
+      button.addEventListener('mouseleave', (e) => {
+        e.target.style.transform = 'translateY(0) scale(1)';
+      });
+
+      // Efeito ripple ao clicar
+      button.addEventListener('click', (e) => {
+        const ripple = document.createElement('div');
+        const rect = e.target.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+          position: absolute;
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}px;
+          top: ${y}px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          transform: scale(0);
+          animation: ripple 0.6s ease-out;
+          pointer-events: none;
+        `;
+        
+        e.target.appendChild(ripple);
+        
+        setTimeout(() => ripple.remove(), 600);
+      });
+    });
+
+    // Adicionar keyframes do ripple dinamicamente
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes ripple {
+        to {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Preload das próximas páginas para melhor performance
+    const preloadLinks = ['chamada.html', 'funcionarios.html', 'horaextra.html', 'relatorios.html'];
+    preloadLinks.forEach(href => {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = href;
+      document.head.appendChild(link);
+    });
+  </script>
 </body>
 </html>
