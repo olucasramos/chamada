@@ -160,108 +160,56 @@
 
   <div class="reports-grid">
     <div class="card">
-      <div class="report-header">
-        <span class="report-icon">📋</span>
-        <h2 class="report-title">Relatório de Faltas</h2>
-      </div>
+      <div class="report-header"><span class="report-icon">📋</span><h2 class="report-title">Relatório de Faltas (Funcionários)</h2></div>
       <div class="form-grid two-cols">
-        <div class="form-group">
-          <label for="faltasTipo" class="form-label">Tipo</label>
-          <select id="faltasTipo" class="form-select">
-            <option value="todos">Todos</option>
-            <option value="funcionario">Funcionário</option>
-            <option value="diarista">Diarista</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="faltasDataInicio" class="form-label">Data Início</label>
-          <input type="date" id="faltasDataInicio" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="faltasDataFim" class="form-label">Data Fim</label>
-          <input type="date" id="faltasDataFim" class="form-input" />
-        </div>
+        <div class="form-group"><label for="faltasEmpresa" class="form-label">Empresa</label><select id="faltasEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="faltasObra" class="form-label">Obra</label><select id="faltasObra" class="form-select obra-select" disabled></select></div>
+        <div class="form-group"><label for="faltasDataInicio" class="form-label">Data Início</label><input type="date" id="faltasDataInicio" class="form-input" /></div>
+        <div class="form-group"><label for="faltasDataFim" class="form-label">Data Fim</label><input type="date" id="faltasDataFim" class="form-input" /></div>
       </div>
       <button id="btnGerarFaltas" class="btn-action">Gerar Relatório</button>
     </div>
 
     <div class="card">
-      <div class="report-header">
-        <span class="report-icon">👤</span>
-        <h2 class="report-title">Dados do Funcionário</h2>
-      </div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="listaFuncionario" class="form-label">Funcionário</label>
-          <select id="listaFuncionario" class="form-select">
-            <option value="todos">Todos</option>
-          </select>
-        </div>
+      <div class="report-header"><span class="report-icon">👤</span><h2 class="report-title">Dados do Funcionário</h2></div>
+      <div class="form-grid two-cols">
+        <div class="form-group"><label for="dadosEmpresa" class="form-label">Empresa</label><select id="dadosEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="dadosObra" class="form-label">Obra</label><select id="dadosObra" class="form-select obra-select" disabled></select></div>
       </div>
       <button id="btnGerarLista" class="btn-action">Gerar Relatório</button>
     </div>
 
     <div class="card">
-      <div class="report-header">
-        <span class="report-icon">💰</span>
-        <h2 class="report-title">Pagamento Diarista</h2>
-      </div>
+      <div class="report-header"><span class="report-icon">💰</span><h2 class="report-title">Pagamento Diarista</h2></div>
       <div class="form-grid two-cols">
-        <div class="form-group">
-          <label for="pagamentoDataInicio" class="form-label">Data Início</label>
-          <input type="date" id="pagamentoDataInicio" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="pagamentoDataFim" class="form-label">Data Fim</label>
-          <input type="date" id="pagamentoDataFim" class="form-input" />
-        </div>
+        <div class="form-group"><label for="pagamentoEmpresa" class="form-label">Empresa</label><select id="pagamentoEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="pagamentoObra" class="form-label">Obra</label><select id="pagamentoObra" class="form-select obra-select" disabled></select></div>
+        <div class="form-group"><label for="pagamentoDataInicio" class="form-label">Data Início</label><input type="date" id="pagamentoDataInicio" class="form-input" /></div>
+        <div class="form-group"><label for="pagamentoDataFim" class="form-label">Data Fim</label><input type="date" id="pagamentoDataFim" class="form-input" /></div>
       </div>
       <button id="btnGerarPagamento" class="btn-action">Gerar Relatório</button>
     </div>
 
     <div class="card">
-      <div class="report-header">
-        <span class="report-icon">⏱️</span>
-        <h2 class="report-title">Relatório de Hora Extra</h2>
-      </div>
+      <div class="report-header"><span class="report-icon">⏱️</span><h2 class="report-title">Relatório de Hora Extra</h2></div>
       <div class="form-grid two-cols">
-        <div class="form-group">
-          <label for="horaExtraInicio" class="form-label">Data Início</label>
-          <input type="date" id="horaExtraInicio" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="horaExtraFim" class="form-label">Data Fim</label>
-          <input type="date" id="horaExtraFim" class="form-input" />
-        </div>
+        <div class="form-group"><label for="heEmpresa" class="form-label">Empresa</label><select id="heEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="heObra" class="form-label">Obra</label><select id="heObra" class="form-select obra-select" disabled></select></div>
+        <div class="form-group"><label for="horaExtraInicio" class="form-label">Data Início</label><input type="date" id="horaExtraInicio" class="form-input" /></div>
+        <div class="form-group"><label for="horaExtraFim" class="form-label">Data Fim</label><input type="date" id="horaExtraFim" class="form-input" /></div>
       </div>
       <button id="btnGerarHoraExtra" class="btn-action">Gerar Relatório</button>
     </div>
 
     <div class="card">
-      <div class="report-header">
-        <span class="report-icon">⚠️</span>
-        <h2 class="report-title">Excluir Registros</h2>
-      </div>
+      <div class="report-header"><span class="report-icon">⚠️</span><h2 class="report-title">Excluir Registros</h2></div>
       <div class="form-grid two-cols">
-        <div class="form-group">
-          <label for="excluirTipo" class="form-label">Tipo</label>
-          <select id="excluirTipo" class="form-select">
-            <option value="chamadas">Chamada</option>
-            <option value="horaextra">Hora Extra</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="excluirDataInicio" class="form-label">Data Início</label>
-          <input type="date" id="excluirDataInicio" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="excluirDataFim" class="form-label">Data Fim</label>
-          <input type="date" id="excluirDataFim" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="excluirSenha" class="form-label">Senha</label>
-          <input type="password" id="excluirSenha" class="form-input" placeholder="Digite a senha" />
-        </div>
+        <div class="form-group"><label for="excluirEmpresa" class="form-label">Empresa</label><select id="excluirEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="excluirObra" class="form-label">Obra</label><select id="excluirObra" class="form-select obra-select" disabled></select></div>
+        <div class="form-group"><label for="excluirTipo" class="form-label">Tipo</label><select id="excluirTipo" class="form-select"><option value="chamadas">Chamada</option><option value="horaextra">Hora Extra</option></select></div>
+        <div class="form-group"><label for="excluirDataInicio" class="form-label">Data Início</label><input type="date" id="excluirDataInicio" class="form-input" /></div>
+        <div class="form-group"><label for="excluirDataFim" class="form-label">Data Fim</label><input type="date" id="excluirDataFim" class="form-input" /></div>
+        <div class="form-group"><label for="excluirSenha" class="form-label">Senha</label><input type="password" id="excluirSenha" class="form-input" /></div>
       </div>
       <button id="btnExcluir" class="btn-action danger">Excluir Registros</button>
     </div>
@@ -287,288 +235,205 @@
 
   const db = getDatabase(app);
 
-  const faltasTipo = document.getElementById('faltasTipo');
-  const faltasDataInicio = document.getElementById('faltasDataInicio');
-  const faltasDataFim = document.getElementById('faltasDataFim');
-  const btnGerarFaltas = document.getElementById('btnGerarFaltas');
-
-  const listaFuncionario = document.getElementById('listaFuncionario');
-  const btnGerarLista = document.getElementById('btnGerarLista');
-
-  const pagamentoDataInicio = document.getElementById('pagamentoDataInicio');
-  const pagamentoDataFim = document.getElementById('pagamentoDataFim');
-  const btnGerarPagamento = document.getElementById('btnGerarPagamento');
-
-  const horaExtraInicio = document.getElementById('horaExtraInicio');
-  const horaExtraFim = document.getElementById('horaExtraFim');
-  const btnGerarHoraExtra = document.getElementById('btnGerarHoraExtra');
-
-  const excluirTipo = document.getElementById('excluirTipo');
-  const excluirDataInicio = document.getElementById('excluirDataInicio');
-  const excluirDataFim = document.getElementById('excluirDataFim');
-  const excluirSenha = document.getElementById('excluirSenha');
-  const btnExcluir = document.getElementById('btnExcluir');
-
   const resultado = document.getElementById('resultado');
   const btnEnviarWhats = document.getElementById('btnEnviarWhats');
-
   const SENHA_EXCLUSAO = '1234';
 
   let funcionariosCache = {};
+  let empresasCache = {};
   let textoRelatorioAtual = '';
 
-  function showToast(message, type = 'success') {
-    alert(message);
-  }
-
-  function setLoadingState(element, loading) {
-    const originalText = element.dataset.originalText || element.textContent;
-    if (loading) {
-      element.dataset.originalText = originalText;
-      element.disabled = true;
-      element.textContent = 'Gerando...';
-    } else {
-      element.disabled = false;
-      element.textContent = originalText;
-    }
-  }
-
+  // --- Funções Utilitárias e de Setup ---
+  function showToast(message) { alert(message); }
   function formatarDataDMY(dataISO) {
     if (!dataISO) return '-';
     const [ano, mes, dia] = dataISO.split('-');
     return `${dia}/${mes}/${ano}`;
   }
 
-  function formatCPF(cpf) {
-    if (!cpf) return '-';
-    let v = String(cpf).replace(/\D/g, '').padStart(11,'0');
-    return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-  }
-
-  function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  function scrollParaResultado() {
-    resultado.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  async function carregarFuncionarios() {
+  async function carregarDadosIniciais() {
     try {
-      const snapshot = await get(ref(db, 'funcionarios'));
-      if (snapshot.exists()) {
-        funcionariosCache = snapshot.val();
-        atualizarListaFuncionarios();
-      } else {
-        funcionariosCache = {};
-        listaFuncionario.innerHTML = '<option value="todos">Nenhum funcionário</option>';
-      }
-    } catch (error) {
-      console.error('Erro ao carregar funcionários:', error);
-      listaFuncionario.innerHTML = '<option value="todos">Erro ao carregar</option>';
+      const [empresasSnap, funcionariosSnap] = await Promise.all([
+        get(ref(db, 'empresas')),
+        get(ref(db, 'funcionarios'))
+      ]);
+      empresasCache = empresasSnap.exists() ? empresasSnap.val() : {};
+      funcionariosCache = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
+      
+      document.querySelectorAll('.empresa-select').forEach(select => popularEmpresasDropdown(select));
+    } catch (e) {
+      console.error("Erro ao carregar dados iniciais:", e);
+      showToast("Falha ao carregar dados do servidor.");
     }
   }
 
-  function atualizarListaFuncionarios() {
-    listaFuncionario.innerHTML = '<option value="todos">Todos</option>';
-    Object.entries(funcionariosCache)
-      .sort(([,a],[,b]) => (a.nome||'').localeCompare(b.nome||'', 'pt-BR',{sensitivity:'base'}))
-      .forEach(([id, f]) => {
-        listaFuncionario.innerHTML += `<option value="${id}">${f.nome}</option>`;
-      });
+  function popularEmpresasDropdown(selectElement) {
+    const temOpcaoTodos = selectElement.id === 'dadosEmpresa';
+    selectElement.innerHTML = `<option value="">${temOpcaoTodos ? 'Todas' : 'Selecione'}</option>`;
+    for (const id in empresasCache) {
+      selectElement.innerHTML += `<option value="${id}">${empresasCache[id].nome}</option>`;
+    }
   }
 
-  async function gerarRelatorioFaltas() {
-    const tipoFiltro = faltasTipo.value;
-    const inicio = faltasDataInicio.value;
-    const fim = faltasDataFim.value;
+  function configurarFiltroObra(empresaSelect, obraSelect) {
+    empresaSelect.addEventListener('change', () => {
+      const empresaId = empresaSelect.value;
+      const temOpcaoTodos = obraSelect.id === 'dadosObra';
+      obraSelect.innerHTML = `<option value="">${temOpcaoTodos ? 'Todas' : 'Selecione'}</option>`;
+      obraSelect.disabled = true;
 
-    if (!inicio || !fim) {
-      showToast('Selecione a data de início e fim', 'error');
-      return;
-    }
-    if (fim < inicio) {
-      showToast('Data fim não pode ser menor que data início', 'error');
-      return;
-    }
-
-    setLoadingState(btnGerarFaltas, true);
-    resultado.textContent = '';
-
-    try {
-      const chamadasSnap = await get(ref(db, 'chamadas'));
-      const funcionariosSnap = await get(ref(db, 'funcionarios'));
-      const empresasSnap = await get(ref(db, 'empresas'));
-      
-      if (!chamadasSnap.exists() || !funcionariosSnap.exists()) {
-        resultado.textContent = 'Não há dados suficientes para gerar o relatório.';
-        return;
+      if (empresaId && empresasCache[empresaId]?.obras) {
+        const obras = empresasCache[empresaId].obras;
+        for (const obraId in obras) {
+          obraSelect.innerHTML += `<option value="${obras[obraId].nome}">${obras[obraId].nome}</option>`;
+        }
+        obraSelect.disabled = false;
       }
+    });
+  }
 
-      const chamadas = chamadasSnap.val();
-      const funcionarios = funcionariosSnap.val();
-      const empresas = empresasSnap.exists() ? empresasSnap.val() : {};
+  // --- Relatório de Faltas (Funcionários) ---
+  const btnGerarFaltas = document.getElementById('btnGerarFaltas');
+  btnGerarFaltas.addEventListener('click', async () => {
+    const empresaId = document.getElementById('faltasEmpresa').value;
+    const obraNome = document.getElementById('faltasObra').value;
+    const inicio = document.getElementById('faltasDataInicio').value;
+    const fim = document.getElementById('faltasDataFim').value;
+    
+    if (!empresaId || !obraNome || !inicio || !fim) {
+      return showToast("Preencha todos os campos para gerar o relatório de faltas.");
+    }
 
-      const faltas = {};
-      
-      // Itera sobre as datas no período selecionado
-      for (const data in chamadas) {
-        if (data < inicio || data > fim) continue;
-        const empresasNoDia = chamadas[data];
-        
-        // Itera sobre as empresas naquele dia
-        for(const empresaId in empresasNoDia) {
-          const obrasNaEmpresa = empresasNoDia[empresaId];
-          
-          // Itera sobre as obras
-          for(const obraNomeCodificado in obrasNaEmpresa) {
-            const obraNome = decodeURIComponent(obraNomeCodificado);
-            const presencasNaObra = obrasNaEmpresa[obraNomeCodificado];
-            
-            // Itera sobre os funcionários com registro na obra
-            for(const funcId in presencasNaObra) {
-              const registro = presencasNaObra[funcId];
-              const funcionario = funcionarios[funcId];
+    resultado.textContent = "Gerando...";
+    let texto = `📋 *Relatório de Faltas (Funcionários)*\n`;
+    texto += `Empresa: ${empresasCache[empresaId].nome} | Obra: ${obraNome}\n`;
+    texto += `Período: ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}\n\n`;
+    
+    let faltasEncontradas = false;
+    const faltasPorFuncionario = {};
 
-              if (!funcionario || (tipoFiltro !== 'todos' && funcionario.tipo !== tipoFiltro)) continue;
-              
-              if (registro.status === 'falta') {
-                if (!faltas[funcId]) {
-                  faltas[funcId] = { nome: funcionario.nome, tipo: funcionario.tipo, faltas: [] };
+    for (let d = new Date(inicio); d <= new Date(fim); d.setDate(d.getDate() + 1)) {
+        const dataISO = d.toISOString().split('T')[0];
+        const obraCodificada = encodeURIComponent(obraNome);
+        const chamadaRef = ref(db, `chamadas/${dataISO}/${empresaId}/${obraCodificada}`);
+        const snap = await get(chamadaRef);
+
+        if (snap.exists()) {
+            const chamadaDia = snap.val();
+            for(const funcId in chamadaDia){
+                const func = funcionariosCache[funcId];
+                if(func && func.tipo === 'funcionario' && chamadaDia[funcId].status === 'falta'){
+                    if(!faltasPorFuncionario[funcId]) {
+                        faltasPorFuncionario[funcId] = { nome: func.nome, faltas: [] };
+                    }
+                    faltasPorFuncionario[funcId].faltas.push({
+                        data: formatarDataDMY(dataISO),
+                        atestado: chamadaDia[funcId].atestado ? 'Sim' : 'Não'
+                    });
+                    faltasEncontradas = true;
                 }
-                faltas[funcId].faltas.push({
-                  data: formatarDataDMY(data),
-                  empresa: empresas[empresaId]?.nome || 'N/A',
-                  obra: obraNome,
-                  atestado: registro.atestado === true ? 'Sim' : 'Não'
-                });
-              }
             }
+        }
+    }
+
+    if (!faltasEncontradas) {
+      texto += "Nenhuma falta encontrada para funcionários nesta obra e período.";
+    } else {
+      for(const funcId in faltasPorFuncionario){
+        const item = faltasPorFuncionario[funcId];
+        texto += `👤 *${item.nome}*\n`;
+        item.faltas.forEach(f => {
+          texto += ` • ${f.data} (Atestado: ${f.atestado})\n`;
+        });
+        texto += `\n`;
+      }
+    }
+
+    resultado.textContent = texto;
+    textoRelatorioAtual = texto;
+  });
+
+  // --- Relatório de Dados do Funcionário ---
+  const btnGerarLista = document.getElementById('btnGerarLista');
+  btnGerarLista.addEventListener('click', () => {
+      const empresaId = document.getElementById('dadosEmpresa').value;
+      const obraNome = document.getElementById('dadosObra').value;
+      
+      let funcionariosFiltrados = Object.values(funcionariosCache);
+
+      if(empresaId) {
+        funcionariosFiltrados = funcionariosFiltrados.filter(f => f.empresaId === empresaId);
+      }
+      if(obraNome) {
+        funcionariosFiltrados = funcionariosFiltrados.filter(f => f.obra === obraNome);
+      }
+      
+      let texto = `👤 *Relatório de Dados de Funcionários*\n\n`;
+      if(funcionariosFiltrados.length === 0){
+        texto += "Nenhum funcionário encontrado para os filtros selecionados.";
+      } else {
+        // Agrupar por empresa e obra
+        const agrupado = {};
+        funcionariosFiltrados.forEach(f => {
+          const empNome = empresasCache[f.empresaId]?.nome || "Sem Empresa";
+          const obrNome = f.obra || "Sem Obra";
+          if(!agrupado[empNome]) agrupado[empNome] = {};
+          if(!agrupado[empNome][obrNome]) agrupado[empNome][obrNome] = [];
+          agrupado[empNome][obrNome].push(f);
+        });
+
+        for(const empNome in agrupado){
+          texto += `🏢 *${empNome}*\n`;
+          for(const obrNome in agrupado[empNome]){
+            texto += ` ﹂ 🏗️ *${obrNome}*\n\n`;
+            agrupado[empNome][obrNome].forEach(f => {
+              texto += `   • *${f.nome}* (${f.tipo})\n`;
+              texto += `     Função: ${f.funcao || '-'}\n\n`;
+            });
           }
         }
       }
-
-      let texto = `📋 *Relatório de Faltas* (${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)})\n\n`;
-      let encontrou = false;
-
-      Object.values(faltas)
-        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-        .forEach(item => {
-          if (item.faltas.length > 0) {
-            encontrou = true;
-            texto += `👤 *${item.nome}* (${capitalize(item.tipo)})\n` +
-                     `Total de Faltas: *${item.faltas.length}*\n` +
-                     item.faltas.map(f => ` • ${f.data} [${f.empresa} - ${f.obra}] (Atestado: ${f.atestado})`).join('\n') +
-                     `\n\n`;
-          }
-        });
-
-      if (!encontrou) {
-        texto += `Nenhum funcionário com faltas no período.`;
-      }
-
-      resultado.textContent = texto.trim();
-      textoRelatorioAtual = texto.trim();
-      scrollParaResultado();
-    } catch (error) {
-      console.error('Erro ao gerar relatório de faltas:', error);
-      resultado.textContent = 'Erro ao gerar relatório de faltas.';
-    } finally {
-      setLoadingState(btnGerarFaltas, false);
-    }
-  }
-
-  function formatarFuncionario(f, empresas) {
-    const empresaNome = f.empresaId ? empresas[f.empresaId]?.nome || 'N/A' : 'Nenhuma';
-    const linhas = [
-      `👤 Nome: *${f.nome || '-'}*`,
-      `Tipo: *${capitalize(f.tipo) || '-'}*`,
-      `Função: *${f.funcao || '-'}*`,
-      `Empresa: *${empresaNome}*`,
-      `Obra: *${f.obra || '-'}*`
-    ];
-
-    if (f.tipo === 'diarista') {
-        linhas.push(`CPF: *${formatCPF(f.cpf)}*`);
-        linhas.push(`Valor diária: *R$ ${parseFloat(f.valorDiaria).toFixed(2)}*`);
-    }
-    return linhas.join('\n');
-  }
-
-  async function gerarRelatorioDadosFuncionario() {
-    const funcionarioId = listaFuncionario.value;
-    setLoadingState(btnGerarLista, true);
-    resultado.textContent = '';
-    try {
-      const [funcionariosSnap, empresasSnap] = await Promise.all([
-        get(ref(db, 'funcionarios')),
-        get(ref(db, 'empresas'))
-      ]);
-
-      if (!funcionariosSnap.exists()) {
-        resultado.textContent = 'Nenhum funcionário cadastrado.';
-        return;
-      }
-      
-      const funcionarios = funcionariosSnap.val();
-      const empresas = empresasSnap.exists() ? empresasSnap.val() : {};
-      let texto = '';
-
-      if (funcionarioId === 'todos') {
-        texto = '👤 *Lista completa de Funcionários:*\n\n';
-        Object.values(funcionarios)
-          .sort((a,b) => (a.nome||'').localeCompare(b.nome||'','pt-BR'))
-          .forEach(f => { texto += formatarFuncionario(f, empresas) + '\n\n'; });
-      } else {
-        const f = funcionarios[funcionarioId];
-        if (!f) { resultado.textContent = 'Funcionário não encontrado.'; return; }
-        texto = '👤 *Informações do Funcionário:*\n\n' + formatarFuncionario(f, empresas);
-      }
-
-      resultado.textContent = texto.trim();
-      textoRelatorioAtual = texto.trim();
-      scrollParaResultado();
-    } catch (error) {
-      console.error('Erro ao gerar lista de funcionários:', error);
-      resultado.textContent = 'Erro ao gerar lista de funcionários.';
-    } finally {
-      setLoadingState(btnGerarLista, false);
-    }
-  }
-
-  async function gerarRelatorioPagamentoDiarista() {
-      // Esta função também precisará de uma grande adaptação
-      // para varrer a nova estrutura de dados aninhada
-      showToast("Lógica de pagamento de diarista precisa ser adaptada.");
-  }
-
-  async function gerarRelatorioHoraExtra() {
-      // Esta função também precisará de uma grande adaptação
-      showToast("Lógica de relatório de hora extra precisa ser adaptada.");
-  }
-  
-  async function excluirRelatorios() {
-      // Esta função também precisará de uma grande adaptação
-      showToast("Lógica de exclusão precisa ser adaptada.");
-  }
-
-  btnGerarFaltas.addEventListener('click', gerarRelatorioFaltas);
-  btnGerarLista.addEventListener('click', gerarRelatorioDadosFuncionario);
-  btnGerarPagamento.addEventListener('click', gerarRelatorioPagamentoDiarista);
-  btnGerarHoraExtra.addEventListener('click', gerarRelatorioHoraExtra);
-  btnExcluir.addEventListener('click', excluirRelatorios);
-
-  btnEnviarWhats.addEventListener('click', () => {
-    if (!textoRelatorioAtual) {
-      showToast('Gere um relatório antes de enviar', 'error');
-      return;
-    }
-    const textoEncoded = encodeURIComponent(textoRelatorioAtual);
-    window.open(`https://wa.me/?text=${textoEncoded}`, '_blank');
+      resultado.textContent = texto;
+      textoRelatorioAtual = texto;
   });
 
-  carregarFuncionarios();
+  // --- Relatório de Pagamento de Diarista ---
+  const btnGerarPagamento = document.getElementById('btnGerarPagamento');
+  btnGerarPagamento.addEventListener('click', async () => {
+    // Lógica similar ao de Faltas, mas filtrando por diaristas e status 'presente'
+    showToast("Funcionalidade de pagamento de diarista a ser implementada.");
+  });
+
+  // --- Relatório de Hora Extra ---
+  const btnGerarHoraExtra = document.getElementById('btnGerarHoraExtra');
+  btnGerarHoraExtra.addEventListener('click', async () => {
+      // Lógica similar ao de Faltas, buscando no nó 'horaextra'
+      showToast("Funcionalidade de relatório de hora extra a ser implementada.");
+  });
+
+  // --- Exclusão de Registros ---
+  const btnExcluir = document.getElementById('btnExcluir');
+  btnExcluir.addEventListener('click', async () => {
+      // Lógica de exclusão com os novos filtros
+      showToast("Funcionalidade de exclusão a ser implementada.");
+  });
+  
+  // --- Setup dos Filtros e Botão WhatsApp ---
+  document.querySelectorAll('.card').forEach(card => {
+    const empresaSelect = card.querySelector('.empresa-select');
+    const obraSelect = card.querySelector('.obra-select');
+    if(empresaSelect && obraSelect) {
+      configurarFiltroObra(empresaSelect, obraSelect);
+    }
+  });
+
+  btnEnviarWhats.addEventListener('click', () => {
+    if (!textoRelatorioAtual) { return showToast('Gere um relatório antes de enviar'); }
+    window.open(`https://wa.me/?text=${encodeURIComponent(textoRelatorioAtual)}`, '_blank');
+  });
+
+  // Inicializa a página
+  carregarDadosIniciais();
 </script>
 
 </body>
