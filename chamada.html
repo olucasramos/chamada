@@ -6,581 +6,160 @@
   <title>Chamada - Controle de Presenças</title>
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-dark: #1e3a8a;
-      --primary-light: #3b82f6;
-      --secondary: #06b6d4;
-      --accent: #10b981;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --surface: rgba(255, 255, 255, 0.1);
-      --surface-hover: rgba(255, 255, 255, 0.15);
-      --surface-card: rgba(255, 255, 255, 0.12);
+      --accent: #2ecc71;
+      --warning: #f1c40f;
       --text-primary: #ffffff;
-      --text-secondary: rgba(255, 255, 255, 0.8);
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
-      --border-radius: 16px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #1f2937;
       color: var(--text-primary);
       margin: 0;
       min-height: 100vh;
-      padding: 20px 15px 80px 15px;
+      padding: 20px 15px 150px 15px; /* Mais espaço para o botão Salvar */
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      position: relative;
-      overflow-x: hidden;
+      gap: 24px;
     }
-
-    /* Elementos decorativos */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      animation: float 25s ease-in-out infinite;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
-    }
-
     header {
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 24px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      animation: slideInDown 0.6s ease-out;
-    }
-
-    .btn-voltar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--text-primary);
-      text-decoration: none;
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-    }
-
-    .btn-voltar:hover {
-      background: var(--surface-hover);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .header-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #ffffff, #e0e7ff);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-align: center;
-      flex: 1;
-    }
-
-    .date-section {
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 32px;
-      animation: slideInUp 0.6s ease-out 0.1s both;
-    }
-
-    .date-label {
-      display: block;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text-secondary);
-      text-align: center;
-    }
-
-    #dataSelecionada {
-      width: 100%;
-      padding: 16px 20px;
-      border-radius: var(--border-radius);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      color: var(--text-primary);
-      font-size: 1.1rem;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: var(--shadow);
-    }
-
-    #dataSelecionada:hover {
-      background: var(--surface-hover);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-    }
-
-    #dataSelecionada:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-    }
-
-    .funcionarios-container {
-      width: 100%;
-      max-width: 500px;
-      display: flex;
-      flex-direction: column;
       gap: 16px;
-      animation: fadeInUp 0.8s ease-out 0.3s both;
+      margin-bottom: 16px;
     }
-
-    .funcionario-card {
-      background: var(--surface-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+    .btn-voltar {
+      display: flex; align-items: center; gap: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary); text-decoration: none;
+      padding: 10px 16px; border-radius: var(--border-radius);
+      font-weight: 600; transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-voltar:hover { background-color: rgba(255, 255, 255, 0.2); }
+    .header-title { font-size: 1.5rem; font-weight: 700; text-align: left; flex-grow: 1; }
+    .card {
+      background-color: rgba(42, 60, 80, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--border-radius);
       padding: 24px;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-
-    .funcionario-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(45deg, var(--accent), var(--secondary));
-      border-radius: 0 4px 4px 0;
+    .card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 0.8rem; font-weight: 500;
+      margin-bottom: 6px; color: var(--text-secondary); text-transform: uppercase;
     }
-
-    .funcionario-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      background: var(--surface-hover);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .funcionario-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .funcionario-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: white;
-      text-transform: uppercase;
-    }
-
-    .funcionario-info {
-      flex: 1;
-    }
-
-    .funcionario-nome {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .funcionario-tipo {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-options {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .status-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: var(--transition);
-      user-select: none;
-    }
-
-    .status-option:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .status-radio {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      position: relative;
-      cursor: pointer;
+    .form-input, .form-select {
+      width: 100%; padding: 12px 14px; border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-primary); font-size: 1rem;
       transition: var(--transition);
     }
-
-    .status-radio.checked {
-      border-color: var(--accent);
-      background: var(--accent);
+    .form-input:focus, .form-select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
     }
-
-    .status-radio.checked::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 8px;
-      height: 8px;
-      background: white;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
+    .funcionario-card {
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    .status-label {
-      font-weight: 600;
-      cursor: pointer;
-    }
-
+    .funcionario-card:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+    .funcionario-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .funcionario-info h3 { font-size: 1.1rem; margin-bottom: 4px; }
+    .funcionario-info p { font-size: 0.85rem; color: var(--text-secondary); }
+    .status-options { display: flex; gap: 16px; flex-wrap: wrap; }
+    .status-option { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .atestado-group {
-      margin-top: 16px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      border-left: 4px solid var(--warning);
-      display: none;
-      animation: slideIn 0.3s ease-out;
+        margin-top: 12px; padding-left: 12px;
+        border-left: 3px solid var(--warning);
+        display: none;
     }
-
-    .atestado-group.show {
-      display: block;
-    }
-
-    .atestado-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--warning);
-    }
-
-    .atestado-options {
+    .atestado-group.show { display: block; }
+    .atestado-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 8px; color: var(--warning); }
+    .btn-salvar-container {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 15px;
+      background: linear-gradient(to top, #1f2937, rgba(31, 41, 55, 0));
       display: flex;
-      gap: 16px;
+      justify-content: center;
     }
-
     .btn-salvar {
-      background: linear-gradient(135deg, var(--success), var(--accent));
-      padding: 18px 32px;
-      border-radius: var(--border-radius);
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: white;
-      border: none;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: var(--transition);
-      margin: 32px auto;
-      max-width: 300px;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
+      width: 100%; max-width: 570px;
+      padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: 600;
+      color: white; border: none; cursor: pointer; transition: var(--transition);
+      background-color: var(--accent);
     }
-
-    .btn-salvar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn-salvar:hover::before {
-      left: 100%;
-    }
-
-    .btn-salvar:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .btn-salvar:active {
-      transform: translateY(-1px) scale(1.02);
-    }
-
-    .btn-salvar:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Loading state */
-    .loading {
-      position: relative;
-    }
-
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Toast notifications */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--success);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-    }
-
-    .toast.show {
-      transform: translateX(0);
-    }
-
-    .toast.error {
-      background: var(--danger);
-    }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-secondary);
-      text-align: center;
-      font-size: 0.9rem;
-      padding: 16px 20px;
-      font-weight: 500;
-    }
-
-    /* Animações */
-    @keyframes slideInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        height: 0;
-        padding: 0 16px;
-      }
-      to {
-        opacity: 1;
-        height: auto;
-        padding: 16px;
-      }
-    }
-
-    /* Responsividade */
-    @media (max-width: 480px) {
-      body {
-        padding: 15px 10px 80px 10px;
-      }
-
-      .funcionario-card {
-        padding: 20px 16px;
-      }
-
-      .status-options {
-        gap: 12px;
-      }
-
-      .atestado-options {
-        gap: 12px;
-      }
-
-      .btn-salvar {
-        font-size: 1.1rem;
-        padding: 16px 24px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .status-options {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .atestado-options {
-        flex-direction: column;
-        gap: 8px;
-      }
-    }
-
-    /* Estados de foco */
-    .status-option:focus-within {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .btn-salvar:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
+    .btn-salvar:hover { background-color: #27ae60; }
+    .btn-salvar:disabled { background-color: #555; cursor: not-allowed; }
   </style>
 </head>
 <body>
-  <header>
-    <a href="index.html" class="btn-voltar" aria-label="Voltar para página inicial">
-      <span>←</span> Voltar
-    </a>
-    <h1 class="header-title">Chamada</h1>
-  </header>
+  <div class="container">
+    <header>
+      <a href="index.html" class="btn-voltar">
+        <span>←</span> Voltar
+      </a>
+      <h1 class="header-title">Chamada</h1>
+    </header>
 
-  <div class="date-section">
-    <label for="dataSelecionada" class="date-label">Data da Chamada</label>
-    <input type="date" id="dataSelecionada" />
+    <div class="card">
+      <h2 class="card-title">1. Selecione a Data e o Local</h2>
+      <div class="form-group">
+        <label for="dataSelecionada" class="form-label">Data da Chamada</label>
+        <input type="date" id="dataSelecionada" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="selectEmpresa" class="form-label">Empresa</label>
+        <select id="selectEmpresa" class="form-select">
+          <option value="">Selecione a empresa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="selectObra" class="form-label">Obra</label>
+        <select id="selectObra" class="form-select" disabled>
+          <option value="">Selecione uma empresa primeiro</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card" id="chamadaCard" style="display: none;">
+      <h2 class="card-title">2. Realizar Chamada</h2>
+      <div id="listaFuncionarios">
+        </div>
+    </div>
   </div>
 
-  <div class="funcionarios-container" id="listaFuncionarios">
-    <!-- Funcionários serão carregados aqui -->
+  <div class="btn-salvar-container">
+    <button class="btn-salvar" id="btnSalvar" disabled>Salvar Chamada</button>
   </div>
-
-  <button class="btn-salvar" id="btnSalvar">
-    <span>Salvar Chamada</span>
-  </button>
-
-  <footer>
-    <p>Desenvolvido por Lucas Ramos Aragão</p>
-  </footer>
-
+  
   <script type="module">
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-    import { app } from "./firebase.js";
+    import { db, ref, get, set } from "./firebase.js";
 
-    const db = getDatabase(app);
-    const listaFuncionarios = document.getElementById("listaFuncionarios");
     const dataSelecionadaInput = document.getElementById("dataSelecionada");
+    const selectEmpresa = document.getElementById("selectEmpresa");
+    const selectObra = document.getElementById("selectObra");
+    const chamadaCard = document.getElementById("chamadaCard");
+    const listaFuncionariosDiv = document.getElementById("listaFuncionarios");
     const btnSalvar = document.getElementById("btnSalvar");
 
-    let funcionarios = {};
+    let funcionariosCache = {};
+    let empresasCache = {};
 
-    // Funções utilitárias
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => toast.classList.add('show'), 100);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-      }, 3000);
-    }
-
-    function setLoadingState(element, loading) {
-      if (loading) {
-        element.classList.add('loading');
-        element.disabled = true;
-      } else {
-        element.classList.remove('loading');
-        element.disabled = false;
-      }
-    }
-
-    function getInitials(nome) {
-      return nome.split(' ').map(n => n[0]).join('').substring(0, 2);
-    }
-
-    // Define data inicial do datepicker para hoje
     function definirDataHoje() {
       const hoje = new Date();
       const yyyy = hoje.getFullYear();
@@ -589,219 +168,210 @@
       dataSelecionadaInput.value = `${yyyy}-${mm}-${dd}`;
     }
 
-    async function carregarFuncionarios() {
-      setLoadingState(btnSalvar, true);
-      
-      try {
-        const snapshot = await get(ref(db, 'funcionarios'));
-        if (snapshot.exists()) {
-          funcionarios = snapshot.val();
-          montarCards();
-          adicionarEventosStatus();
-        } else {
-          listaFuncionarios.innerHTML = '<div class="funcionario-card"><p>Nenhum funcionário encontrado.</p></div>';
+    async function carregarDadosIniciais() {
+        try {
+            const [empresasSnap, funcionariosSnap] = await Promise.all([
+                get(ref(db, 'empresas')),
+                get(ref(db, 'funcionarios'))
+            ]);
+            empresasCache = empresasSnap.exists() ? empresasSnap.val() : {};
+            funcionariosCache = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
+            preencherSelectEmpresas();
+        } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            alert("Não foi possível carregar os dados. Verifique a conexão.");
         }
-      } catch (error) {
-        console.error('Erro ao carregar funcionários:', error);
-        showToast('Erro ao carregar funcionários', 'error');
-        listaFuncionarios.innerHTML = '<div class="funcionario-card"><p>Erro ao carregar funcionários.</p></div>';
-      } finally {
-        setLoadingState(btnSalvar, false);
-      }
     }
 
-    function montarCards() {
-      listaFuncionarios.innerHTML = '';
-
-      // Converter objeto para array e ordenar alfabeticamente pelo nome
-      const listaOrdenada = Object.entries(funcionarios)
-        .sort(([, a], [, b]) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
-
-      for (const [id, f] of listaOrdenada) {
-        const tipoFormatado = f.tipo.toLowerCase() === 'funcionario' ? 'Funcionário' : 
-                             f.tipo.toLowerCase() === 'diarista' ? 'Diarista' : 
-                             f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1);
-
-        const card = document.createElement('div');
-        card.classList.add('funcionario-card');
-        card.innerHTML = `
-          <div class="funcionario-header">
-            <div class="funcionario-avatar">${getInitials(f.nome)}</div>
-            <div class="funcionario-info">
-              <div class="funcionario-nome">${f.nome}</div>
-              <div class="funcionario-tipo">${tipoFormatado}</div>
-            </div>
-          </div>
-          
-          <div class="status-options">
-            <div class="status-option" onclick="selecionarStatus('${id}', 'presente')">
-              <div class="status-radio" id="presente_${id}"></div>
-              <span class="status-label">Presente</span>
-            </div>
-            <div class="status-option" onclick="selecionarStatus('${id}', 'falta')">
-              <div class="status-radio" id="falta_${id}"></div>
-              <span class="status-label">Falta</span>
-            </div>
-          </div>
-          
-          <div class="atestado-group" id="atestado-group-${id}">
-            <div class="atestado-title">Atestado médico:</div>
-            <div class="atestado-options">
-              <div class="status-option" onclick="selecionarAtestado('${id}', 'com')">
-                <div class="status-radio" id="com_${id}"></div>
-                <span class="status-label">Com atestado</span>
-              </div>
-              <div class="status-option" onclick="selecionarAtestado('${id}', 'sem')">
-                <div class="status-radio" id="sem_${id}"></div>
-                <span class="status-label">Sem atestado</span>
-              </div>
-            </div>
-          </div>
-        `;
-        listaFuncionarios.appendChild(card);
-
-        // Definir status padrão como presente
-        selecionarStatus(id, 'presente');
-      }
+    function preencherSelectEmpresas() {
+        selectEmpresa.innerHTML = '<option value="">Selecione a empresa</option>';
+        for (const id in empresasCache) {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = empresasCache[id].nome;
+            selectEmpresa.appendChild(option);
+        }
     }
 
-    function selecionarStatus(id, status) {
-      // Limpar seleção anterior
-      document.getElementById(`presente_${id}`).classList.remove('checked');
-      document.getElementById(`falta_${id}`).classList.remove('checked');
-      
-      // Marcar novo status
-      document.getElementById(`${status}_${id}`).classList.add('checked');
-      
-      // Mostrar/esconder grupo de atestado
-      const atestadoGroup = document.getElementById(`atestado-group-${id}`);
-      const func = funcionarios[id];
-      
-      if (status === 'falta' && func.tipo.toLowerCase() === 'funcionario') {
-        atestadoGroup.classList.add('show');
-      } else {
-        atestadoGroup.classList.remove('show');
-        // Limpar seleção de atestado
-        const comEl = document.getElementById(`com_${id}`);
-        const semEl = document.getElementById(`sem_${id}`);
-        if (comEl) comEl.classList.remove('checked');
-        if (semEl) semEl.classList.remove('checked');
-      }
+    function atualizarSelectObras() {
+        const empresaId = selectEmpresa.value;
+        selectObra.innerHTML = '';
+        selectObra.disabled = true;
+        if (!empresaId || !empresasCache[empresaId]?.obras) {
+            selectObra.innerHTML = `<option value="">${empresaId ? "Nenhuma obra" : "Selecione uma empresa"}</option>`;
+            return;
+        }
+        selectObra.disabled = false;
+        selectObra.innerHTML = '<option value="">Selecione a obra</option>';
+        const obras = empresasCache[empresaId].obras;
+        for (const obraId in obras) {
+            const option = document.createElement('option');
+            option.value = obras[obraId].nome;
+            option.textContent = obras[obraId].nome;
+            selectObra.appendChild(option);
+        }
     }
 
-    function selecionarAtestado(id, tipo) {
-      // Limpar seleção anterior
-      document.getElementById(`com_${id}`).classList.remove('checked');
-      document.getElementById(`sem_${id}`).classList.remove('checked');
-      
-      // Marcar nova seleção
-      document.getElementById(`${tipo}_${id}`).classList.add('checked');
+    async function atualizarInterfaceChamada() {
+        const data = dataSelecionadaInput.value;
+        const empresaId = selectEmpresa.value;
+        const obraNome = selectObra.value;
+
+        if (!data || !empresaId || !obraNome) {
+            chamadaCard.style.display = 'none';
+            btnSalvar.disabled = true;
+            return;
+        }
+        
+        chamadaCard.style.display = 'block';
+        btnSalvar.disabled = false;
+
+        const funcionariosFiltrados = Object.entries(funcionariosCache).filter(([id, f]) => 
+            f.empresaId === empresaId && f.obra === obraNome
+        );
+
+        montarCards(funcionariosFiltrados);
+        await carregarChamadaSalva(data, empresaId, obraNome);
     }
 
-    function adicionarEventosStatus() {
-      // Eventos já são adicionados via onclick no HTML
+    function montarCards(funcionarios) {
+        listaFuncionariosDiv.innerHTML = '';
+        if (funcionarios.length === 0) {
+            listaFuncionariosDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Nenhum funcionário encontrado para esta obra.</p>';
+            return;
+        }
+        funcionarios.forEach(([id, f]) => {
+            const card = document.createElement('div');
+            card.className = 'funcionario-card';
+            card.dataset.id = id;
+            card.innerHTML = `
+                <div class="funcionario-header">
+                    <div class="funcionario-info">
+                        <h3>${f.nome}</h3>
+                        <p>${f.tipo === 'diarista' ? 'Diarista' : 'Funcionário'} - ${f.funcao || 'N/A'}</p>
+                    </div>
+                </div>
+                <div class="status-options">
+                    <label class="status-option"><input type="radio" name="status_${id}" value="presente" checked> Presente</label>
+                    <label class="status-option"><input type="radio" name="status_${id}" value="falta"> Falta</label>
+                </div>
+                <div class="atestado-group" id="atestado-group-${id}">
+                    <p class="atestado-title">Atestado médico:</p>
+                    <div class="status-options">
+                        <label class="status-option"><input type="radio" name="atestado_${id}" value="com"> Com atestado</label>
+                        <label class="status-option"><input type="radio" name="atestado_${id}" value="sem"> Sem atestado</label>
+                    </div>
+                </div>
+            `;
+            listaFuncionariosDiv.appendChild(card);
+
+            // Adicionar eventos para mostrar/esconder atestado
+            card.querySelectorAll(`input[name="status_${id}"]`).forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const atestadoGroup = document.getElementById(`atestado-group-${id}`);
+                    if (radio.value === 'falta' && f.tipo === 'funcionario') {
+                        atestadoGroup.classList.add('show');
+                    } else {
+                        atestadoGroup.classList.remove('show');
+                    }
+                });
+            });
+        });
     }
+    
+    async function carregarChamadaSalva(data, empresaId, obraNome) {
+        if (!data || !empresaId || !obraNome) return;
+        const obraNomeCodificado = encodeURIComponent(obraNome);
+        const chamadaRef = ref(db, `chamadas/${data}/${empresaId}/${obraNomeCodificado}`);
+        try {
+            const snapshot = await get(chamadaRef);
+            if (snapshot.exists()) {
+                const chamadaDoDia = snapshot.val();
+                for (const id in chamadaDoDia) {
+                    const registro = chamadaDoDia[id];
+                    const statusRadio = document.querySelector(`input[name="status_${id}"][value="${registro.status}"]`);
+                    if (statusRadio) statusRadio.checked = true;
 
-    // Função para carregar a chamada salva na data selecionada
-    async function carregarChamadaData(data) {
-      if (!data) return;
-
-      try {
-        const snapshot = await get(ref(db, `chamadas/${data}`));
-        if (snapshot.exists()) {
-          const chamadasDoDia = snapshot.val();
-          
-          for (const id in funcionarios) {
-            if (chamadasDoDia[id]) {
-              const status = chamadasDoDia[id].status || 'presente';
-              const atestado = chamadasDoDia[id].atestado;
-
-              selecionarStatus(id, status);
-
-              if (status === 'falta' && atestado !== null && atestado !== undefined) {
-                selecionarAtestado(id, atestado ? 'com' : 'sem');
-              }
-            } else {
-              selecionarStatus(id, 'presente');
+                    const funcCard = document.querySelector(`.funcionario-card[data-id="${id}"]`);
+                    if (funcCard && funcionariosCache[id]?.tipo === 'funcionario' && registro.status === 'falta') {
+                        funcCard.querySelector(`#atestado-group-${id}`).classList.add('show');
+                        const atestadoValue = registro.atestado ? 'com' : 'sem';
+                        const atestadoRadio = funcCard.querySelector(`input[name="atestado_${id}"][value="${atestadoValue}"]`);
+                        if(atestadoRadio) atestadoRadio.checked = true;
+                    }
+                }
             }
-          }
-        } else {
-          // Reset para padrão se não existir chamada
-          for (const id in funcionarios) {
-            selecionarStatus(id, 'presente');
-          }
+        } catch (error) {
+            console.error("Erro ao carregar chamada salva:", error);
         }
-      } catch (error) {
-        console.error('Erro ao carregar chamada da data:', error);
-        showToast('Erro ao carregar dados da data', 'error');
-      }
     }
 
     async function salvarChamada() {
-      const dataSelecionada = dataSelecionadaInput.value;
-      if (!dataSelecionada) {
-        showToast('Por favor, selecione uma data', 'error');
-        return;
-      }
+        const data = dataSelecionadaInput.value;
+        const empresaId = selectEmpresa.value;
+        const obraNome = selectObra.value;
 
-      setLoadingState(btnSalvar, true);
-
-      try {
-        const chamadasDoDia = {};
-
-        for (const id in funcionarios) {
-          const presenteChecked = document.getElementById(`presente_${id}`).classList.contains('checked');
-          const statusSelecionado = presenteChecked ? 'presente' : 'falta';
-          const func = funcionarios[id];
-          let atestado = null;
-
-          if (func.tipo.toLowerCase() === 'funcionario' && statusSelecionado === 'falta') {
-            const comChecked = document.getElementById(`com_${id}`).classList.contains('checked');
-            const semChecked = document.getElementById(`sem_${id}`).classList.contains('checked');
-            
-            if (!comChecked && !semChecked) {
-              showToast(`Por favor, selecione "Com atestado" ou "Sem atestado" para ${func.nome}`, 'error');
-              return;
-            }
-            
-            atestado = comChecked;
-          }
-
-          chamadasDoDia[id] = {
-            status: statusSelecionado,
-            atestado: atestado
-          };
+        if (!data || !empresaId || !obraNome) {
+            alert("Por favor, selecione data, empresa e obra.");
+            return;
         }
 
-        await set(ref(db, `chamadas/${dataSelecionada}`), chamadasDoDia);
-        showToast('Chamada salva com sucesso!');
-      } catch (error) {
-        console.error('Erro ao salvar chamada:', error);
-        showToast('Erro ao salvar chamada', 'error');
-      } finally {
-        setLoadingState(btnSalvar, false);
-      }
+        btnSalvar.disabled = true;
+        btnSalvar.textContent = "Salvando...";
+
+        const chamadasDoDia = {};
+        const cards = listaFuncionariosDiv.querySelectorAll('.funcionario-card');
+        let formValido = true;
+
+        cards.forEach(card => {
+            const id = card.dataset.id;
+            const funcionario = funcionariosCache[id];
+            const statusSelecionado = card.querySelector(`input[name="status_${id}"]:checked`)?.value;
+            
+            chamadasDoDia[id] = { status: statusSelecionado, atestado: null };
+
+            if (funcionario.tipo === 'funcionario' && statusSelecionado === 'falta') {
+                const atestadoSelecionado = card.querySelector(`input[name="atestado_${id}"]:checked`)?.value;
+                if (!atestadoSelecionado) {
+                    alert(`Por favor, informe se ${funcionario.nome} apresentou atestado.`);
+                    formValido = false;
+                }
+                chamadasDoDia[id].atestado = atestadoSelecionado === 'com';
+            }
+        });
+
+        if (!formValido) {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar Chamada";
+            return;
+        }
+
+        try {
+            const obraNomeCodificado = encodeURIComponent(obraNome);
+            const chamadaRef = ref(db, `chamadas/${data}/${empresaId}/${obraNomeCodificado}`);
+            await set(chamadaRef, chamadasDoDia);
+            alert("Chamada salva com sucesso!");
+        } catch (error) {
+            console.error("Erro ao salvar chamada:", error);
+            alert("Erro ao salvar chamada.");
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar Chamada";
+        }
     }
 
-    // Event listeners
-    btnSalvar.addEventListener('click', salvarChamada);
-    
-    dataSelecionadaInput.addEventListener('change', () => {
-      carregarChamadaData(dataSelecionadaInput.value);
+    // Event Listeners
+    selectEmpresa.addEventListener('change', () => {
+        atualizarSelectObras();
+        atualizarInterfaceChamada();
     });
+    dataSelecionadaInput.addEventListener('change', atualizarInterfaceChamada);
+    selectObra.addEventListener('change', atualizarInterfaceChamada);
+    btnSalvar.addEventListener('click', salvarChamada);
 
-    // Tornar funções globais para onclick
-    window.selecionarStatus = selecionarStatus;
-    window.selecionarAtestado = selecionarAtestado;
-
-    // Inicializar
-    async function iniciar() {
-      definirDataHoje();
-      await carregarFuncionarios();
-      carregarChamadaData(dataSelecionadaInput.value);
-    }
-
-    iniciar();
+    // Inicialização
+    definirDataHoje();
+    carregarDadosIniciais();
   </script>
 </body>
 </html>
