@@ -201,7 +201,6 @@
   let empresasCache = {};
   let textoRelatorioAtual = '';
 
-  // --- Funções Utilitárias e de Setup ---
   function showToast(message) { alert(message); }
   function formatarDataDMY(dataISO) {
     if (!dataISO) return '-';
@@ -233,7 +232,6 @@
   }
 
   function popularEmpresasDropdown(selectElement) {
-    // CORREÇÃO: Adicionada opção "Todas" ao dropdown de faltas
     const temOpcaoTodos = selectElement.id === 'faltasEmpresa' || selectElement.id === 'dadosEmpresa';
     selectElement.innerHTML = `<option value="">${temOpcaoTodos ? 'Todas' : 'Selecione'}</option>`;
     if (temOpcaoTodos && selectElement.id === 'faltasEmpresa') {
@@ -251,7 +249,6 @@
       obraSelect.innerHTML = `<option value="">Todas</option>`;
       obraSelect.disabled = true;
 
-      // CORREÇÃO: Desabilita Obra se "Todas as Empresas" for selecionado
       if (empresaId && empresaId !== 'todos' && empresasCache[empresaId]?.obras) {
         const obras = empresasCache[empresaId].obras;
         for (const obraId in obras) {
@@ -270,17 +267,12 @@
     const inicio = document.getElementById('faltasDataInicio').value;
     const fim = document.getElementById('faltasDataFim').value;
     
-    if (!inicio || !fim) {
-      return showToast("Preencha o intervalo de datas.");
-    }
-    if (!empresaId) {
-      return showToast("Selecione uma empresa ou 'Todas'.");
-    }
+    if (!inicio || !fim) return showToast("Preencha o intervalo de datas.");
+    if (!empresaId) return showToast("Selecione uma empresa ou 'Todas'.");
 
     resultado.textContent = "Gerando, por favor aguarde...";
     
     try {
-        // CORREÇÃO: Busca os dados uma única vez para melhorar a performance
         const chamadasSnap = await get(ref(db, 'chamadas'));
         const chamadas = chamadasSnap.exists() ? chamadasSnap.val() : {};
 
@@ -289,32 +281,57 @@
         
         const faltasPorFuncionario = {};
 
-        // Processamento dos dados em memória (muito mais rápido)
         for (const data in chamadas) {
             if (data < inicio || data > fim) continue;
             
-            for (const idEmpresa in chamadas[data]) {
-                if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
+            const dadosDoDia = chamadas[data];
+            const primeiroId = Object.keys(dadosDoDia)[0];
+            const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined;
 
-                for (const nomeObraCodificado in chamadas[data][idEmpresa]) {
-                    const nomeObra = decodeURIComponent(nomeObraCodificado);
-                    if (obraNome && nomeObra !== obraNome) continue;
-
-                    const presencas = chamadas[data][idEmpresa][nomeObraCodificado];
-                    for (const funcId in presencas) {
+            if (éFormatoAntigo) {
+                // Processa dados no formato antigo (só se "Todas as Empresas" estiver selecionado)
+                if (empresaId === 'todos') {
+                    for (const funcId in dadosDoDia) {
+                        const registro = dadosDoDia[funcId];
                         const func = funcionariosCache[funcId];
-                        const registro = presencas[funcId];
-
                         if (func && func.tipo === 'funcionario' && registro.status === 'falta') {
                             if (!faltasPorFuncionario[funcId]) {
                                 faltasPorFuncionario[funcId] = { nome: func.nome, faltas: [] };
                             }
                             faltasPorFuncionario[funcId].faltas.push({
                                 data: formatarDataDMY(data),
-                                empresa: empresasCache[idEmpresa]?.nome || 'N/A',
-                                obra: nomeObra,
+                                empresa: 'N/A',
+                                obra: 'Registro Antigo',
                                 atestado: registro.atestado ? 'Sim' : 'Não'
                             });
+                        }
+                    }
+                }
+            } else {
+                // Processa dados no formato novo
+                for (const idEmpresa in dadosDoDia) {
+                    if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
+
+                    for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
+                        const nomeObra = decodeURIComponent(nomeObraCodificado);
+                        if (obraNome && nomeObra !== obraNome) continue;
+
+                        const presencas = dadosDoDia[idEmpresa][nomeObraCodificado];
+                        for (const funcId in presencas) {
+                            const func = funcionariosCache[funcId];
+                            const registro = presencas[funcId];
+
+                            if (func && func.tipo === 'funcionario' && registro.status === 'falta') {
+                                if (!faltasPorFuncionario[funcId]) {
+                                    faltasPorFuncionario[funcId] = { nome: func.nome, faltas: [] };
+                                }
+                                faltasPorFuncionario[funcId].faltas.push({
+                                    data: formatarDataDMY(data),
+                                    empresa: empresasCache[idEmpresa]?.nome || 'N/A',
+                                    obra: nomeObra,
+                                    atestado: registro.atestado ? 'Sim' : 'Não'
+                                });
+                            }
                         }
                     }
                 }
@@ -339,16 +356,13 @@
     } catch (error) {
         console.error("Erro ao gerar relatório:", error);
         resultado.textContent = "Ocorreu um erro ao gerar o relatório.";
-        showToast("Ocorreu um erro. Verifique o console para mais detalhes.");
     } finally {
-        // CORREÇÃO: Rolagem automática movida para o final da execução
         scrollParaResultado();
     }
   });
 
   // (O restante do seu JavaScript para outros relatórios permanece aqui)
   
-  // --- Setup dos Filtros ---
   document.querySelectorAll('.card').forEach(card => {
     const empresaSelect = card.querySelector('.empresa-select');
     const obraSelect = card.querySelector('.obra-select');
@@ -362,7 +376,6 @@
     window.open(`https://wa.me/?text=${encodeURIComponent(textoRelatorioAtual)}`, '_blank');
   });
 
-  // Inicializa a página
   carregarDadosIniciais();
 </script>
 
