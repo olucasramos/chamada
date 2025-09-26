@@ -17,7 +17,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 15px 80px 15px;
+    /* ALTERADO: Aumentado o padding inferior de 80px para 95px para evitar sobreposição do rodapé */
+    padding: 20px 15px 95px 15px;
     position: relative;
     overflow-x: hidden;
   }
@@ -182,6 +183,7 @@
     font-weight: 600;
   }
   
+  /* ALTERADO: Estilo do rodapé refinado */
   footer {
     position: fixed;
     bottom: 0;
@@ -189,13 +191,15 @@
     width: 100%;
     background: rgba(21, 67, 96, 0.95);
     backdrop-filter: blur(10px);
-    color: #ddd;
+    color: #e0e0e0; /* Cor levemente mais clara */
     text-align: center;
     font-size: 0.9rem;
-    padding: 12px 0;
+    font-weight: 500; /* Adicionado peso de fonte */
+    padding: 15px 0; /* Padding vertical aumentado */
     user-select: none;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255,255,255,0.2); /* Borda mais visível */
+    z-index: 10;
   }
   
   @media (max-width: 450px) {
