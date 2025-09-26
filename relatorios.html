@@ -3,268 +3,597 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Relatórios</title>
+<title>Relatórios - Controle de Presenças</title>
 <style>
-  * { box-sizing: border-box; }
+  :root {
+    --primary: #1e40af;
+    --primary-dark: #1e3a8a;
+    --primary-light: #3b82f6;
+    --secondary: #06b6d4;
+    --accent: #10b981;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --surface: rgba(255, 255, 255, 0.1);
+    --surface-hover: rgba(255, 255, 255, 0.15);
+    --surface-card: rgba(255, 255, 255, 0.12);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
+    --border-radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #2980b9, #6dd5fa);
-    color: #fff;
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
     margin: 0;
     min-height: 100vh;
-    padding: 20px 15px 60px 15px;
+    padding: 20px 15px 80px 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    overflow-x: hidden;
   }
+
+  /* Elementos decorativos */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(3deg); }
+  }
+
   header {
     width: 100%;
-    max-width: 840px;
-    margin: 0 auto 12px auto;
+    max-width: 900px;
+    margin-bottom: 32px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    user-select: none;
-  }
-  a.btn-voltar {
-    cursor: pointer;
-    background-color: #154360;
-    color: white;
-    text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(21,67,96,0.7);
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
-    user-select: none;
-  }
-  a.btn-voltar:hover {
-    background-color: #0e2a48;
-    box-shadow: 0 6px 14px rgba(14, 42, 72, 0.9);
+    justify-content: space-between;
+    animation: slideInDown 0.6s ease-out;
   }
 
-  h1 {
-    font-size: 2.4rem;
-    margin: 0 0 20px 0;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    user-select: none;
-    text-align: center;
-    max-width: 840px;
-    width: 100%;
-  }
-
-  section {
-    background-color: rgba(21, 67, 96, 0.85);
-    border-radius: 12px;
-    padding: 18px 24px;
-    margin-bottom: 18px;
-    width: 100%;
-    max-width: 840px;
-    box-shadow: 0 6px 14px rgba(21, 67, 96, 0.7);
-    user-select: none;
-  }
-
-  section h2 {
-    margin: 0 0 14px 0;
-    font-size: 1.3rem;
-  }
-
-  label {
-    display: block;
-    font-weight: 600;
-    margin: 10px 0 6px 0;
-  }
-
-  select, input[type="date"], input[type="password"] {
-    width: 100%;
-    max-width: 340px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    margin-bottom: 10px;
-    font-size: 1rem;
-    color: #154360;
-  }
-
-  .linha {
+  .btn-voltar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 14px 18px;
-    align-items: flex-end;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
   }
 
-  button.btn-acao {
-    background-color: #154360;
-    padding: 10px 18px;
+  .btn-voltar:hover {
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .header-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff, #e0e7ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    flex: 1;
+  }
+
+  .reports-grid {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  @media (min-width: 768px) {
+    .reports-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .report-section {
+    background: var(--surface-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .report-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--secondary));
+  }
+
+  .report-section:hover {
+    transform: translateY(-2px);
+    background: var(--surface-hover);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .report-section.danger::before {
+    background: linear-gradient(90deg, var(--danger), #ef4444);
+  }
+
+  .report-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .report-icon {
+    font-size: 1.5rem;
+  }
+
+  .report-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (min-width: 480px) {
+    .form-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .form-grid.single {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input, .form-select {
+    padding: 12px 14px;
     border-radius: 10px;
-    font-size: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: var(--transition);
+  }
+
+  .form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    background: var(--surface-hover);
+  }
+
+  .btn-action {
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
     font-weight: 700;
     color: white;
     border: none;
-    box-shadow: 0 5px 12px rgba(21, 67, 96, 0.7);
+    box-shadow: var(--shadow);
     cursor: pointer;
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
-    margin-top: 4px;
-  }
-  button.btn-acao:hover {
-    background-color: #0e2a48;
-    box-shadow: 0 7px 18px rgba(14, 42, 72, 0.9);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
   }
 
-  pre#resultado {
-    background: rgba(255,255,255,0.92);
-    color: #0b2a3f;
+  .btn-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
-    max-width: 840px;
-    padding: 18px 20px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-action:hover::before {
+    left: 100%;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .btn-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-action.danger {
+    background: linear-gradient(135deg, var(--danger), #ef4444);
+  }
+
+  .btn-whatsapp {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    padding: 16px 24px;
     border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(21, 67, 96, 0.7);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    border: none;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: var(--transition);
+    margin: 24px auto;
+    max-width: 300px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-whatsapp:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .result-container {
+    width: 100%;
+    max-width: 900px;
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+  }
+
+  .result-display {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1f2937;
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
     white-space: pre-wrap;
     word-wrap: break-word;
-    margin-top: 6px;
-    min-height: 110px;
+    min-height: 120px;
+    font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .result-display:empty::before {
+    content: 'Os relatórios aparecerão aqui...';
+    color: #6b7280;
+    font-style: italic;
+  }
+
+  /* Loading state */
+  .loading {
+    position: relative;
+  }
+
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Toast notifications */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--success);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .toast.show {
+    transform: translateX(0);
+  }
+
+  .toast.error {
+    background: var(--danger);
   }
 
   footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
-    background: rgba(21, 67, 96, 0.9);
-    color: #ddd;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
     text-align: center;
-    font-size: 0.85rem;
-    padding: 8px 0;
-    user-select: none;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
-    max-width: 100%;
+    font-size: 0.9rem;
+    padding: 16px 20px;
+    font-weight: 500;
   }
 
-  @media (max-width: 420px) {
-    h1 {
-      font-size: 2rem;
+  /* Animações */
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
     }
-    section {
-      padding: 16px 20px;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    button.btn-acao {
-      min-width: 140px;
-      margin-bottom: 10px;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
     }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .reports-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    body {
+      padding: 15px 10px 80px 10px;
+    }
+
+    .report-section {
+      padding: 20px 16px;
+    }
+
+    .btn-action {
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
+
+  /* Estados de foco */
+  .btn-action:focus-visible,
+  .btn-whatsapp:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+  <a href="index.html" class="btn-voltar" aria-label="Voltar para página inicial">
+    <span>←</span> Voltar
+  </a>
+  <h1 class="header-title">Relatórios</h1>
 </header>
 
-<h1>Relatórios</h1>
+<div class="reports-grid">
+  <!-- RELATÓRIO DE FALTAS -->
+  <section class="report-section">
+    <div class="report-header">
+      <span class="report-icon">📋</span>
+      <h2 class="report-title">Relatório de Faltas</h2>
+    </div>
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="faltasTipo" class="form-label">Tipo</label>
+        <select id="faltasTipo" class="form-select">
+          <option value="todos">Todos</option>
+          <option value="funcionario">Funcionário</option>
+          <option value="diarista">Diarista</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="faltasDataInicio" class="form-label">Data Início</label>
+        <input type="date" id="faltasDataInicio" class="form-input" />
+      </div>
+      
+      <div class="form-group">
+        <label for="faltasDataFim" class="form-label">Data Fim</label>
+        <input type="date" id="faltasDataFim" class="form-input" />
+      </div>
+    </div>
+    
+    <button id="btnGerarFaltas" class="btn-action">Gerar Relatório</button>
+  </section>
 
-<!-- FALTAS -->
-<section id="faltasSection">
-  <h2>📋 Relatório de Faltas</h2>
-  <div class="linha">
-    <div>
-      <label for="faltasTipo">Tipo</label>
-      <select id="faltasTipo">
-        <option value="todos">Todos</option>
-        <option value="funcionario">Funcionário</option>
-        <option value="diarista">Diarista</option>
-      </select>
+  <!-- DADOS DO FUNCIONÁRIO -->
+  <section class="report-section">
+    <div class="report-header">
+      <span class="report-icon">👤</span>
+      <h2 class="report-title">Dados do Funcionário</h2>
     </div>
-    <div>
-      <label for="faltasDataInicio">Data Início</label>
-      <input type="date" id="faltasDataInicio" />
+    
+    <div class="form-grid single">
+      <div class="form-group">
+        <label for="listaFuncionario" class="form-label">Funcionário</label>
+        <select id="listaFuncionario" class="form-select">
+          <option value="todos">Todos</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label for="faltasDataFim">Data Fim</label>
-      <input type="date" id="faltasDataFim" />
-    </div>
-    <button id="btnGerarFaltas" class="btn-acao">Gerar Relatório</button>
-  </div>
-</section>
+    
+    <button id="btnGerarLista" class="btn-action">Gerar Relatório</button>
+  </section>
 
-<!-- DADOS DO FUNCIONÁRIO -->
-<section id="dadosFuncionarioSection">
-  <h2>🧑 Dados do Funcionário</h2>
-  <div class="linha">
-    <div>
-      <label for="listaFuncionario">Funcionário</label>
-      <select id="listaFuncionario">
-        <option value="todos">Todos</option>
-      </select>
+  <!-- PAGAMENTO DIARISTA -->
+  <section class="report-section">
+    <div class="report-header">
+      <span class="report-icon">💰</span>
+      <h2 class="report-title">Pagamento Diarista</h2>
     </div>
-    <button id="btnGerarLista" class="btn-acao">Gerar Relatório</button>
-  </div>
-</section>
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="pagamentoDataInicio" class="form-label">Data Início</label>
+        <input type="date" id="pagamentoDataInicio" class="form-input" />
+      </div>
+      
+      <div class="form-group">
+        <label for="pagamentoDataFim" class="form-label">Data Fim</label>
+        <input type="date" id="pagamentoDataFim" class="form-input" />
+      </div>
+    </div>
+    
+    <button id="btnGerarPagamento" class="btn-action">Gerar Relatório</button>
+  </section>
 
-<!-- PAGAMENTO DIARISTA -->
-<section id="pagamentoDiaristaSection">
-  <h2>💰 Relatório de Pagamento Diarista</h2>
-  <div class="linha">
-    <div>
-      <label for="pagamentoDataInicio">Data Início</label>
-      <input type="date" id="pagamentoDataInicio" />
+  <!-- HORA EXTRA -->
+  <section class="report-section">
+    <div class="report-header">
+      <span class="report-icon">⏱️</span>
+      <h2 class="report-title">Relatório de Hora Extra</h2>
     </div>
-    <div>
-      <label for="pagamentoDataFim">Data Fim</label>
-      <input type="date" id="pagamentoDataFim" />
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="horaExtraInicio" class="form-label">Data Início</label>
+        <input type="date" id="horaExtraInicio" class="form-input" />
+      </div>
+      
+      <div class="form-group">
+        <label for="horaExtraFim" class="form-label">Data Fim</label>
+        <input type="date" id="horaExtraFim" class="form-input" />
+      </div>
     </div>
-    <button id="btnGerarPagamento" class="btn-acao">Gerar Relatório</button>
-  </div>
-</section>
+    
+    <button id="btnGerarHoraExtra" class="btn-action">Gerar Relatório</button>
+  </section>
 
-<!-- HORA EXTRA -->
-<section id="horaExtraSection">
-  <h2>⏱️ Relatório de Hora Extra</h2>
-  <div class="linha">
-    <div>
-      <label for="horaExtraInicio">Data Início</label>
-      <input type="date" id="horaExtraInicio" />
+  <!-- EXCLUIR RELATÓRIOS -->
+  <section class="report-section danger">
+    <div class="report-header">
+      <span class="report-icon">⚠️</span>
+      <h2 class="report-title">Excluir Registros</h2>
     </div>
-    <div>
-      <label for="horaExtraFim">Data Fim</label>
-      <input type="date" id="horaExtraFim" />
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="excluirTipo" class="form-label">Tipo de Registro</label>
+        <select id="excluirTipo" class="form-select">
+          <option value="chamadas">Chamada</option>
+          <option value="horaextra">Hora Extra</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="excluirDataInicio" class="form-label">Data Início</label>
+        <input type="date" id="excluirDataInicio" class="form-input" />
+      </div>
+      
+      <div class="form-group">
+        <label for="excluirDataFim" class="form-label">Data Fim</label>
+        <input type="date" id="excluirDataFim" class="form-input" />
+      </div>
+      
+      <div class="form-group">
+        <label for="excluirSenha" class="form-label">Senha de Exclusão</label>
+        <input type="password" id="excluirSenha" class="form-input" placeholder="Digite a senha" />
+      </div>
     </div>
-    <button id="btnGerarHoraExtra" class="btn-acao">Gerar Relatório</button>
-  </div>
-</section>
+    
+    <button id="btnExcluir" class="btn-action danger">Excluir Registros</button>
+  </section>
+</div>
 
-<!-- EXCLUIR RELATÓRIOS -->
-<section id="excluirSection">
-  <h2>❌ Excluir Relatórios</h2>
-  <div class="linha">
-    <div>
-      <label for="excluirTipo">Tipo de Registro</label>
-      <select id="excluirTipo">
-        <option value="chamadas">Chamada</option>
-        <option value="horaextra">Hora Extra</option>
-      </select>
-    </div>
-    <div>
-      <label for="excluirDataInicio">Data Início</label>
-      <input type="date" id="excluirDataInicio" />
-    </div>
-    <div>
-      <label for="excluirDataFim">Data Fim</label>
-      <input type="date" id="excluirDataFim" />
-    </div>
-    <div>
-      <label for="excluirSenha">Senha de Exclusão</label>
-      <input type="password" id="excluirSenha" placeholder="Digite a senha" />
-    </div>
-    <button id="btnExcluir" class="btn-acao" style="background-color:#c0392b;">Excluir</button>
-  </div>
-</section>
+<div class="result-container">
+  <pre id="resultado" class="result-display" tabindex="0" aria-label="Resultado do relatório"></pre>
+</div>
 
-<pre id="resultado" tabindex="0" aria-label="Resultado do relatório"></pre>
+<button id="btnEnviarWhats" class="btn-whatsapp">
+  <span>📱</span>
+  <span>Enviar por WhatsApp</span>
+</button>
 
-<button id="btnEnviarWhats" class="btn-acao" style="background-color:#25D366; margin-bottom:40px;">📲 Enviar relatório por WhatsApp</button>
-
-<footer>Desenvolvido por Lucas Ramos Aragão</footer>
+<footer>
+  <p>Desenvolvido por Lucas Ramos Aragão</p>
+</footer>
 
 <script type="module">
   import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -272,7 +601,7 @@
 
   const db = getDatabase(app);
 
-  // ========= DOM =========
+  // DOM Elements
   const faltasTipo = document.getElementById('faltasTipo');
   const faltasDataInicio = document.getElementById('faltasDataInicio');
   const faltasDataFim = document.getElementById('faltasDataFim');
@@ -298,33 +627,59 @@
   const resultado = document.getElementById('resultado');
   const btnEnviarWhats = document.getElementById('btnEnviarWhats');
 
-  // ========= CONFIG =========
-  const SENHA_EXCLUSAO = '1234'; // 🔐 Altere aqui se quiser outra senha
+  // CONFIG
+  const SENHA_EXCLUSAO = '1234';
 
-  // ========= ESTADO =========
+  // ESTADO
   let funcionariosCache = {};
   let textoRelatorioAtual = '';
 
-  // ========= HELPERS =========
+  // Funções utilitárias
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
+  }
+
+  function setLoadingState(element, loading) {
+    if (loading) {
+      element.classList.add('loading');
+      element.disabled = true;
+    } else {
+      element.classList.remove('loading');
+      element.disabled = false;
+    }
+  }
+
   function formatarDataDMY(dataISO) {
     if (!dataISO) return '-';
     const [ano, mes, dia] = dataISO.split('-');
     return `${dia}/${mes}/${ano}`;
   }
+
   function formatCPF(cpf) {
     if (!cpf) return '-';
     let v = String(cpf).replace(/\D/g, '').padStart(11,'0');
     return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   }
+
   function capitalize(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
+
   function scrollParaResultado() {
     resultado.scrollIntoView({ behavior: 'smooth' });
   }
 
-  // ========= CARREGAR FUNCIONÁRIOS =========
+  // Carregar funcionários
   async function carregarFuncionarios() {
     try {
       const snapshot = await get(ref(db, 'funcionarios'));
@@ -350,78 +705,90 @@
       });
   }
 
-  // ========= RELATÓRIO DE FALTAS (apenas faltantes) =========
+  // Relatório de faltas
   async function gerarRelatorioFaltas() {
-  const tipoFiltro = faltasTipo.value;
-  const inicio = faltasDataInicio.value;
-  const fim = faltasDataFim.value;
+    const tipoFiltro = faltasTipo.value;
+    const inicio = faltasDataInicio.value;
+    const fim = faltasDataFim.value;
 
-  resultado.textContent = '';
-  if (!inicio || !fim) { alert('Selecione a data de início e fim'); return; }
-  if (fim < inicio) { alert('Data fim não pode ser menor que data início.'); return; }
-
-  try {
-    const chamadasSnap = await get(ref(db, 'chamadas'));
-    const funcionariosSnap = await get(ref(db, 'funcionarios'));
-    if (!chamadasSnap.exists() || !funcionariosSnap.exists()) {
-      resultado.textContent = 'Não há dados suficientes para gerar o relatório.';
+    if (!inicio || !fim) {
+      showToast('Selecione a data de início e fim', 'error');
       return;
     }
-    const chamadas = chamadasSnap.val();
-    const funcionarios = funcionariosSnap.val();
-
-    // Mapa id -> {nome, tipo, faltas: [{data, atestado}]}
-    const faltas = {};
-    for (const id in funcionarios) {
-      const f = funcionarios[id];
-      if (tipoFiltro !== 'todos' && f.tipo !== tipoFiltro) continue;
-      faltas[id] = { nome: f.nome, tipo: f.tipo, faltas: [] };
+    if (fim < inicio) {
+      showToast('Data fim não pode ser menor que data início', 'error');
+      return;
     }
 
-    for (const dataChamada in chamadas) {
-      if (dataChamada < inicio || dataChamada > fim) continue;
-      const presencasDia = chamadas[dataChamada];
-      for (const id in faltas) {
-        const registro = presencasDia?.[id];
-        if (registro && registro.status === 'falta') {
-          faltas[id].faltas.push({
-            data: formatarDataDMY(dataChamada),
-            atestado: registro.atestado === true ? 'Sim' : 'Não'
-          });
+    setLoadingState(btnGerarFaltas, true);
+    resultado.textContent = '';
+
+    try {
+      const chamadasSnap = await get(ref(db, 'chamadas'));
+      const funcionariosSnap = await get(ref(db, 'funcionarios'));
+      
+      if (!chamadasSnap.exists() || !funcionariosSnap.exists()) {
+        resultado.textContent = 'Não há dados suficientes para gerar o relatório.';
+        return;
+      }
+
+      const chamadas = chamadasSnap.val();
+      const funcionarios = funcionariosSnap.val();
+
+      const faltas = {};
+      for (const id in funcionarios) {
+        const f = funcionarios[id];
+        if (tipoFiltro !== 'todos' && f.tipo !== tipoFiltro) continue;
+        faltas[id] = { nome: f.nome, tipo: f.tipo, faltas: [] };
+      }
+
+      for (const dataChamada in chamadas) {
+        if (dataChamada < inicio || dataChamada > fim) continue;
+        const presencasDia = chamadas[dataChamada];
+        for (const id in faltas) {
+          const registro = presencasDia?.[id];
+          if (registro && registro.status === 'falta') {
+            faltas[id].faltas.push({
+              data: formatarDataDMY(dataChamada),
+              atestado: registro.atestado === true ? 'Sim' : 'Não'
+            });
+          }
         }
       }
+
+      let texto = `📋 *Relatório de Faltas* (${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)})\n\n`;
+      let encontrou = false;
+
+      Object.values(faltas)
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }))
+        .forEach(item => {
+          if (item.faltas.length > 0) {
+            encontrou = true;
+            const tipoLabel = item.tipo === 'funcionario' ? 'Funcionário' : 'Diarista';
+            texto += `👤 *${item.nome}* (${tipoLabel})\n` +
+                     `Faltas: *${item.faltas.length}*\n` +
+                     `Datas:\n` +
+                     item.faltas.map(f => `• ${f.data} (Atestado: ${f.atestado})`).join('\n') +
+                     `\n\n`;
+          }
+        });
+
+      if (!encontrou) {
+        texto = `📋 *Relatório de Faltas* (${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)})\n\nNenhum funcionário com faltas no período.`;
+      }
+
+      resultado.textContent = texto.trim();
+      textoRelatorioAtual = texto.trim();
+      scrollParaResultado();
+    } catch (error) {
+      console.error('Erro ao gerar relatório de faltas:', error);
+      resultado.textContent = 'Erro ao gerar relatório de faltas.';
+    } finally {
+      setLoadingState(btnGerarFaltas, false);
     }
-
-    let texto = `📋 *Relatório de Faltas* (${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)})\n\n`;
-    let encontrou = false;
-
-    Object.values(faltas)
-      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }))
-      .forEach(item => {
-        if (item.faltas.length > 0) {
-          encontrou = true;
-          const tipoLabel = item.tipo === 'funcionario' ? 'Funcionário' : 'Diarista';
-          texto += `👤 *${item.nome}* (${tipoLabel})\n` +
-                   `Faltas: *${item.faltas.length}*\n` +
-                   `Datas:\n` +
-                   item.faltas.map(f => `• ${f.data} (Atestado: ${f.atestado})`).join('\n') +
-                   `\n\n`;
-        }
-      });
-
-    if (!encontrou) {
-      texto = `📋 *Relatório de Faltas* (${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)})\n\nNenhum funcionário com faltas no período.`;
-    }
-
-    resultado.textContent = texto.trim();
-    textoRelatorioAtual = texto.trim();
-    scrollParaResultado();
-  } catch (error) {
-    console.error('Erro ao gerar relatório de faltas:', error);
-    resultado.textContent = 'Erro ao gerar relatório de faltas.';
   }
-}
-  // ========= DADOS DO FUNCIONÁRIO (com dados de pagamento quando houver) =========
+
+  // Dados do funcionário
   function formatarFuncionario(f) {
     const funcaoDisplay = f.funcao || '-';
     const linhas = [
@@ -431,7 +798,6 @@
       `Obra: *${f.obra || '-'}*`
     ];
 
-    // Dados de pagamento (se existirem)
     const pagamento = [];
     if (f.cpf) pagamento.push(`CPF: *${formatCPF(f.cpf)}*`);
     if (f.valorDiaria != null) pagamento.push(`Valor diária: *R$ ${parseFloat(f.valorDiaria).toFixed(2)}*`);
@@ -447,6 +813,7 @@
 
   async function gerarRelatorioDadosFuncionario() {
     const funcionarioId = listaFuncionario.value;
+    setLoadingState(btnGerarLista, true);
     resultado.textContent = '';
 
     try {
@@ -455,18 +822,19 @@
         resultado.textContent = 'Nenhum funcionário cadastrado.';
         return;
       }
+      
       const funcionarios = funcionariosSnap.val();
-
       let texto = '';
+
       if (funcionarioId === 'todos') {
-        texto = '🧑 *Lista completa de Funcionários:*\n\n';
+        texto = '👤 *Lista completa de Funcionários:*\n\n';
         Object.entries(funcionarios)
           .sort(([,a],[,b]) => (a.nome||'').localeCompare(b.nome||'','pt-BR',{sensitivity:'base'}))
           .forEach(([,f]) => { texto += formatarFuncionario(f) + '\n\n'; });
       } else {
         const f = funcionarios[funcionarioId];
         if (!f) { resultado.textContent = 'Funcionário não encontrado.'; return; }
-        texto = '🧑 *Informações do Funcionário:*\n\n' + formatarFuncionario(f);
+        texto = '👤 *Informações do Funcionário:*\n\n' + formatarFuncionario(f);
       }
 
       resultado.textContent = texto.trim();
@@ -475,25 +843,37 @@
     } catch (error) {
       console.error('Erro ao gerar lista de funcionários:', error);
       resultado.textContent = 'Erro ao gerar lista de funcionários.';
+    } finally {
+      setLoadingState(btnGerarLista, false);
     }
   }
 
-  // ========= PAGAMENTO DIARISTA =========
+  // Relatório de pagamento
   async function gerarRelatorioPagamentoDiarista() {
     const inicio = pagamentoDataInicio.value;
     const fim = pagamentoDataFim.value;
 
+    if (!inicio || !fim) {
+      showToast('Selecione a data de início e fim', 'error');
+      return;
+    }
+    if (fim < inicio) {
+      showToast('Data fim não pode ser menor que data início', 'error');
+      return;
+    }
+
+    setLoadingState(btnGerarPagamento, true);
     resultado.textContent = '';
-    if (!inicio || !fim) { alert('Selecione a data de início e fim'); return; }
-    if (fim < inicio) { alert('Data fim não pode ser menor que data início.'); return; }
 
     try {
       const chamadasSnap = await get(ref(db, 'chamadas'));
       const funcionariosSnap = await get(ref(db, 'funcionarios'));
+      
       if (!chamadasSnap.exists() || !funcionariosSnap.exists()) {
         resultado.textContent = 'Não há dados suficientes para gerar o relatório.';
         return;
       }
+
       const chamadas = chamadasSnap.val();
       const funcionarios = funcionariosSnap.val();
 
@@ -539,29 +919,40 @@
     } catch (error) {
       console.error('Erro ao gerar relatório de pagamento:', error);
       resultado.textContent = 'Erro ao gerar relatório de pagamento.';
+    } finally {
+      setLoadingState(btnGerarPagamento, false);
     }
   }
 
-  // ========= RELATÓRIO DE HORA EXTRA =========
+  // Relatório de hora extra
   async function gerarRelatorioHoraExtra() {
     const inicio = horaExtraInicio.value;
     const fim = horaExtraFim.value;
 
+    if (!inicio || !fim) {
+      showToast('Selecione a data de início e fim', 'error');
+      return;
+    }
+    if (fim < inicio) {
+      showToast('Data fim não pode ser menor que data início', 'error');
+      return;
+    }
+
+    setLoadingState(btnGerarHoraExtra, true);
     resultado.textContent = '';
-    if (!inicio || !fim) { alert('Selecione a data de início e fim'); return; }
-    if (fim < inicio) { alert('Data fim não pode ser menor que data início.'); return; }
 
     try {
       const horaExtraSnap = await get(ref(db, 'horaextra'));
       const funcionariosSnap = await get(ref(db, 'funcionarios'));
+      
       if (!horaExtraSnap.exists() || !funcionariosSnap.exists()) {
         resultado.textContent = 'Não há dados suficientes para gerar o relatório de hora extra.';
         return;
       }
+
       const horaextra = horaExtraSnap.val();
       const funcionarios = funcionariosSnap.val();
 
-      // Estrutura: por funcionário
       const mapa = {};
       Object.keys(funcionarios).forEach(id => {
         mapa[id] = {
@@ -569,7 +960,7 @@
           totalHoras: 0,
           horas100: 0,
           horas50: 0,
-          datas: [] // todas as datas em que teve registro
+          datas: []
         };
       });
 
@@ -577,7 +968,7 @@
         if (data < inicio || data > fim) continue;
         const porDia = horaextra[data];
         for (const id in porDia) {
-          if (!mapa[id]) continue; // funcionário pode ter sido removido
+          if (!mapa[id]) continue;
           const perc = parseInt(String(porDia[id].percentual || '0'), 10);
           const qtd = parseInt(String(porDia[id].quantidadeHoras || '0'), 10);
           if (!qtd) continue;
@@ -586,7 +977,6 @@
           if (perc === 100) mapa[id].horas100 += qtd;
           else if (perc === 50) mapa[id].horas50 += qtd;
 
-          // registra data (evitar duplicadas por segurança)
           if (!mapa[id].datas.includes(formatarDataDMY(data))) {
             mapa[id].datas.push(formatarDataDMY(data));
           }
@@ -619,49 +1009,73 @@
     } catch (error) {
       console.error('Erro ao gerar relatório de hora extra:', error);
       resultado.textContent = 'Erro ao gerar relatório de hora extra.';
+    } finally {
+      setLoadingState(btnGerarHoraExtra, false);
     }
   }
 
-  // ========= EXCLUIR RELATÓRIOS (Chamada ou Hora Extra) =========
+  // Excluir registros
   async function excluirRelatorios() {
-    const tipo = excluirTipo.value; // 'chamadas' | 'horaextra'
+    const tipo = excluirTipo.value;
     const inicio = excluirDataInicio.value;
     const fim = excluirDataFim.value;
     const senha = excluirSenha.value.trim();
 
-    if (!inicio || !fim) { alert('Selecione a data de início e fim para excluir.'); return; }
-    if (fim < inicio) { alert('Data fim não pode ser menor que data início.'); return; }
-    if (!senha) { alert('Informe a senha.'); return; }
-    if (senha !== SENHA_EXCLUSAO) { alert('Senha incorreta.'); return; }
+    if (!inicio || !fim) {
+      showToast('Selecione a data de início e fim para excluir', 'error');
+      return;
+    }
+    if (fim < inicio) {
+      showToast('Data fim não pode ser menor que data início', 'error');
+      return;
+    }
+    if (!senha) {
+      showToast('Informe a senha', 'error');
+      return;
+    }
+    if (senha !== SENHA_EXCLUSAO) {
+      showToast('Senha incorreta', 'error');
+      return;
+    }
 
     if (!confirm(`Tem certeza que deseja excluir *${tipo === 'chamadas' ? 'Chamadas' : 'Hora Extra'}* de ${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)}? Esta ação é irreversível.`)) {
       return;
     }
 
+    setLoadingState(btnExcluir, true);
+
     try {
       const raiz = tipo === 'chamadas' ? 'chamadas' : 'horaextra';
       const snap = await get(ref(db, raiz));
-      if (!snap.exists()) { alert('Nenhum registro encontrado para exclusão.'); return; }
-      const todos = snap.val();
+      if (!snap.exists()) {
+        showToast('Nenhum registro encontrado para exclusão', 'error');
+        return;
+      }
 
+      const todos = snap.val();
       const datas = Object.keys(todos).filter(d => d >= inicio && d <= fim);
-      if (datas.length === 0) { alert('Nenhum registro encontrado no intervalo informado.'); return; }
+      if (datas.length === 0) {
+        showToast('Nenhum registro encontrado no intervalo informado', 'error');
+        return;
+      }
 
       for (const d of datas) {
         await remove(ref(db, `${raiz}/${d}`));
       }
 
-      alert(`${tipo === 'chamadas' ? 'Chamadas' : 'Hora Extra'} de ${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)} excluídas com sucesso.`);
+      showToast(`${tipo === 'chamadas' ? 'Chamadas' : 'Hora Extra'} de ${formatarDataDMY(inicio)} até ${formatarDataDMY(fim)} excluídas com sucesso!`);
       resultado.textContent = '';
       textoRelatorioAtual = '';
       excluirSenha.value = '';
     } catch (error) {
       console.error('Erro ao excluir registros:', error);
-      alert('Erro ao excluir. Veja o console para detalhes.');
+      showToast('Erro ao excluir registros', 'error');
+    } finally {
+      setLoadingState(btnExcluir, false);
     }
   }
 
-  // ========= EVENTOS =========
+  // Event listeners
   btnGerarFaltas.addEventListener('click', gerarRelatorioFaltas);
   btnGerarLista.addEventListener('click', gerarRelatorioDadosFuncionario);
   btnGerarPagamento.addEventListener('click', gerarRelatorioPagamentoDiarista);
@@ -669,14 +1083,22 @@
   btnExcluir.addEventListener('click', excluirRelatorios);
 
   btnEnviarWhats.addEventListener('click', () => {
-    if (!textoRelatorioAtual) { alert('Gere um relatório antes de enviar.'); return; }
+    if (!textoRelatorioAtual) {
+      showToast('Gere um relatório antes de enviar', 'error');
+      return;
+    }
     const textoEncoded = encodeURIComponent(textoRelatorioAtual);
     window.open(`https://wa.me/?text=${textoEncoded}`, '_blank');
   });
 
-  // ========= BOOT =========
+  // Inicializar
   carregarFuncionarios();
 </script>
 
 </body>
-</html>
+</html>color: var(--text-secondary);
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 16px 20px;
+    font-weight: 500;
+    
