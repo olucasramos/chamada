@@ -252,7 +252,7 @@
                     </div>
                 </div>
                 <div class="status-options">
-                    <label class="status-option"><input type="radio" name="status_${id}" value="presente" checked> Presente</label>
+                    <label class="status-option"><input type="radio" name="status_${id}" value="presente"> Presente</label>
                     <label class="status-option"><input type="radio" name="status_${id}" value="falta"> Falta</label>
                 </div>
                 <div class="atestado-group" id="atestado-group-${id}">
@@ -265,7 +265,6 @@
             `;
             listaFuncionariosDiv.appendChild(card);
 
-            // Adicionar eventos para mostrar/esconder atestado
             card.querySelectorAll(`input[name="status_${id}"]`).forEach(radio => {
                 radio.addEventListener('change', () => {
                     const atestadoGroup = document.getElementById(`atestado-group-${id}`);
@@ -279,28 +278,48 @@
         });
     }
     
+    // CORREÇÃO: Função para processar os dados da chamada, evitando código duplicado
+    function processarDadosChamada(chamadaDoDia) {
+        for (const id in chamadaDoDia) {
+            const registro = chamadaDoDia[id];
+            if (!registro.status) continue;
+            
+            const statusRadio = document.querySelector(`input[name="status_${id}"][value="${registro.status}"]`);
+            if (statusRadio) statusRadio.checked = true;
+
+            const funcCard = document.querySelector(`.funcionario-card[data-id="${id}"]`);
+            if (funcCard && funcionariosCache[id]?.tipo === 'funcionario' && registro.status === 'falta') {
+                funcCard.querySelector(`#atestado-group-${id}`).classList.add('show');
+                const atestadoValue = registro.atestado ? 'com' : 'sem';
+                const atestadoRadio = funcCard.querySelector(`input[name="atestado_${id}"][value="${atestadoValue}"]`);
+                if(atestadoRadio) atestadoRadio.checked = true;
+            }
+        }
+    }
+
+    // CORREÇÃO: Função agora busca no formato novo e, se não encontrar, busca no formato antigo
     async function carregarChamadaSalva(data, empresaId, obraNome) {
         if (!data || !empresaId || !obraNome) return;
+        
+        // 1. Tenta buscar no formato NOVO
         const obraNomeCodificado = encodeURIComponent(obraNome);
-        const chamadaRef = ref(db, `chamadas/${data}/${empresaId}/${obraNomeCodificado}`);
+        const chamadaRefNova = ref(db, `chamadas/${data}/${empresaId}/${obraNomeCodificado}`);
+        
         try {
-            const snapshot = await get(chamadaRef);
-            if (snapshot.exists()) {
-                const chamadaDoDia = snapshot.val();
-                for (const id in chamadaDoDia) {
-                    const registro = chamadaDoDia[id];
-                    const statusRadio = document.querySelector(`input[name="status_${id}"][value="${registro.status}"]`);
-                    if (statusRadio) statusRadio.checked = true;
-
-                    const funcCard = document.querySelector(`.funcionario-card[data-id="${id}"]`);
-                    if (funcCard && funcionariosCache[id]?.tipo === 'funcionario' && registro.status === 'falta') {
-                        funcCard.querySelector(`#atestado-group-${id}`).classList.add('show');
-                        const atestadoValue = registro.atestado ? 'com' : 'sem';
-                        const atestadoRadio = funcCard.querySelector(`input[name="atestado_${id}"][value="${atestadoValue}"]`);
-                        if(atestadoRadio) atestadoRadio.checked = true;
-                    }
-                }
+            const snapshotNova = await get(chamadaRefNova);
+            if (snapshotNova.exists()) {
+                processarDadosChamada(snapshotNova.val());
+                return; // Encontrou no formato novo, encerra a função
             }
+
+            // 2. Se não encontrou, tenta buscar no formato ANTIGO
+            const chamadaRefAntiga = ref(db, `chamadas/${data}`);
+            const snapshotAntiga = await get(chamadaRefAntiga);
+            if(snapshotAntiga.exists()) {
+                console.log("Dados de chamada encontrados no formato antigo. Carregando...");
+                processarDadosChamada(snapshotAntiga.val());
+            }
+
         } catch (error) {
             console.error("Erro ao carregar chamada salva:", error);
         }
@@ -311,11 +330,6 @@
         const empresaId = selectEmpresa.value;
         const obraNome = selectObra.value;
 
-        if (!data || !empresaId || !obraNome) {
-            alert("Por favor, selecione data, empresa e obra.");
-            return;
-        }
-
         btnSalvar.disabled = true;
         btnSalvar.textContent = "Salvando...";
 
@@ -323,22 +337,29 @@
         const cards = listaFuncionariosDiv.querySelectorAll('.funcionario-card');
         let formValido = true;
 
-        cards.forEach(card => {
+        for (const card of cards) {
             const id = card.dataset.id;
             const funcionario = funcionariosCache[id];
             const statusSelecionado = card.querySelector(`input[name="status_${id}"]:checked`)?.value;
             
+            if (!statusSelecionado) {
+                alert(`Por favor, defina o status de "${funcionario.nome}".`);
+                formValido = false;
+                break;
+            }
+
             chamadasDoDia[id] = { status: statusSelecionado, atestado: null };
 
             if (funcionario.tipo === 'funcionario' && statusSelecionado === 'falta') {
                 const atestadoSelecionado = card.querySelector(`input[name="atestado_${id}"]:checked`)?.value;
                 if (!atestadoSelecionado) {
-                    alert(`Por favor, informe se ${funcionario.nome} apresentou atestado.`);
+                    alert(`Por favor, informe se "${funcionario.nome}" apresentou atestado.`);
                     formValido = false;
+                    break;
                 }
                 chamadasDoDia[id].atestado = atestadoSelecionado === 'com';
             }
-        });
+        }
 
         if (!formValido) {
             btnSalvar.disabled = false;
@@ -347,6 +368,7 @@
         }
 
         try {
+            // Sempre salva no formato NOVO para migrar os dados gradualmente
             const obraNomeCodificado = encodeURIComponent(obraNome);
             const chamadaRef = ref(db, `chamadas/${data}/${empresaId}/${obraNomeCodificado}`);
             await set(chamadaRef, chamadasDoDia);
