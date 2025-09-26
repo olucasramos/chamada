@@ -17,7 +17,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 15px 110px 15px; /* Aumentado padding para o rodapé e dashboard */
+    padding: 20px 15px 110px 15px;
     position: relative;
     overflow-x: hidden;
   }
@@ -63,7 +63,7 @@
   
   h1 {
     font-size: 2.8rem;
-    margin: 40px 0 50px 0;
+    margin: 40px 0 30px 0;
     text-shadow: 0 4px 15px rgba(0,0,0,0.3);
     user-select: none;
     line-height: 1.2;
@@ -80,20 +80,12 @@
     background-clip: text;
   }
   
-  .subtitle {
-    text-align: center;
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 40px;
-    font-weight: 400;
-    animation: fadeInUp 0.8s ease-out 0.2s both;
-  }
-  
   .btn-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
     width: 100%;
+    margin-top: 40px; /* Espaço depois do dashboard */
   }
   
   a.button {
@@ -110,7 +102,6 @@
       0 8px 25px rgba(21, 67, 96, 0.4),
       0 2px 10px rgba(0,0,0,0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    user-select: none;
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.1);
@@ -136,55 +127,59 @@
   a.button:active { transform: translateY(-1px) scale(1.01); }
   .button-icon { display: inline-block; margin-right: 12px; font-size: 1.4em; vertical-align: middle; }
   
-  .btn-container a { animation: fadeInUp 0.8s ease-out 0.3s both; }
-  .btn-container a:nth-child(2) { animation-delay: 0.4s; }
-  .btn-container a:nth-child(3) { animation-delay: 0.5s; }
-  .btn-container a:nth-child(4) { animation-delay: 0.6s; }
-  .btn-container a:nth-child(5) { animation-delay: 0.7s; }
+  .btn-container a { animation: fadeInUp 0.8s ease-out 0.4s both; }
+  .btn-container a:nth-child(2) { animation-delay: 0.5s; }
+  .btn-container a:nth-child(3) { animation-delay: 0.6s; }
+  .btn-container a:nth-child(4) { animation-delay: 0.7s; }
+  .btn-container a:nth-child(5) { animation-delay: 0.8s; }
   
   .info-card {
-    margin-top: 40px;
-    padding: 20px;
-    background: rgba(255,255,255,0.1);
+    padding: 16px; /* Mais fino */
+    background: rgba(0, 0, 0, 0.2); /* Mais escuro */
     backdrop-filter: blur(10px);
     border-radius: 16px;
     text-align: center;
-    font-size: 0.95rem;
-    opacity: 0.9;
     border: 1px solid rgba(255,255,255,0.1);
-    animation: fadeInUp 0.8s ease-out 0.8s both;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
   }
   .info-card h3 {
     margin: 0 0 10px 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
   }
 
   .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 15px;
+      gap: 10px; /* Menor */
+      margin-top: 10px;
   }
   .dashboard-item {
-      padding: 10px;
+      padding: 8px;
       background: rgba(0,0,0,0.1);
       border-radius: 8px;
   }
   .dashboard-item .value {
-      font-size: 1.8rem;
+      font-size: 1.5rem; /* Menor */
       font-weight: 700;
       display: block;
   }
   .dashboard-item .label {
-      font-size: 0.8rem;
+      font-size: 0.75rem; /* Menor */
       color: rgba(255,255,255,0.8);
   }
 
-  /* ESTILOS PARA O ACOMPANHAMENTO DE DIARISTAS */
   .diaristas-acompanhamento {
-      margin-top: 20px;
+      margin-top: 15px;
       text-align: left;
+  }
+  .diaristas-acompanhamento h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 8px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 15px;
   }
   .diarista-item {
       display: flex;
@@ -193,36 +188,29 @@
       border-radius: 6px;
       margin-bottom: 4px;
       font-weight: 500;
+      font-size: 0.9rem;
   }
   .diarista-item.alerta {
-      background-color: rgba(241, 196, 15, 0.8); /* Amarelo de alerta */
-      color: #1f2937; /* Texto escuro para contraste */
+      background-color: rgba(241, 196, 15, 0.9);
+      color: #1f2937;
+      font-weight: 600;
   }
   
   footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    position: fixed; bottom: 0; left: 0; width: 100%;
     background: rgba(21, 67, 96, 0.95);
     backdrop-filter: blur(10px);
-    color: #e0e0e0;
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 15px 0;
-    user-select: none;
+    color: #e0e0e0; text-align: center; font-size: 0.9rem;
+    font-weight: 500; padding: 15px 0; user-select: none;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
     border-top: 1px solid rgba(255,255,255,0.2);
     z-index: 10;
   }
   
   @media (max-width: 450px) {
-    h1 { font-size: 2.2rem; margin: 30px 0 35px 0; }
-    .subtitle { font-size: 1rem; margin-bottom: 30px; }
+    h1 { font-size: 2.2rem; margin: 30px 0; }
     a.button { font-size: 1.2rem; padding: 18px 25px; }
     .container { max-width: 350px; }
-    .info-card { margin-top: 30px; padding: 16px; font-size: 0.9rem; }
   }
 </style>
 </head>
@@ -234,18 +222,8 @@
       <span class="highlight">Presenças</span>
     </h1>
     
-    <p class="subtitle">Gerencie sua equipe com eficiência</p>
-
-    <div class="btn-container">
-      <a href="chamada.html" class="button"><span class="button-icon">📋</span>Chamada</a>
-      <a href="horaextra.html" class="button"><span class="button-icon">⏰</span>Hora Extra</a>
-      <a href="funcionarios.html" class="button"><span class="button-icon">👥</span>Funcionários</a>
-      <a href="empresas.html" class="button"><span class="button-icon">🏢</span>Empresas & Obras</a>
-      <a href="relatorios.html" class="button"><span class="button-icon">📊</span>Relatórios</a>
-    </div>
-    
     <div id="dashboard" class="info-card">
-        <h3 id="dashboard-title">Resumo de Hoje</h3>
+        <h3 id="dashboard-title">Resumo do Dia</h3>
         <div class="dashboard-grid">
             <div class="dashboard-item">
                 <span class="value" id="presentesHoje">--</span>
@@ -257,11 +235,19 @@
             </div>
         </div>
         <div class="diaristas-acompanhamento">
-            <h4 style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">Acompanhamento de Diaristas (Ciclo 15 Dias)</h4>
+            <h4>Acompanhamento de Diaristas</h4>
             <div id="diaristas-lista">
                 <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center; padding: 10px;">Calculando...</p>
             </div>
         </div>
+    </div>
+
+    <div class="btn-container">
+      <a href="chamada.html" class="button"><span class="button-icon">📋</span>Chamada</a>
+      <a href="horaextra.html" class="button"><span class="button-icon">⏰</span>Hora Extra</a>
+      <a href="funcionarios.html" class="button"><span class="button-icon">👥</span>Funcionários</a>
+      <a href="empresas.html" class="button"><span class="button-icon">🏢</span>Empresas & Obras</a>
+      <a href="relatorios.html" class="button"><span class="button-icon">📊</span>Relatórios</a>
     </div>
   </div>
 
@@ -283,6 +269,20 @@
         return { dataISO: `${yyyy}-${mm}-${dd}`, dataFormatada: `${dd}/${mm}/${yyyy}` };
     }
 
+    // NOVA FUNÇÃO: Conta dias úteis entre duas datas
+    function contarDiasUteis(dataInicio, dataFim) {
+        let count = 0;
+        const curDate = new Date(dataInicio.valueOf());
+        while (curDate <= dataFim) {
+            const dayOfWeek = curDate.getDay();
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) { // 0=Domingo, 6=Sábado
+                count++;
+            }
+            curDate.setDate(curDate.getDate() + 1);
+        }
+        return count;
+    }
+
     async function atualizarDashboard() {
         const { dataISO, dataFormatada } = getDataDeHoje();
         document.getElementById('dashboard-title').textContent = `Resumo de ${dataFormatada}`;
@@ -296,10 +296,8 @@
             const chamadas = chamadasSnap.exists() ? chamadasSnap.val() : {};
             const funcionarios = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
 
-            // 1. Calcular Total de Colaboradores
             document.getElementById('totalFuncionarios').textContent = Object.keys(funcionarios).length;
 
-            // 2. Calcular Presentes Hoje
             const chamadasHoje = chamadas[dataISO] || {};
             let presentesHoje = 0;
             if (Object.keys(chamadasHoje).length > 0) {
@@ -315,38 +313,47 @@
             }
             document.getElementById('presentesHoje').textContent = presentesHoje;
 
-            // 3. Calcular Pagamentos Pendentes de Diaristas
-            const diaristasPendentes = {};
+            // LÓGICA ATUALIZADA para Acompanhamento de Diaristas
+            const diaristaStats = {};
             for (const id in funcionarios) {
                 if (funcionarios[id].tipo === 'diarista') {
-                    diaristasPendentes[id] = { nome: funcionarios[id].nome, diasNaoPagos: 0 };
+                    diaristaStats[id] = { nome: funcionarios[id].nome, diasNaoPagos: 0, ultimoDiaPago: null, primeiroDiaNaoPago: null };
                 }
             }
-
-            for (const data in chamadas) {
+            
+            const sortedDates = Object.keys(chamadas).sort();
+            for (const data of sortedDates) {
                 const registrosDoDia = chamadas[data];
+                // Lógica para processar ambos os formatos de dados
+                const processarRegistro = (funcId, registro) => {
+                    if (diaristaStats[funcId] && registro.status === 'presente') {
+                        if (registro.pago) {
+                            diaristaStats[funcId].ultimoDiaPago = data;
+                        } else {
+                            diaristaStats[funcId].diasNaoPagos++;
+                            if (!diaristaStats[funcId].primeiroDiaNaoPago) {
+                                diaristaStats[funcId].primeiroDiaNaoPago = data;
+                            }
+                        }
+                    }
+                };
+                
                 const primeiroId = Object.keys(registrosDoDia)[0];
                 if (!primeiroId) continue;
                 const éFormatoAntigo = registrosDoDia[primeiroId]?.status !== undefined;
 
                 if (éFormatoAntigo) {
-                    for (const funcId in registrosDoDia) {
-                        if (diaristasPendentes[funcId] && registrosDoDia[funcId].status === 'presente' && !registrosDoDia[funcId].pago) {
-                            diaristasPendentes[funcId].diasNaoPagos++;
-                        }
-                    }
+                    for (const funcId in registrosDoDia) processarRegistro(funcId, registrosDoDia[funcId]);
                 } else {
                     for (const empId in registrosDoDia) for (const obNome in registrosDoDia[empId]) for (const funcId in registrosDoDia[empId][obNome]) {
-                        if (diaristasPendentes[funcId] && registrosDoDia[empId][obNome][funcId].status === 'presente' && !registrosDoDia[empId][obNome][funcId].pago) {
-                            diaristasPendentes[funcId].diasNaoPagos++;
-                        }
+                        processarRegistro(funcId, registrosDoDia[empId][obNome][funcId]);
                     }
                 }
             }
             
             const listaDiv = document.getElementById('diaristas-lista');
             listaDiv.innerHTML = '';
-            const diaristasComPendencia = Object.values(diaristasPendentes).filter(d => d.diasNaoPagos > 0);
+            const diaristasComPendencia = Object.values(diaristaStats).filter(d => d.diasNaoPagos > 0);
 
             if (diaristasComPendencia.length === 0) {
                 listaDiv.innerHTML = '<p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center; padding: 10px;">Nenhum pagamento pendente.</p>';
@@ -354,9 +361,22 @@
                 diaristasComPendencia.sort((a,b) => b.diasNaoPagos - a.diasNaoPagos).forEach(diarista => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'diarista-item';
-                    if (diarista.diasNaoPagos >= 11) {
-                        itemDiv.classList.add('alerta');
+
+                    const hoje = new Date();
+                    // O ciclo começa no dia seguinte ao último pagamento, ou no primeiro dia não pago se nunca houve pagamento.
+                    const dataInicioCicloStr = diarista.ultimoDiaPago || diarista.primeiroDiaNaoPago;
+                    
+                    if (dataInicioCicloStr) {
+                         const dataInicioCiclo = new Date(dataInicioCicloStr + 'T00:00:00');
+                         if(diarista.ultimoDiaPago) dataInicioCiclo.setDate(dataInicioCiclo.getDate() + 1); // Ciclo começa no dia seguinte
+                         
+                         const diasUteisCorridos = contarDiasUteis(dataInicioCiclo, hoje);
+                         
+                         if (diasUteisCorridos >= 11) {
+                             itemDiv.classList.add('alerta');
+                         }
                     }
+
                     itemDiv.innerHTML = `<span>${diarista.nome}</span><span>${diarista.diasNaoPagos} / 15 dias</span>`;
                     listaDiv.appendChild(itemDiv);
                 });
@@ -367,7 +387,6 @@
         }
     }
 
-    // Inicia o dashboard ao carregar a página
     document.addEventListener('DOMContentLoaded', atualizarDashboard);
   </script>
 </body>
