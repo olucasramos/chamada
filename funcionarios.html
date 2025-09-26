@@ -6,23 +6,12 @@
   <title>Funcionários - Controle de Presenças</title>
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-dark: #1e3a8a;
-      --primary-light: #3b82f6;
-      --secondary: #06b6d4;
-      --accent: #10b981;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --surface: rgba(255, 255, 255, 0.1);
-      --surface-hover: rgba(255, 255, 255, 0.15);
-      --surface-card: rgba(255, 255, 255, 0.12);
-      --text-primary: #ffffff;
-      --text-secondary: rgba(255, 255, 255, 0.8);
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
-      --border-radius: 16px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --accent: #2ecc71; /* Verde para botões de ação */
+      --danger: #dc2626; /* Vermelho para exclusão */
+      --text-primary: #ffffff; /* Texto principal branco */
+      --text-secondary: rgba(255, 255, 255, 0.7); /* Texto secundário com leve transparência */
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
     }
 
     * {
@@ -32,162 +21,105 @@
     }
 
     body {
-      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      /* DESIGN UNIFICADO: Fundo sólido escuro para garantir compatibilidade e contraste */
+      background-color: #1f2937;
       color: var(--text-primary);
       margin: 0;
       min-height: 100vh;
-      padding: 20px 15px 80px 15px;
+      padding: 20px 15px 100px 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    /* Elementos decorativos */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      animation: float 25s ease-in-out infinite;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
+      gap: 24px;
     }
 
     header {
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 32px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      animation: slideInDown 0.6s ease-out;
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
     .btn-voltar {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.1);
       color: var(--text-primary);
       text-decoration: none;
-      padding: 12px 18px;
-      border-radius: 12px;
+      padding: 10px 16px;
+      border-radius: var(--border-radius);
       font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: var(--shadow);
       transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .btn-voltar:hover {
-      background: var(--surface-hover);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
+      background-color: rgba(255, 255, 255, 0.2);
     }
 
     .header-title {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #ffffff, #e0e7ff);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-align: center;
-      flex: 1;
+      text-align: left;
+      flex-grow: 1;
     }
 
-    .form-section {
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 40px;
-      animation: slideInUp 0.6s ease-out 0.1s both;
-    }
-
-    .form-card {
-      background: var(--surface-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+    .card {
+      background-color: rgba(42, 60, 80, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--border-radius);
-      padding: 32px;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-
-    .form-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--secondary));
-    }
-
-    .form-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-      color: var(--text-primary);
+    
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .form-label {
       display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 6px;
       color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
     .form-input, .form-select {
       width: 100%;
-      padding: 12px 16px;
-      border-radius: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      background: var(--surface);
-      backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.2);
       color: var(--text-primary);
       font-size: 1rem;
-      font-family: inherit;
       transition: var(--transition);
     }
 
     .form-input:focus, .form-select:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-      background: var(--surface-hover);
-    }
-
-    .form-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
     }
 
     .radio-group {
       display: flex;
-      gap: 20px;
+      gap: 16px;
       margin-top: 8px;
-      flex-wrap: wrap;
     }
 
     .radio-option {
@@ -195,415 +127,81 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      padding: 8px 12px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
       border-radius: 8px;
-      transition: var(--transition);
-      user-select: none;
-    }
-
-    .radio-option:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .radio-input {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      position: relative;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      border: none;
       cursor: pointer;
       transition: var(--transition);
-    }
-
-    .radio-input.checked {
-      border-color: var(--accent);
-      background: var(--accent);
-    }
-
-    .radio-input.checked::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 8px;
-      height: 8px;
-      background: white;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .radio-label {
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .conditional-group {
-      display: none;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    .conditional-group.show {
-      display: block;
+      margin-top: 16px;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--success));
-      padding: 16px 32px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: white;
-      border: none;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: var(--transition);
-      width: 100%;
-      position: relative;
-      overflow: hidden;
+      background-color: var(--accent);
     }
-
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn-primary:hover::before {
-      left: 100%;
-    }
-
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
+      background-color: #27ae60;
+    }
+    
+    .btn-secondary {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.2);
     }
 
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
+    .funcionario-details p {
+        margin: 0 0 8px 0;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
     }
-
-    .funcionarios-list {
-      width: 100%;
-      max-width: 500px;
-      animation: fadeInUp 0.8s ease-out 0.3s both;
-    }
-
-    .list-header {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--text-primary);
-      text-align: center;
-    }
-
-    .funcionario-item {
-      background: var(--surface-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: var(--border-radius);
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .funcionario-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(45deg, var(--primary-light), var(--secondary));
-      border-radius: 0 4px 4px 0;
-    }
-
-    .funcionario-item:hover {
-      transform: translateY(-2px);
-      background: var(--surface-hover);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .funcionario-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .funcionario-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: white;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-
-    .funcionario-info {
-      flex: 1;
-    }
-
-    .funcionario-nome {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .funcionario-tipo {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .funcionario-details {
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: var(--text-secondary);
-    }
-
-    .detail-row {
-      display: flex;
-      margin-bottom: 4px;
-    }
-
-    .detail-label {
-      font-weight: 600;
-      min-width: 100px;
-      color: var(--text-primary);
-    }
-
-    .detail-value {
-      flex: 1;
+    .funcionario-details p strong {
+        color: var(--text-primary);
+        font-weight: 600;
     }
 
     .funcionario-actions {
-      display: flex;
-      gap: 12px;
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 16px;
     }
-
-    .btn-edit, .btn-delete {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .btn-edit {
-      background: var(--primary-light);
-      color: white;
-    }
-
-    .btn-edit:hover {
-      background: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .btn-delete {
-      background: var(--danger);
-      color: white;
-    }
-
-    .btn-delete:hover {
-      background: #b91c1c;
-      transform: translateY(-1px);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-secondary);
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    /* Loading state */
-    .loading {
-      position: relative;
-    }
-
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Toast notifications */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--success);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-    }
-
-    .toast.show {
-      transform: translateX(0);
-    }
-
-    .toast.error {
-      background: var(--danger);
-    }
-
+    
     footer {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-secondary);
       text-align: center;
-      font-size: 0.9rem;
-      padding: 16px 20px;
+      font-size: 0.85rem;
+      padding: 16px;
       font-weight: 500;
-    }
-
-    /* Animações */
-    @keyframes slideInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        max-height: 0;
-        padding: 0;
-      }
-      to {
-        opacity: 1;
-        max-height: 300px;
-        padding: initial;
-      }
-    }
-
-    /* Responsividade */
-    @media (max-width: 480px) {
-      body {
-        padding: 15px 10px 80px 10px;
-      }
-
-      .form-card {
-        padding: 24px 20px;
-      }
-
-      .funcionario-item {
-        padding: 20px 16px;
-      }
-
-      .radio-group {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .funcionario-actions {
-        flex-direction: column;
-      }
-
-      .btn-edit, .btn-delete {
-        flex: none;
-      }
-    }
-
-    /* Estados de foco */
-    .btn-primary:focus-visible,
-    .btn-edit:focus-visible,
-    .btn-delete:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .radio-option:focus-within {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <a href="index.html" class="btn-voltar" aria-label="Voltar para página inicial">
-      <span>←</span> Voltar
-    </a>
-    <h1 class="header-title">Funcionários</h1>
-  </header>
+  <div class="container">
+    <header>
+      <a href="index.html" class="btn-voltar">
+        <span>←</span> Voltar
+      </a>
+      <h1 class="header-title">Funcionários</h1>
+    </header>
 
-  <div class="form-section">
-    <div class="form-card">
-      <h2 class="form-title" id="formTitle">Cadastrar Funcionário</h2>
+    <div class="card">
+      <h2 class="card-title" id="formTitle">Cadastrar Funcionário</h2>
       
       <form id="formFuncionario" autocomplete="off">
         <div class="form-group">
@@ -614,91 +212,56 @@
         <div class="form-group">
           <label class="form-label">Tipo</label>
           <div class="radio-group">
-            <div class="radio-option" onclick="selecionarTipo('funcionario')">
-              <div class="radio-input" id="tipo_funcionario"></div>
-              <span class="radio-label">Funcionário</span>
-            </div>
-            <div class="radio-option" onclick="selecionarTipo('diarista')">
-              <div class="radio-input" id="tipo_diarista"></div>
-              <span class="radio-label">Diarista</span>
-            </div>
+            <label class="radio-option">
+              <input type="radio" name="tipo" value="funcionario" checked> Funcionário
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="tipo" value="diarista"> Diarista
+            </label>
           </div>
         </div>
-
+        
         <div class="form-group">
-          <label for="funcao" class="form-label">Função</label>
-          <select id="funcao" class="form-select" required>
-            <option value="" disabled selected>Selecione a função</option>
-            <option value="Ajudante Prático">Ajudante Prático</option>
-            <option value="Oficial">Oficial</option>
-            <option value="Oficial Pleno">Oficial Pleno</option>
-            <option value="Oficial Polivalente">Oficial Polivalente</option>
-            <option value="Encarregado">Encarregado</option>
-            <option value="Outro">Outro</option>
+          <label for="empresa" class="form-label">Empresa</label>
+          <select id="empresa" class="form-select">
+            <option value="">Nenhuma</option>
           </select>
         </div>
 
-        <div class="form-group conditional-group" id="funcaoOutroGroup">
-          <label for="funcaoOutro" class="form-label">Especificar Função</label>
-          <input type="text" id="funcaoOutro" class="form-input" placeholder="Digite a função" />
+        <div class="form-group">
+          <label for="obra" class="form-label">Obra</label>
+          <select id="obra" class="form-select" disabled>
+            <option value="">Selecione uma empresa primeiro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="funcao" class="form-label">Função</label>
+          <input type="text" id="funcao" class="form-input" placeholder="Ex: Ajudante, Oficial, etc."/>
         </div>
 
-        <div class="conditional-group show" id="funcionarioCampos">
-          <div class="form-group">
-            <label for="obra" class="form-label">Obra</label>
-            <input type="text" id="obra" class="form-input" placeholder="Nome da obra" />
-          </div>
-        </div>
-
-        <div class="conditional-group" id="diaristaCampos">
+        <div id="diaristaCampos" style="display: none;">
           <div class="form-group">
             <label for="cpf" class="form-label">CPF</label>
             <input type="text" id="cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" />
           </div>
 
           <div class="form-group">
-            <label for="tipoPix" class="form-label">Tipo de Chave PIX</label>
-            <select id="tipoPix" class="form-select">
-              <option value="" disabled selected>Selecione o tipo de chave PIX</option>
-              <option value="CPF">CPF</option>
-              <option value="CNPJ">CNPJ</option>
-              <option value="Email">Email</option>
-              <option value="Telefone">Telefone</option>
-              <option value="Aleatória">Chave Aleatória</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="chavePix" class="form-label">Chave PIX</label>
-            <input type="text" id="chavePix" class="form-input" placeholder="Digite a chave PIX" />
-          </div>
-
-          <div class="form-group">
-            <label for="banco" class="form-label">Banco</label>
-            <input type="text" id="banco" class="form-input" placeholder="Nome do banco" />
-          </div>
-
-          <div class="form-group">
             <label for="valorDiaria" class="form-label">Valor da Diária (R$)</label>
             <input type="number" id="valorDiaria" class="form-input" min="0" step="1" placeholder="0" />
           </div>
-
-          <div class="form-group">
-            <label for="obraDiarista" class="form-label">Obra</label>
-            <input type="text" id="obraDiarista" class="form-input" placeholder="Nome da obra" />
-          </div>
         </div>
 
-        <button type="submit" class="btn-primary" id="btnSalvar">
-          <span>Salvar Funcionário</span>
+        <button type="submit" class="btn btn-primary" id="btnSalvar">
+          Salvar
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnCancelarEdicao" style="display: none;">
+          Cancelar Edição
         </button>
       </form>
     </div>
-  </div>
 
-  <div class="funcionarios-list">
-    <h2 class="list-header">Lista de Funcionários</h2>
-    <div id="listaFuncionarios"></div>
+    <div id="listaFuncionarios">
+      </div>
   </div>
 
   <footer>
@@ -711,330 +274,239 @@
     const form = document.getElementById('formFuncionario');
     const formTitle = document.getElementById('formTitle');
     const btnSalvar = document.getElementById('btnSalvar');
-    const funcionarioCampos = document.getElementById('funcionarioCampos');
-    const diaristaCampos = document.getElementById('diaristaCampos');
-    const funcaoSelect = document.getElementById('funcao');
-    const funcaoOutroGroup = document.getElementById('funcaoOutroGroup');
-    const funcaoOutroInput = document.getElementById('funcaoOutro');
+    const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
     const listaFuncionarios = document.getElementById('listaFuncionarios');
+    const diaristaCampos = document.getElementById('diaristaCampos');
+    
+    // NOVOS ELEMENTOS DO DOM
+    const selectEmpresa = document.getElementById('empresa');
+    const selectObra = document.getElementById('obra');
 
-    let funcionarios = {};
+    let funcionariosCache = {};
+    let empresasCache = {}; // Cache para empresas e obras
     let editandoId = null;
-    let tipoSelecionado = 'funcionario';
 
-    // Funções utilitárias
+    // --- Funções Utilitárias ---
     function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => toast.classList.add('show'), 100);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-      }, 3000);
-    }
-
-    function setLoadingState(element, loading) {
-      if (loading) {
-        element.classList.add('loading');
-        element.disabled = true;
-      } else {
-        element.classList.remove('loading');
-        element.disabled = false;
-      }
-    }
-
-    function getInitials(nome) {
-      return nome.split(' ').map(n => n[0]).join('').substring(0, 2);
+      // (seu código de toast aqui, se precisar)
+      alert(message);
     }
 
     function formatarCPF(cpf) {
-      return cpf.replace(/\D/g, '')
+      return (cpf || '').replace(/\D/g, '')
                 .replace(/(\d{3})(\d)/, '$1.$2')
                 .replace(/(\d{3})(\d)/, '$1.$2')
                 .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     }
+    
+    // --- LÓGICA DE EMPRESAS E OBRAS ---
 
-    function selecionarTipo(tipo) {
-      tipoSelecionado = tipo;
-      
-      // Limpar seleção anterior
-      document.getElementById('tipo_funcionario').classList.remove('checked');
-      document.getElementById('tipo_diarista').classList.remove('checked');
-      
-      // Marcar novo tipo
-      document.getElementById(`tipo_${tipo}`).classList.add('checked');
-      
-      // Mostrar campos apropriados
-      if (tipo === 'funcionario') {
-        funcionarioCampos.classList.add('show');
-        diaristaCampos.classList.remove('show');
-        form.obra.required = true;
-        form.obraDiarista.required = false;
-      } else {
-        funcionarioCampos.classList.remove('show');
-        diaristaCampos.classList.add('show');
-        form.obra.required = false;
-        form.obraDiarista.required = true;
-      }
+    async function carregarEmpresas() {
+        try {
+            const snapshot = await get(ref(db, 'empresas'));
+            empresasCache = snapshot.exists() ? snapshot.val() : {};
+            preencherSelectEmpresas();
+        } catch (error) {
+            console.error("Erro ao carregar empresas:", error);
+        }
     }
 
-    // Event listeners
-    funcaoSelect.addEventListener('change', () => {
-      if (funcaoSelect.value === 'Outro') {
-        funcaoOutroGroup.classList.add('show');
-        funcaoOutroInput.required = true;
-      } else {
-        funcaoOutroGroup.classList.remove('show');
-        funcaoOutroInput.required = false;
-        funcaoOutroInput.value = '';
-      }
+    function preencherSelectEmpresas() {
+        selectEmpresa.innerHTML = '<option value="">Nenhuma</option>';
+        for (const id in empresasCache) {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = empresasCache[id].nome;
+            selectEmpresa.appendChild(option);
+        }
+    }
+
+    function atualizarSelectObras() {
+        const empresaId = selectEmpresa.value;
+        selectObra.innerHTML = ''; // Limpa as opções
+        selectObra.disabled = true;
+
+        if (!empresaId || !empresasCache[empresaId]?.obras) {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = empresaId ? "Nenhuma obra cadastrada" : "Selecione uma empresa";
+            selectObra.appendChild(defaultOption);
+            return;
+        }
+
+        selectObra.disabled = false;
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Selecione a obra";
+        selectObra.appendChild(defaultOption);
+
+        const obras = empresasCache[empresaId].obras;
+        for (const obraId in obras) {
+            const option = document.createElement('option');
+            option.value = obras[obraId].nome; // Salva o nome da obra
+            option.textContent = obras[obraId].nome;
+            selectObra.appendChild(option);
+        }
+    }
+    
+    // Evento para atualizar obras quando empresa muda
+    selectEmpresa.addEventListener('change', atualizarSelectObras);
+
+    // --- LÓGICA DE FUNCIONÁRIOS ---
+
+    function toggleDiaristaCampos() {
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        diaristaCampos.style.display = tipo === 'diarista' ? 'block' : 'none';
+    }
+    document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+        radio.addEventListener('change', toggleDiaristaCampos);
     });
 
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btnSalvar.disabled = true;
+        btnSalvar.textContent = "Salvando...";
+
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        const dadosFuncionario = {
+            nome: form.nome.value.trim(),
+            tipo: tipo,
+            funcao: form.funcao.value.trim(),
+            // Novos dados salvos
+            empresaId: selectEmpresa.value,
+            obra: selectObra.value,
+        };
+
+        if (tipo === 'diarista') {
+            dadosFuncionario.cpf = form.cpf.value.trim();
+            dadosFuncionario.valorDiaria = form.valorDiaria.value || 0;
+        }
+
+        try {
+            const id = editandoId || Date.now();
+            await set(ref(db, `funcionarios/${id}`), dadosFuncionario);
+            showToast(editandoId ? 'Funcionário atualizado!' : 'Funcionário cadastrado!');
+            resetarFormulario();
+            await carregarFuncionarios();
+        } catch (error) {
+            console.error('Erro ao salvar:', error);
+            showToast('Erro ao salvar funcionário', 'error');
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar";
+        }
+    });
+    
+    async function carregarFuncionarios() {
+        try {
+            const snapshot = await get(ref(db, 'funcionarios'));
+            funcionariosCache = snapshot.exists() ? snapshot.val() : {};
+            montarLista();
+        } catch (error) {
+            console.error('Erro ao carregar funcionários:', error);
+        }
+    }
+    
+    function montarLista() {
+        listaFuncionarios.innerHTML = '';
+        if (Object.keys(funcionariosCache).length === 0) {
+            listaFuncionarios.innerHTML = `<div class="card" style="text-align:center; color: var(--text-secondary);"><p>Nenhum funcionário cadastrado.</p></div>`;
+            return;
+        }
+
+        for (const id in funcionariosCache) {
+            const f = funcionariosCache[id];
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.marginBottom = '16px';
+            
+            const empresaNome = f.empresaId ? empresasCache[f.empresaId]?.nome || 'N/A' : 'Nenhuma';
+
+            card.innerHTML = `
+                <h3 class="card-title" style="font-size: 1.1rem;">${f.nome}</h3>
+                <div class="funcionario-details">
+                    <p><strong>Tipo:</strong> ${f.tipo === 'diarista' ? 'Diarista' : 'Funcionário'}</p>
+                    <p><strong>Função:</strong> ${f.funcao || '-'}</p>
+                    <p><strong>Empresa:</strong> ${empresaNome}</p>
+                    <p><strong>Obra:</strong> ${f.obra || 'Nenhuma'}</p>
+                    ${f.tipo === 'diarista' ? `<p><strong>CPF:</strong> ${formatarCPF(f.cpf)}</p><p><strong>Valor/diária:</strong> R$ ${parseFloat(f.valorDiaria || 0).toFixed(2)}</p>` : ''}
+                </div>
+                <div class="funcionario-actions">
+                    <button class="btn btn-secondary">Editar</button>
+                    <button class="btn" style="background-color: var(--danger)">Excluir</button>
+                </div>
+            `;
+
+            card.querySelector('.btn-secondary').addEventListener('click', () => editarFuncionario(id));
+            card.querySelector('.btn[style*="--danger"]').addEventListener('click', () => excluirFuncionario(id));
+
+            listaFuncionarios.appendChild(card);
+        }
+    }
+
+    function editarFuncionario(id) {
+        const f = funcionariosCache[id];
+        if (!f) return;
+
+        editandoId = id;
+        formTitle.textContent = 'Editar Funcionário';
+        btnSalvar.textContent = 'Atualizar';
+        btnCancelarEdicao.style.display = 'inline-block';
+
+        form.nome.value = f.nome;
+        document.querySelector(`input[name="tipo"][value="${f.tipo}"]`).checked = true;
+        toggleDiaristaCampos();
+        form.funcao.value = f.funcao || '';
+        form.cpf.value = f.cpf || '';
+        form.valorDiaria.value = f.valorDiaria || '';
+        
+        // Preenche empresa e obra
+        selectEmpresa.value = f.empresaId || '';
+        atualizarSelectObras(); // Popula as obras da empresa
+        
+        // Atraso para garantir que as opções de obra foram carregadas
+        setTimeout(() => {
+            selectObra.value = f.obra || '';
+        }, 100);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function excluirFuncionario(id) {
+        if (!confirm(`Deseja realmente excluir "${funcionariosCache[id].nome}"?`)) return;
+        try {
+            await remove(ref(db, `funcionarios/${id}`));
+            showToast('Funcionário excluído!');
+            await carregarFuncionarios();
+        } catch (error) {
+            console.error('Erro ao excluir:', error);
+            showToast('Erro ao excluir', 'error');
+        }
+    }
+    
+    function resetarFormulario() {
+        form.reset();
+        editandoId = null;
+        formTitle.textContent = 'Cadastrar Funcionário';
+        btnSalvar.textContent = 'Salvar';
+        btnCancelarEdicao.style.display = 'none';
+        toggleDiaristaCampos();
+        selectEmpresa.value = '';
+        atualizarSelectObras();
+    }
+    
+    btnCancelarEdicao.addEventListener('click', resetarFormulario);
     document.getElementById('cpf').addEventListener('input', e => {
       e.target.value = formatarCPF(e.target.value);
     });
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      setLoadingState(btnSalvar, true);
-
-      try {
-        const nome = form.nome.value.trim();
-        let dadosFuncionario = { nome, tipo: tipoSelecionado };
-
-        let funcao = funcaoSelect.value;
-        if (funcao === 'Outro') {
-          funcao = funcaoOutroInput.value.trim();
-          if (!funcao) {
-            showToast('Por favor, especifique a função', 'error');
-            return;
-          }
-        }
-        dadosFuncionario.funcao = funcao;
-
-        if (tipoSelecionado === 'funcionario') {
-          const obra = form.obra.value.trim();
-          if (!nome || !funcao || !obra) {
-            showToast('Por favor, preencha todos os campos obrigatórios', 'error');
-            return;
-          }
-          dadosFuncionario.obra = obra;
-        } else {
-          const cpf = form.cpf.value.trim();
-          const tipoPix = form.tipoPix.value.trim();
-          const chavePix = form.chavePix.value.trim();
-          const banco = form.banco.value.trim();
-          const valorDiaria = form.valorDiaria.value.trim();
-          const obraDiarista = form.obraDiarista.value.trim();
-
-          if (!nome || !cpf || !valorDiaria || !obraDiarista) {
-            showToast('Por favor, preencha os campos obrigatórios do diarista', 'error');
-            return;
-          }
-
-          dadosFuncionario.cpf = cpf;
-          dadosFuncionario.tipoPix = tipoPix;
-          dadosFuncionario.chavePix = chavePix;
-          dadosFuncionario.banco = banco;
-          dadosFuncionario.valorDiaria = parseInt(valorDiaria, 10);
-          dadosFuncionario.obra = obraDiarista;
-        }
-
-        if (editandoId) {
-          await update(ref(db, `funcionarios/${editandoId}`), dadosFuncionario);
-          showToast('Funcionário atualizado com sucesso!');
-          editandoId = null;
-          formTitle.textContent = 'Cadastrar Funcionário';
-          btnSalvar.innerHTML = '<span>Salvar Funcionário</span>';
-        } else {
-          const novoRef = ref(db, 'funcionarios');
-          const snapshot = await get(novoRef);
-          const idNovo = snapshot.exists() ? Object.keys(snapshot.val()).length + 1 : 1;
-          await set(ref(db, `funcionarios/${idNovo}`), dadosFuncionario);
-          showToast('Funcionário cadastrado com sucesso!');
-        }
-
-        form.reset();
-        funcaoOutroGroup.classList.remove('show');
-        selecionarTipo('funcionario');
-        carregarFuncionarios();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (error) {
-        console.error('Erro ao salvar funcionário:', error);
-        showToast('Erro ao salvar funcionário', 'error');
-      } finally {
-        setLoadingState(btnSalvar, false);
-      }
-    });
-
-    async function carregarFuncionarios() {
-      try {
-        const snapshot = await get(ref(db, 'funcionarios'));
-        if (snapshot.exists()) {
-          funcionarios = snapshot.val();
-          montarLista();
-        } else {
-          listaFuncionarios.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">👥</div>
-              <p>Nenhum funcionário cadastrado ainda.</p>
-            </div>
-          `;
-        }
-      } catch (error) {
-        console.error('Erro ao carregar funcionários:', error);
-        showToast('Erro ao carregar funcionários', 'error');
-        listaFuncionarios.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">❌</div>
-            <p>Erro ao carregar funcionários.</p>
-          </div>
-        `;
-      }
+    async function iniciar() {
+        toggleDiaristaCampos();
+        await carregarEmpresas(); // Carrega empresas primeiro
+        await carregarFuncionarios(); // Depois carrega funcionários para ter os nomes das empresas
     }
 
-    function montarLista() {
-      listaFuncionarios.innerHTML = '';
-      
-      const funcionariosOrdenados = Object.entries(funcionarios)
-        .sort(([, a], [, b]) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
-
-      for (const [id, f] of funcionariosOrdenados) {
-        const tipoFormatado = f.tipo === 'funcionario' ? 'Funcionário' : 'Diarista';
-        
-        const item = document.createElement('div');
-        item.className = 'funcionario-item';
-        
-        let detalhes = '';
-        if (f.tipo === 'funcionario') {
-          detalhes = `
-            <div class="detail-row">
-              <span class="detail-label">Função:</span>
-              <span class="detail-value">${f.funcao || '-'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Obra:</span>
-              <span class="detail-value">${f.obra || '-'}</span>
-            </div>
-          `;
-        } else {
-          detalhes = `
-            <div class="detail-row">
-              <span class="detail-label">CPF:</span>
-              <span class="detail-value">${f.cpf || '-'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Valor/Diária:</span>
-              <span class="detail-value">R$ ${Number(f.valorDiaria || 0).toFixed(2)}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Banco:</span>
-              <span class="detail-value">${f.banco || '-'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">PIX:</span>
-              <span class="detail-value">${f.tipoPix || '-'} - ${f.chavePix || '-'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Obra:</span>
-              <span class="detail-value">${f.obra || '-'}</span>
-            </div>
-          `;
-        }
-
-        item.innerHTML = `
-          <div class="funcionario-header">
-            <div class="funcionario-avatar">${getInitials(f.nome)}</div>
-            <div class="funcionario-info">
-              <div class="funcionario-nome">${f.nome}</div>
-              <div class="funcionario-tipo">${tipoFormatado}</div>
-            </div>
-          </div>
-          <div class="funcionario-details">
-            ${detalhes}
-          </div>
-          <div class="funcionario-actions">
-            <button class="btn-edit" onclick="editarFuncionario('${id}')">Editar</button>
-            <button class="btn-delete" onclick="excluirFuncionario('${id}')">Excluir</button>
-          </div>
-        `;
-        
-        listaFuncionarios.appendChild(item);
-      }
-    }
-
-    function editarFuncionario(id) {
-      const f = funcionarios[id];
-      if (!f) return;
-
-      editandoId = id;
-      formTitle.textContent = 'Editar Funcionário';
-      btnSalvar.innerHTML = '<span>Atualizar Funcionário</span>';
-
-      form.nome.value = f.nome;
-      selecionarTipo(f.tipo);
-
-      if (f.tipo === 'funcionario') {
-        form.obra.value = f.obra || '';
-      } else {
-        form.cpf.value = f.cpf || '';
-        form.tipoPix.value = f.tipoPix || '';
-        form.chavePix.value = f.chavePix || '';
-        form.banco.value = f.banco || '';
-        form.valorDiaria.value = f.valorDiaria || '';
-        form.obraDiarista.value = f.obra || '';
-      }
-
-      if (f.funcao) {
-        const opcoes = Array.from(funcaoSelect.options).map(opt => opt.value);
-        if (opcoes.includes(f.funcao)) {
-          funcaoSelect.value = f.funcao;
-          funcaoOutroGroup.classList.remove('show');
-          funcaoOutroInput.value = '';
-          funcaoOutroInput.required = false;
-        } else {
-          funcaoSelect.value = 'Outro';
-          funcaoOutroGroup.classList.add('show');
-          funcaoOutroInput.value = f.funcao;
-          funcaoOutroInput.required = true;
-        }
-      } else {
-        funcaoSelect.value = '';
-        funcaoOutroGroup.classList.remove('show');
-        funcaoOutroInput.value = '';
-        funcaoOutroInput.required = false;
-      }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function excluirFuncionario(id) {
-      const f = funcionarios[id];
-      if (!f) return;
-
-      if (!confirm(`Deseja realmente excluir o funcionário "${f.nome}"?`)) return;
-
-      try {
-        await remove(ref(db, `funcionarios/${id}`));
-        showToast('Funcionário excluído com sucesso!');
-        carregarFuncionarios();
-      } catch (error) {
-        console.error('Erro ao excluir funcionário:', error);
-        showToast('Erro ao excluir funcionário', 'error');
-      }
-    }
-
-    // Tornar funções globais
-    window.selecionarTipo = selecionarTipo;
-    window.editarFuncionario = editarFuncionario;
-    window.excluirFuncionario = excluirFuncionario;
-
-    // Inicializar
-    selecionarTipo('funcionario');
-    carregarFuncionarios();
+    iniciar();
   </script>
 </body>
 </html>
