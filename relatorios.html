@@ -459,19 +459,34 @@
     const fim = document.getElementById('horaExtraFim').value;
     if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa.");
     resultado.textContent = "Gerando...";
-    
-    const agregador = {};
+
+    // Estrutura de dados aprimorada para agrupar por empresa e obra
+    const agregador = {}; 
+
     const processarItem = (item) => {
-        const func = funcionariosCache[item.funcId];
-        if (func) {
-          if (!agregador[item.funcId]) {
-            agregador[item.funcId] = { nome: func.nome, horas50: 0, horas100: 0, datas: new Set() };
-          }
-          const qtd = parseInt(item.registro.quantidadeHoras) || 0;
-          if (String(item.registro.percentual) === '50') agregador[item.funcId].horas50 += qtd;
-          if (String(item.registro.percentual) === '100') agregador[item.funcId].horas100 += qtd;
-          agregador[item.funcId].datas.add(formatarDataDMY(item.data));
-        }
+      const func = funcionariosCache[item.funcId];
+      if (!func) return;
+
+      // Garante que a estrutura exista no agregador
+      if (!agregador[item.empresaId]) {
+        agregador[item.empresaId] = { nome: item.empresaNome, obras: {} };
+      }
+      if (!agregador[item.empresaId].obras[item.obraNome]) {
+        agregador[item.empresaId].obras[item.obraNome] = { funcionarios: {} };
+      }
+      if (!agregador[item.empresaId].obras[item.obraNome].funcionarios[item.funcId]) {
+        agregador[item.empresaId].obras[item.obraNome].funcionarios[item.funcId] = {
+          nome: func.nome, horas50: 0, horas100: 0, datas: new Set()
+        };
+      }
+
+      // Adiciona os valores
+      const qtd = parseInt(item.registro.quantidadeHoras) || 0;
+      const funcionarioAgregado = agregador[item.empresaId].obras[item.obraNome].funcionarios[item.funcId];
+      
+      if (String(item.registro.percentual) === '50') funcionarioAgregado.horas50 += qtd;
+      if (String(item.registro.percentual) === '100') funcionarioAgregado.horas100 += qtd;
+      funcionarioAgregado.datas.add(formatarDataDMY(item.data));
     };
 
     try {
@@ -483,23 +498,20 @@
         const dadosDoDia = horasExtras[data];
         const primeiroId = Object.keys(dadosDoDia)[0];
         if (!primeiroId) continue;
-        
         const éFormatoAntigo = dadosDoDia[primeiroId]?.percentual !== undefined;
-        
+
         if (éFormatoAntigo) {
-          // CORREÇÃO: Bloco para filtrar dados no formato antigo
           for (const funcId in dadosDoDia) {
             const func = funcionariosCache[funcId];
             if (func) {
               const correspondeEmpresa = empresaId === 'todos' || func.empresaId === empresaId;
               const correspondeObra = !obraNome || func.obra === obraNome;
               if (correspondeEmpresa && correspondeObra) {
-                processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaNome: empresasCache[func.empresaId]?.nome || 'N/A', obraNome: func.obra || 'N/A' });
+                processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaId: func.empresaId, empresaNome: empresasCache[func.empresaId]?.nome || 'Sem Empresa', obraNome: func.obra || 'Sem Obra' });
               }
             }
           }
         } else {
-          // Lógica para o formato novo (que já estava correta)
           for (const idEmpresa in dadosDoDia) {
             if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
             for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
@@ -507,27 +519,47 @@
               if (obraNome && nomeObraDecodificado !== obraNome) continue;
               const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
               for (const funcId in registros) {
-                processarItem({ data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObraDecodificado });
+                processarItem({ data, funcId, registro: registros[funcId], empresaId: idEmpresa, empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObraDecodificado });
               }
             }
           }
         }
       }
 
-      let texto = `⏱️ *Relatório de Horas Extras*\nPeríodo: ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}\n\n`;
-      const comHE = Object.values(agregador);
-      if (comHE.length === 0) {
+      const nomeEmpresaFiltro = empresaId === 'todos' ? 'Todas as Empresas' : empresasCache[empresaId]?.nome || 'N/A';
+      const nomeObraFiltro = obraNome ? obraNome : 'Todas as Obras';
+      let texto = `⏱️ *Relatório de Horas Extras*\n`;
+      texto += `Período: ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}\n`;
+      texto += `Empresa: *${nomeEmpresaFiltro}*\n`;
+      texto += `Obra: *${nomeObraFiltro}*\n\n`;
+
+      if (Object.keys(agregador).length === 0) {
         texto += "Nenhuma hora extra encontrada para os filtros selecionados.";
       } else {
-        comHE.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
-          const total = item.horas50 + item.horas100;
-          if(total > 0){
-            texto += `👤 *${item.nome}*\n   Total: *${total}h*\n`;
-            if(item.horas50 > 0) texto += `   - 50%: *${item.horas50}h*\n`;
-            if(item.horas100 > 0) texto += `   - 100%: *${item.horas100}h*\n`;
-            texto += `   (Dias: ${Array.from(item.datas).join(', ')})\n\n`;
+        // --- NOVA LÓGICA PARA EXIBIÇÃO AGRUPADA ---
+        for (const idEmpresa in agregador) {
+          const empresa = agregador[idEmpresa];
+          texto += `🏢 *Empresa: ${empresa.nome}*\n`;
+          texto += `--------------------------------\n`;
+
+          for (const nomeObra in empresa.obras) {
+            const obra = empresa.obras[nomeObra];
+            texto += `  🏗️ *Obra: ${nomeObra}*\n\n`;
+
+            Object.values(obra.funcionarios)
+              .sort((a,b) => a.nome.localeCompare(b.nome))
+              .forEach(item => {
+                const total = item.horas50 + item.horas100;
+                if(total > 0){
+                  texto += `    👤 *${item.nome}*\n       Total: *${total}h*\n`;
+                  if(item.horas50 > 0) texto += `       - 50%: *${item.horas50}h*\n`;
+                  if(item.horas100 > 0) texto += `       - 100%: *${item.horas100}h*\n`;
+                  texto += `       (Dias: ${Array.from(item.datas).join(', ')})\n\n`;
+                }
+              });
           }
-        });
+          texto += `\n`;
+        }
       }
       resultado.textContent = texto;
       textoRelatorioAtual = texto;
@@ -535,6 +567,7 @@
     finally { scrollParaResultado(); }
   });
 
+  
   // --- Relatório de Dados do Funcionário ---
   document.getElementById('btnGerarLista').addEventListener('click', () => {
       const empresaId = document.getElementById('dadosEmpresa').value;
