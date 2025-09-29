@@ -163,29 +163,6 @@
 
   <div class="reports-grid">
     <div class="card">
-      <div class="report-header"><span class="report-icon">✔️</span><h2 class="report-title">Validar Pagamentos de Diaristas</h2></div>
-      <div class="form-grid two-cols">
-        <div class="form-group"><label for="validarEmpresa" class="form-label">Empresa</label><select id="validarEmpresa" class="form-select empresa-select"></select></div>
-        <div class="form-group"><label for="validarDiarista" class="form-label">Diarista</label><select id="validarDiarista" class="form-select diarista-select" disabled></select></div>
-        <div class="form-group"><label for="validarDataInicio" class="form-label">Período Início</label><input type="date" id="validarDataInicio" class="form-input" /></div>
-        <div class="form-group"><label for="validarDataFim" class="form-label">Período Fim</label><input type="date" id="validarDataFim" class="form-input" /></div>
-        <div class="form-group" style="grid-column: 1 / -1;"><label for="validarSenha" class="form-label">Senha</label><input type="password" id="validarSenha" class="form-input" placeholder="Digite 1234 para confirmar" /></div>
-      </div>
-      <button id="btnValidarPagamento" class="btn-action success">Marcar Período como Pago</button>
-    </div>
-
-    <div class="card">
-      <div class="report-header"><span class="report-icon">💰</span><h2 class="report-title">Relatório de Pagamento de Diarista</h2></div>
-      <div class="form-grid two-cols">
-        <div class="form-group"><label for="pagamentoEmpresa" class="form-label">Empresa</label><select id="pagamentoEmpresa" class="form-select empresa-select"></select></div>
-        <div class="form-group"><label for="pagamentoObra" class="form-label">Obra</label><select id="pagamentoObra" class="form-select obra-select" disabled></select></div>
-        <div class="form-group"><label for="pagamentoDataInicio" class="form-label">Data Início</label><input type="date" id="pagamentoDataInicio" class="form-input" /></div>
-        <div class="form-group"><label for="pagamentoDataFim" class="form-label">Data Fim</label><input type="date" id="pagamentoDataFim" class="form-input" /></div>
-      </div>
-      <button id="btnGerarPagamento" class="btn-action">Gerar Relatório</button>
-    </div>
-
-    <div class="card">
       <div class="report-header"><span class="report-icon">📋</span><h2 class="report-title">Relatório de Faltas (Funcionários)</h2></div>
       <div class="form-grid two-cols">
         <div class="form-group"><label for="faltasEmpresa" class="form-label">Empresa</label><select id="faltasEmpresa" class="form-select empresa-select"></select></div>
@@ -194,6 +171,17 @@
         <div class="form-group"><label for="faltasDataFim" class="form-label">Data Fim</label><input type="date" id="faltasDataFim" class="form-input" /></div>
       </div>
       <button id="btnGerarFaltas" class="btn-action">Gerar Relatório</button>
+    </div>
+
+    <div class="card">
+        <div class="report-header"><span class="report-icon">💰</span><h2 class="report-title">Pagamento Diarista</h2></div>
+        <div class="form-grid two-cols">
+          <div class="form-group"><label for="pagamentoEmpresa" class="form-label">Empresa</label><select id="pagamentoEmpresa" class="form-select empresa-select"></select></div>
+          <div class="form-group"><label for="pagamentoObra" class="form-label">Obra</label><select id="pagamentoObra" class="form-select obra-select" disabled></select></div>
+          <div class="form-group"><label for="pagamentoDataInicio" class="form-label">Data Início</label><input type="date" id="pagamentoDataInicio" class="form-input" /></div>
+          <div class="form-group"><label for="pagamentoDataFim" class="form-label">Data Fim</label><input type="date" id="pagamentoDataFim" class="form-input" /></div>
+        </div>
+        <button id="btnGerarPagamento" class="btn-action">Gerar Relatório</button>
     </div>
 
     <div class="card">
@@ -207,6 +195,18 @@
         <button id="btnGerarHoraExtra" class="btn-action">Gerar Relatório</button>
     </div>
     
+    <div class="card">
+      <div class="report-header"><span class="report-icon">✔️</span><h2 class="report-title">Validar Pagamentos de Diaristas</h2></div>
+      <div class="form-grid two-cols">
+        <div class="form-group"><label for="validarEmpresa" class="form-label">Empresa</label><select id="validarEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="validarDiarista" class="form-label">Diarista</label><select id="validarDiarista" class="form-select diarista-select" disabled></select></div>
+        <div class="form-group"><label for="validarDataInicio" class="form-label">Período Início</label><input type="date" id="validarDataInicio" class="form-input" /></div>
+        <div class="form-group"><label for="validarDataFim" class="form-label">Período Fim</label><input type="date" id="validarDataFim" class="form-input" /></div>
+        <div class="form-group" style="grid-column: 1 / -1;"><label for="validarSenha" class="form-label">Senha</label><input type="password" id="validarSenha" class="form-input" placeholder="Digite 1234 para confirmar" /></div>
+      </div>
+      <button id="btnValidarPagamento" class="btn-action success">Marcar Período como Pago</button>
+    </div>
+
     <div class="card">
       <div class="report-header"><span class="report-icon">⚠️</span><h2 class="report-title">Excluir Registros</h2></div>
       <div class="form-grid two-cols">
@@ -255,8 +255,7 @@
     return `${dia}/${mes}/${ano}`;
   }
   function scrollParaResultado() {
-    const el = document.getElementById('resultadoCard');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('resultadoCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   async function carregarDadosIniciais() {
@@ -315,10 +314,14 @@
             }
         } else {
             for (const idEmpresa in dadosDoDia) {
-                if (filtro.empresaId !== 'todos' && idEmpresa !== filtro.empresaId) continue;
+                const deveProcessarEmpresa = filtro.empresaId === 'todos' || idEmpresa === filtro.empresaId;
+                if (!deveProcessarEmpresa) continue;
+
                 for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
                     const nomeObra = decodeURIComponent(nomeObraCodificado);
-                    if (filtro.obraNome && nomeObra !== filtro.obraNome) continue;
+                    const deveProcessarObra = !filtro.obraNome || nomeObra === filtro.obraNome;
+                    if (!deveProcessarObra) continue;
+                    
                     const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
                     for (const funcId in registros) filtro.callback(agregador, { data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
                 }
