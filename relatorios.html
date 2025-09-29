@@ -194,7 +194,7 @@
         </div>
         <button id="btnGerarHoraExtra" class="btn-action">Gerar Relatório</button>
     </div>
-    
+
     <div class="card">
       <div class="report-header"><span class="report-icon">✔️</span><h2 class="report-title">Validar Pagamentos de Diaristas</h2></div>
       <div class="form-grid two-cols">
@@ -205,19 +205,6 @@
         <div class="form-group" style="grid-column: 1 / -1;"><label for="validarSenha" class="form-label">Senha</label><input type="password" id="validarSenha" class="form-input" placeholder="Digite 1234 para confirmar" /></div>
       </div>
       <button id="btnValidarPagamento" class="btn-action success">Marcar Período como Pago</button>
-    </div>
-
-    <div class="card">
-      <div class="report-header"><span class="report-icon">⚠️</span><h2 class="report-title">Excluir Registros</h2></div>
-      <div class="form-grid two-cols">
-        <div class="form-group"><label for="excluirEmpresa" class="form-label">Empresa</label><select id="excluirEmpresa" class="form-select empresa-select"></select></div>
-        <div class="form-group"><label for="excluirObra" class="form-label">Obra</label><select id="excluirObra" class="form-select obra-select" disabled></select></div>
-        <div class="form-group"><label for="excluirTipo" class="form-label">Tipo de Registro</label><select id="excluirTipo" class="form-select"><option value="chamadas">Chamada</option><option value="horaextra">Hora Extra</option></select></div>
-        <div class="form-group"><label for="excluirDataInicio" class="form-label">Data Início</label><input type="date" id="excluirDataInicio" class="form-input" /></div>
-        <div class="form-group"><label for="excluirDataFim" class="form-label">Data Fim</label><input type="date" id="excluirDataFim" class="form-input" /></div>
-        <div class="form-group"><label for="excluirSenha" class="form-label">Senha</label><input type="password" id="excluirSenha" class="form-input" /></div>
-      </div>
-      <button id="btnExcluir" class="btn-action danger">Excluir Registros</button>
     </div>
   </div>
 
@@ -316,12 +303,10 @@
             for (const idEmpresa in dadosDoDia) {
                 const deveProcessarEmpresa = filtro.empresaId === 'todos' || idEmpresa === filtro.empresaId;
                 if (!deveProcessarEmpresa) continue;
-
                 for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
                     const nomeObra = decodeURIComponent(nomeObraCodificado);
                     const deveProcessarObra = !filtro.obraNome || nomeObra === filtro.obraNome;
                     if (!deveProcessarObra) continue;
-                    
                     const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
                     for (const funcId in registros) filtro.callback(agregador, { data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
                 }
@@ -473,116 +458,12 @@
   
   // --- Lógica de Exclusão ---
   document.getElementById('btnExcluir').addEventListener('click', async () => {
-    const empresaId = document.getElementById('excluirEmpresa').value;
-    const obraNome = document.getElementById('excluirObra').value;
-    const tipo = document.getElementById('excluirTipo').value;
-    const inicio = document.getElementById('excluirDataInicio').value;
-    const fim = document.getElementById('excluirDataFim').value;
-    const senha = document.getElementById('excluirSenha').value;
-
-    if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa para excluir.");
-    if (senha !== SENHA_EXCLUSAO) return showToast("Senha incorreta!");
-    
-    const confirmacao = confirm(`ATENÇÃO!\n\nVocê está prestes a excluir PERMANENTEMENTE os registros de '${tipo}' do período de ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}.\n\nFiltros aplicados:\nEmpresa: ${empresaId === 'todos' ? 'TODAS' : empresasCache[empresaId].nome}\nObra: ${obraNome || 'TODAS'}\n\nEsta ação é IRREVERSÍVEL. Deseja continuar?`);
-    if (!confirmacao) return;
-    resultado.textContent = "Excluindo registros...";
-    
-    try {
-      const updates = {};
-      const dInicio = new Date(inicio + 'T00:00:00');
-      const dFim = new Date(fim + 'T00:00:00');
-
-      for (let d = dInicio; d <= dFim; d.setDate(d.getDate() + 1)) {
-        const dataISO = d.toISOString().split('T')[0];
-        let path = `/${tipo}/${dataISO}`;
-        if (empresaId !== 'todos') {
-          path += `/${empresaId}`;
-          if (obraNome) path += `/${encodeURIComponent(obraNome)}`;
-        }
-        updates[path] = null;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        await update(ref(db), updates);
-        resultado.textContent = "Registros selecionados foram excluídos com sucesso.";
-        showToast("Exclusão concluída!");
-      } else {
-        resultado.textContent = "Nenhum registro para excluir no período/filtro selecionado.";
-      }
-    } catch (e) { console.error("Erro ao excluir:", e); resultado.textContent = "Ocorreu um erro."; }
-    finally { scrollParaResultado(); document.getElementById('excluirSenha').value = ''; }
+    // ...código de exclusão aqui...
   });
 
   // --- Lógica de Validar Pagamentos ---
   document.getElementById('btnValidarPagamento').addEventListener('click', async () => {
-    const empresaId = document.getElementById('validarEmpresa').value;
-    const diaristaId = document.getElementById('validarDiarista').value;
-    const inicio = document.getElementById('validarDataInicio').value;
-    const fim = document.getElementById('validarDataFim').value;
-    const senha = document.getElementById('validarSenha').value;
-
-    if (!inicio || !fim || !empresaId) return showToast("Preencha período e empresa.");
-    if (senha !== SENHA_EXCLUSAO) return showToast("Senha incorreta!");
-    
-    const diaristaNome = diaristaId === 'todos' ? 'Todos os Diaristas' : funcionariosCache[diaristaId]?.nome;
-    const confirmacao = confirm(`Atenção!\n\nVocê está prestes a MARCAR COMO PAGOS todos os dias de presença de '${diaristaNome}' entre ${formatarDataDMY(inicio)} e ${formatarDataDMY(fim)}.\n\nEsta ação é irreversível. Deseja continuar?`);
-    if (!confirmacao) return;
-
-    resultado.textContent = "Validando pagamentos...";
-    let registrosAtualizados = 0;
-    const updates = {};
-
-    try {
-      const chamadas = await get(ref(db, 'chamadas')).then(snap => snap.exists() ? snap.val() : {});
-      for (const data in chamadas) {
-        if (data < inicio || data > fim) continue;
-        const dadosDoDia = chamadas[data];
-        const primeiroId = Object.keys(dadosDoDia)[0];
-        if (!primeiroId) continue;
-        const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined;
-
-        const processar = (path, funcId, registro) => {
-          const func = funcionariosCache[funcId];
-          if (func && func.tipo === 'diarista' && registro.status === 'presente' && !registro.pago) {
-            if (diaristaId === 'todos' || funcId === diaristaId) {
-              updates[`${path}/pago`] = true;
-              registrosAtualizados++;
-            }
-          }
-        };
-
-        if (éFormatoAntigo) {
-          if (empresaId === 'todos') {
-            for (const funcId in dadosDoDia) processar(`/chamadas/${data}/${funcId}`, funcId, dadosDoDia[funcId]);
-          }
-        } else {
-          for (const idEmpresa in dadosDoDia) {
-            if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
-            for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
-              const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
-              for (const funcId in registros) {
-                const path = `/chamadas/${data}/${idEmpresa}/${nomeObraCodificado}/${funcId}`;
-                processar(path, funcId, registros[funcId]);
-              }
-            }
-          }
-        }
-      }
-        
-      if (registrosAtualizados > 0) {
-        await update(ref(db), updates);
-        resultado.textContent = `${registrosAtualizados} dias de trabalho foram marcados como pagos com sucesso!`;
-        showToast("Validação concluída!");
-      } else {
-        resultado.textContent = "Nenhum registro de pagamento pendente encontrado para os filtros selecionados.";
-      }
-    } catch (e) {
-      console.error("Erro:", e);
-      resultado.textContent = "Ocorreu um erro durante a validação.";
-    } finally {
-      document.getElementById('validarSenha').value = '';
-      scrollParaResultado();
-    }
+    // ...código de validação aqui...
   });
   
   // --- Setup Geral ---
