@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Painel de Acompanhamento - Controle de Presenças</title>
+<style>
+  :root {
+    --accent: #2ecc71;
+    --info: #3498db;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+    --card-bg: rgba(42, 60, 80, 0.8);
+    --input-bg: rgba(0, 0, 0, 0.2);
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #1f2937;
+    color: var(--text-primary);
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px 15px 100px 15px;
+  }
+  .container {
+    width: 100%;
+    max-width: 1200px; /* Layout mais largo para dashboard */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .btn-voltar {
+    display: flex; align-items: center; gap: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary); text-decoration: none;
+    padding: 10px 16px; border-radius: var(--border-radius);
+    font-weight: 600; transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .btn-voltar:hover { background-color: rgba(255, 255, 255, 0.2); }
+  .header-title { font-size: 1.5rem; font-weight: 700; text-align: left; flex-grow: 1; }
+  .card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    align-items: end;
+  }
+  .form-group { margin-bottom: 8px; }
+  .form-label {
+    display: block; font-size: 0.8rem; font-weight: 500;
+    margin-bottom: 6px; color: var(--text-secondary); text-transform: uppercase;
+  }
+  .form-input, .form-select {
+    width: 100%; padding: 12px 14px; border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: var(--input-bg);
+    color: var(--text-primary); font-size: 1rem;
+    transition: var(--transition);
+  }
+  .btn-action {
+    width: 100%; padding: 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+    color: white; border: none; cursor: pointer; transition: var(--transition);
+    background-color: var(--accent);
+  }
+  .btn-action:hover { background-color: #27ae60; }
+  
+  .dashboard-main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .metric-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+  }
+  .metric-item { text-align: left; }
+  .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+  }
+  .metric-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+  }
+  .ranking-list {
+      list-style: none;
+      padding: 0;
+      font-size: 0.9rem;
+  }
+  .ranking-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-color);
+  }
+  .ranking-list li:last-child { border-bottom: none; }
+  .ranking-list .value { font-weight: 600; }
+
+  .chart-placeholder {
+    width: 100%;
+    min-height: 200px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <a href="index.html" class="btn-voltar"><span>←</span> Voltar</a>
+    <h1 class="header-title">Painel de Acompanhamento</h1>
+  </header>
+
+  <div class="card">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="filtroPeriodo" class="form-label">Período</label>
+        <select id="filtroPeriodo" class="form-select">
+          <option value="hoje">Hoje</option>
+          <option value="7dias">Últimos 7 dias</option>
+          <option value="mes_atual" selected>Este Mês</option>
+          <option value="folha_ponto">Folha de Ponto (26 a 25)</option>
+          <option value="custom">Período Customizado</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="filtroEmpresa" class="form-label">Empresa</label>
+        <select id="filtroEmpresa" class="form-select">
+          <option value="todas">Todas as Empresas</option>
+          </select>
+      </div>
+      <div class="form-group">
+        <label for="filtroObra" class="form-label">Obra</label>
+        <select id="filtroObra" class="form-select" disabled>
+          <option value="todas">Todas as Obras</option>
+          </select>
+      </div>
+      <div class="form-group">
+        <button id="btnAplicarFiltros" class="btn-action">Aplicar Filtros</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-main-grid">
+    
+    <div class="card">
+      <h2 class="card-title">Custos com Diaristas</h2>
+      <div class="metric-container" style="grid-template-columns: 1fr 1fr; display: grid;">
+        <div class="metric-item">
+          <span class="metric-value" id="custo-pago">R$ --</span>
+          <span class="metric-label">Valor Total Pago</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value" id="custo-pendente" style="color: #f59e0b;">R$ --</span>
+          <span class="metric-label">Valor Total a Pagar</span>
+        </div>
+      </div>
+      <div class="chart-placeholder">
+          <span>Gráfico de Custo Diário<br>(Requer biblioteca de gráficos)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Acompanhamento de Horas Extras</h2>
+      <div class="metric-container" style="grid-template-columns: 1fr 1fr 1fr; display: grid;">
+          <div class="metric-item">
+              <span class="metric-value" id="he-total">--h</span>
+              <span class="metric-label">Total de Horas</span>
+            </div>
+        <div class="metric-item">
+          <span class="metric-value" id="he-50">--h</span>
+          <span class="metric-label">Horas a 50%</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value" id="he-100">--h</span>
+          <span class="metric-label">Horas a 100%</span>
+        </div>
+      </div>
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Top 3 com Mais Horas Extras</h3>
+      <ul class="ranking-list" id="ranking-he-obras">
+        <li><span>--</span> <span class="value">--h</span></li>
+      </ul>
+      <ul class="ranking-list" id="ranking-he-funcionarios" style="margin-top: 8px;">
+        <li><span>--</span> <span class="value">--h</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Controle de Frequência</h2>
+      <div class="metric-container">
+        <div class="metric-item">
+          <span class="metric-value" id="taxa-assiduidade">--%</span>
+          <span class="metric-label">Taxa de Assiduidade</span>
+        </div>
+      </div>
+      <div class="chart-placeholder">
+        <span>Gráfico de Faltas: Com vs. Sem Atestado<br>(Requer biblioteca de gráficos)</span>
+      </div>
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Ranking de Faltas (Sem Atestado)</h3>
+      <ul class="ranking-list" id="ranking-faltas-sem-atestado">
+          <li><span>--</span> <span class="value">-- dias</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Análise de Mão de Obra</h2>
+      <h3 style="font-size: 0.9rem; font-weight: 600;">Horas Extras por Função</h3>
+      <div class="chart-placeholder">
+        <span>Gráfico de Horas Extras por Função<br>(Requer biblioteca de gráficos)</span>
+      </div>
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Distribuição de Funções em Campo</h3>
+      <div class="chart-placeholder">
+        <span>Gráfico de Distribuição de Funções<br>(Requer biblioteca de gráficos)</span>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: 1 / -1;"> <h2 class="card-title">Efetivo Diário Presente (Últimos 30 dias)</h2>
+      <div class="chart-placeholder">
+        <span>Gráfico de Linha do Efetivo Diário<br>(Requer biblioteca de gráficos)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Desenvolvido por Lucas Ramos Aragão</p>
+</footer>
+
+<script type="module">
+  // import { db, ref, get } from "./firebase.js";
+  
+  // O código JavaScript para popular os dados deste painel entrará aqui.
+  // Será necessário buscar dados de 'empresas', 'funcionarios', 'chamadas' e 'horaextra'.
+
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("Página do Painel de Acompanhamento carregada.");
+    // Chamar a função inicial para carregar dados e popular os filtros.
+    // carregarFiltrosIniciais();
+    // aplicarFiltros();
+  });
+
+  // Exemplo de como a função de aplicar filtros seria
+  // async function aplicarFiltros() {
+  //   // 1. Obter valores dos filtros (período, empresa, obra)
+  //   // 2. Definir o intervalo de datas com base na seleção (ex: lógica para "Folha de Ponto")
+  //   // 3. Buscar todos os dados necessários do Firebase
+  //   // 4. Filtrar os dados com base na seleção
+  //   // 5. Calcular cada métrica
+  //   // 6. Atualizar o HTML com os resultados (ex: document.getElementById('custo-pago').textContent = ...)
+  //   // 7. Desenhar os gráficos com uma biblioteca externa
+  // }
+
+</script>
+
+</body>
+</html>
