@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Painel de Acompanhamento - Controle de Presenças</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -67,6 +68,14 @@
     margin-bottom: 20px;
     color: var(--text-primary);
   }
+  .card-subtitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+  }
   .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -111,7 +120,6 @@
       list-style: none;
       padding: 0;
       font-size: 0.9rem;
-      margin-top: 8px;
   }
   .ranking-list li {
       display: flex;
@@ -222,7 +230,11 @@
           <span class="metric-label">Horas a 100%</span>
         </div>
       </div>
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Top 3 Funcionários com Mais Horas Extras</h3>
+      <h3 class="card-subtitle">Resumo por Empresa e Obra</h3>
+      <ul class="ranking-list" id="lista-he-empresa-obra" style="max-height: 150px; overflow-y: auto;">
+        <li class="ranking-list-placeholder">Nenhuma hora extra encontrada.</li>
+      </ul>
+      <h3 class="card-subtitle">Top 3 Funcionários com Mais Horas Extras</h3>
       <ul class="ranking-list" id="ranking-he-funcionarios">
         <li class="ranking-list-placeholder">Nenhum funcionário encontrado.</li>
       </ul>
@@ -237,8 +249,12 @@
         </div>
       </div>
       <canvas id="graficoFaltas"></canvas>
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Ranking de Faltas (Sem Atestado)</h3>
+      <h3 class="card-subtitle">Ranking de Faltas (Sem Atestado)</h3>
       <ul class="ranking-list" id="ranking-faltas-sem-atestado">
+          <li class="ranking-list-placeholder">Nenhuma falta encontrada.</li>
+      </ul>
+      <h3 class="card-subtitle">Ranking de Faltas (Com Atestado)</h3>
+      <ul class="ranking-list" id="ranking-faltas-com-atestado">
           <li class="ranking-list-placeholder">Nenhuma falta encontrada.</li>
       </ul>
     </div>
@@ -247,8 +263,6 @@
       <h2 class="card-title">Análise de Mão de Obra</h2>
       <h3 style="font-size: 0.9rem; font-weight: 600;">Horas Extras por Função</h3>
       <canvas id="graficoHEFuncao"></canvas>
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Distribuição de Funções em Campo</h3>
-       <canvas id="graficoDistFuncoes"></canvas>
     </div>
 
     <div class="card" style="grid-column: 1 / -1;">
@@ -271,7 +285,6 @@
   const customDateFilters = document.getElementById('custom-date-filters');
   const dataInicioInput = document.getElementById('dataInicio');
   const dataFimInput = document.getElementById('dataFim');
-
 
   async function carregarDadosIniciais() {
     try {
@@ -327,7 +340,7 @@
     atualizarCardCustos(dadosFiltrados.chamadas);
     atualizarCardHE(dadosFiltrados.horasExtras);
     atualizarCardFrequencia(dadosFiltrados.chamadas, inicio, fim);
-    atualizarCardMaoDeObra(dadosFiltrados.chamadas, dadosFiltrados.horasExtras);
+    atualizarCardMaoDeObra(dadosFiltrados.horasExtras);
     atualizarCardEfetivo(dadosFiltrados.chamadas, inicio, fim);
   }
   
@@ -400,41 +413,63 @@
     document.getElementById('custo-pendente').textContent = `R$ ${valorPendente.toFixed(2)}`;
     document.getElementById('diarias-pagas').textContent = qtdPagas;
     document.getElementById('diarias-pendentes').textContent = qtdPendentes;
-    
     const sortedDates = Object.keys(custoPorDia).sort();
     renderChart('graficoCustoDiario', 'bar', {
         labels: sortedDates.map(d => d.substring(5).split('-').reverse().join('/')),
         datasets: [{ data: sortedDates.map(d => custoPorDia[d]) }]
-    }, { title: 'Custo Diário com Diaristas (R$)' });
+    }, { title: 'Custo Diário com Diaristas (R$)', legendDisplay: false });
   }
 
   function atualizarCardHE(horasExtras) {
       let total = 0, h50 = 0, h100 = 0;
-      const hePorFunc = {};
+      const hePorFunc = {}, hePorEmpresaEObra = {};
       iterarRegistros(horasExtras, (data, empId, obNome, funcId, registro) => {
           const qtd = parseInt(registro.quantidadeHoras) || 0;
           total += qtd;
           if (registro.percentual === '50') h50 += qtd; else h100 += qtd;
           const nomeFunc = funcionariosCache[funcId]?.nome || 'Desconhecido';
           hePorFunc[nomeFunc] = (hePorFunc[nomeFunc] || 0) + qtd;
+          const nomeEmpresa = empresasCache[empId]?.nome || 'Sem Empresa';
+          if (!hePorEmpresaEObra[nomeEmpresa]) hePorEmpresaEObra[nomeEmpresa] = {};
+          hePorEmpresaEObra[nomeEmpresa][obNome] = (hePorEmpresaEObra[nomeEmpresa][obNome] || 0) + qtd;
       });
       document.getElementById('he-total').textContent = `${total}h`;
       document.getElementById('he-50').textContent = `${h50}h`;
       document.getElementById('he-100').textContent = `${h100}h`;
       renderRanking('ranking-he-funcionarios', hePorFunc, 'h', 'Nenhum funcionário com HE.');
+      
+      const listaEmpresaObra = document.getElementById('lista-he-empresa-obra');
+      listaEmpresaObra.innerHTML = '';
+      if(Object.keys(hePorEmpresaEObra).length === 0) {
+          listaEmpresaObra.innerHTML = '<li class="ranking-list-placeholder">Nenhuma hora extra encontrada.</li>';
+      } else {
+        for(const nomeEmpresa in hePorEmpresaEObra) {
+            let totalEmpresa = 0;
+            let obrasHtml = '';
+            for(const nomeObra in hePorEmpresaEObra[nomeEmpresa]) {
+                const qtdObra = hePorEmpresaEObra[nomeEmpresa][nomeObra];
+                totalEmpresa += qtdObra;
+                obrasHtml += `<li style="padding-left: 15px;"><span>${nomeObra}</span><span class="value">${qtdObra}h</span></li>`;
+            }
+            listaEmpresaObra.innerHTML += `<li><strong>${nomeEmpresa}</strong><strong class="value">${totalEmpresa}h</strong></li>` + obrasHtml;
+        }
+      }
   }
   
   function atualizarCardFrequencia(chamadas, inicio, fim) {
       let faltasCom = 0, faltasSem = 0, presencas = 0;
-      const faltasPorFunc = {};
+      const faltasPorFuncSemAtestado = {}, faltasPorFuncComAtestado = {};
       iterarRegistros(chamadas, (data, empId, obNome, funcId, registro) => {
           if (funcionariosCache[funcId]?.tipo !== 'funcionario') return;
           if(registro.status === 'presente') presencas++;
           if(registro.status === 'falta') {
-              if(registro.atestado) faltasCom++; else {
+              const nomeFunc = funcionariosCache[funcId]?.nome || 'Desconhecido';
+              if(registro.atestado) {
+                  faltasCom++;
+                  faltasPorFuncComAtestado[nomeFunc] = (faltasPorFuncComAtestado[nomeFunc] || 0) + 1;
+              } else {
                   faltasSem++;
-                  const nomeFunc = funcionariosCache[funcId]?.nome || 'Desconhecido';
-                  faltasPorFunc[nomeFunc] = (faltasPorFunc[nomeFunc] || 0) + 1;
+                  faltasPorFuncSemAtestado[nomeFunc] = (faltasPorFuncSemAtestado[nomeFunc] || 0) + 1;
               }
           }
       });
@@ -442,31 +477,26 @@
       const diasPossiveis = numFuncionarios * diasUteisNoPeriodo(inicio, fim);
       const taxa = diasPossiveis > 0 ? (presencas / diasPossiveis) * 100 : 0;
       document.getElementById('taxa-assiduidade').textContent = `${taxa.toFixed(1)}%`;
-      renderRanking('ranking-faltas-sem-atestado', faltasPorFunc, ' dias', 'Nenhuma falta sem atestado.');
-      renderChart('graficoFaltas', 'pie', {
+      
+      renderRanking('ranking-faltas-sem-atestado', faltasPorFuncSemAtestado, ' dias', 'Nenhuma falta sem atestado.');
+      renderRanking('ranking-faltas-com-atestado', faltasPorFuncComAtestado, ' dias', 'Nenhuma falta com atestado.');
+
+      renderChart('graficoFaltas', 'bar', {
           labels: ['Com Atestado', 'Sem Atestado'],
           datasets: [{ data: [faltasCom, faltasSem], backgroundColor: ['#3498db', '#e74c3c'] }]
-      }, { title: 'Proporção de Faltas' });
+      }, { title: 'Total de Faltas no Período', legendDisplay: false });
   }
 
-  function atualizarCardMaoDeObra(chamadas, horasExtras) {
-      const hePorFuncao = {}, distFuncoes = {};
+  function atualizarCardMaoDeObra(horasExtras) {
+      const hePorFuncao = {};
       iterarRegistros(horasExtras, (d,e,o,funcId,reg) => {
           const func = funcionariosCache[funcId];
           if(func?.funcao) hePorFuncao[func.funcao] = (hePorFuncao[func.funcao] || 0) + (parseInt(reg.quantidadeHoras) || 0);
       });
-      iterarRegistros(chamadas, (d,e,o,funcId,reg) => {
-          const func = funcionariosCache[funcId];
-          if(func?.funcao && reg.status === 'presente') distFuncoes[func.funcao] = (distFuncoes[func.funcao] || 0) + 1;
-      });
       renderChart('graficoHEFuncao', 'bar', {
         labels: Object.keys(hePorFuncao),
         datasets: [{ data: Object.values(hePorFuncao) }]
-      }, { title: 'Horas Extras por Função', legendDisplay: false });
-      renderChart('graficoDistFuncoes', 'doughnut', {
-        labels: Object.keys(distFuncoes),
-        datasets: [{ data: Object.values(distFuncoes), backgroundColor: ['#1abc9c', '#f1c40f', '#e67e22', '#34495e', '#95a5a6', '#7f8c8d'] }]
-      }, { title: 'Funções Mais Presentes' });
+      }, { title: 'Horas Extras por Função', legendDisplay: false, indexAxis: 'y' });
   }
   
   function atualizarCardEfetivo(chamadas, inicio, fim) {
@@ -487,18 +517,12 @@
       }, { title: 'Funcionários Presentes por Dia', legendDisplay: false });
   }
 
-  /**
-   * MODIFICADO: Esta função agora entende os dois formatos de dados (antigo e novo)
-   * para garantir a compatibilidade com o histórico do sistema.
-   */
   function iterarRegistros(dados, callback) {
       for (const data in dados) {
           const registrosDoDia = dados[data];
           if (!registrosDoDia || Object.keys(registrosDoDia).length === 0) continue;
-
           const primeiroId = Object.keys(registrosDoDia)[0];
           const éFormatoAntigo = registrosDoDia[primeiroId]?.status !== undefined || registrosDoDia[primeiroId]?.percentual !== undefined;
-
           if (éFormatoAntigo) {
               for (const funcId in registrosDoDia) {
                   const registro = registrosDoDia[funcId];
@@ -541,28 +565,37 @@
     
     Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
     Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+    Chart.defaults.plugins.datalabels = {
+        color: '#fff',
+        anchor: 'end',
+        align: 'end',
+        font: { weight: 'bold' },
+        formatter: (value) => value > 0 ? value : ''
+    };
 
-    const defaultOptions = {
+    const options = {
         responsive: true, maintainAspectRatio: false,
         plugins: {
             legend: { display: customOptions.legendDisplay !== false, labels: { color: 'rgba(255, 255, 255, 0.8)' }},
             title: { display: !!customOptions.title, text: customOptions.title, color: 'rgba(255, 255, 255, 0.9)', font: { size: 14 }},
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.7)', titleFont: { size: 14 }, bodyFont: { size: 12 }
-            }
+            tooltip: { backgroundColor: 'rgba(0,0,0,0.7)', titleFont: { size: 14 }, bodyFont: { size: 12 }}
         },
         scales: { 
             x: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}, 
             y: { beginAtZero: true, ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}
         },
-        layout: { padding: 10 }
+        layout: { padding: 10 },
+        indexAxis: customOptions.indexAxis || 'x'
     };
     
     if (type === 'pie' || type === 'doughnut') {
-        delete defaultOptions.scales;
+        delete options.scales;
+    } else {
+       if (!data.datasets[0].label) data.datasets[0].label = 'Valor';
+       if (!data.datasets[0].backgroundColor) data.datasets[0].backgroundColor = 'rgba(52, 152, 219, 0.7)';
     }
-    
-    charts[canvasId] = new Chart(ctx, { type, data, options: defaultOptions });
+
+    charts[canvasId] = new Chart(ctx, { type, data, options });
   }
   
   function diasUteisNoPeriodo(inicio, fim) {
