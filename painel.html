@@ -126,8 +126,8 @@
       font-style: italic;
   }
   #custom-date-filters {
-    display: none; /* Começa escondido */
-    grid-column: 1 / -1; /* Ocupa a linha toda */
+    display: none;
+    grid-column: 1 / -1;
   }
   canvas {
       margin-top: 16px;
@@ -316,7 +316,7 @@
   function aplicarFiltros() {
     const { inicio, fim } = getIntervaloDeDatas();
     if (!inicio || !fim) {
-        alert("Por favor, selecione as datas de início e fim para o período customizado.");
+        if (filtroPeriodo.value === 'custom') alert("Por favor, selecione as datas de início e fim.");
         return;
     }
     const empresaId = filtroEmpresa.value;
@@ -336,7 +336,6 @@
     hoje.setHours(0, 0, 0, 0);
     let inicio = new Date(hoje);
     let fim = new Date(hoje);
-
     const periodo = filtroPeriodo.value;
 
     if (periodo === 'custom') {
@@ -344,9 +343,7 @@
     }
 
     switch (periodo) {
-      case '7dias':
-        inicio.setDate(hoje.getDate() - 6);
-        break;
+      case '7dias': inicio.setDate(hoje.getDate() - 6); break;
       case 'mes_atual':
         inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
         fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
@@ -367,31 +364,23 @@
   }
   
   function filtrarDadosGerais(inicio, fim, empresaId, obraNome) {
-      const chamadasFiltradas = {};
-      const horasExtrasFiltradas = {};
-
+      const chamadasFiltradas = {}, horasExtrasFiltradas = {};
       const filtrar = (cache, resultado) => {
           for (const data in cache) {
               if (data >= inicio && data <= fim) {
-                  const registrosDoDia = {};
                   iterarRegistros({[data]: cache[data]}, (d, eId, oNome, fId, reg) => {
                       if ((empresaId === 'todas' || eId === empresaId) && (obraNome === 'todas' || oNome === obraNome)) {
-                          if (!registrosDoDia[d]) registrosDoDia[d] = {};
-                          if (!registrosDoDia[d][eId]) registrosDoDia[d][eId] = {};
-                          if (!registrosDoDia[d][eId][encodeURIComponent(oNome)]) registrosDoDia[d][eId][encodeURIComponent(oNome)] = {};
-                          registrosDoDia[d][eId][encodeURIComponent(oNome)][fId] = reg;
+                          if (!resultado[d]) resultado[d] = {};
+                          if (!resultado[d][eId]) resultado[d][eId] = {};
+                          if (!resultado[d][eId][encodeURIComponent(oNome)]) resultado[d][eId][encodeURIComponent(oNome)] = {};
+                          resultado[d][eId][encodeURIComponent(oNome)][fId] = reg;
                       }
                   });
-                  if (Object.keys(registrosDoDia).length > 0) {
-                      resultado[data] = registrosDoDia[data];
-                  }
               }
           }
       };
-
       filtrar(chamadasCache, chamadasFiltradas);
       filtrar(horasExtrasCache, horasExtrasFiltradas);
-
       return { chamadas: chamadasFiltradas, horasExtras: horasExtrasFiltradas };
   }
   
@@ -402,13 +391,8 @@
         const func = funcionariosCache[funcId];
         if (func?.tipo === 'diarista' && registro.status === 'presente') {
             const valor = parseFloat(func.valorDiaria) || 0;
-            if (registro.pago) {
-                valorPago += valor;
-                qtdPagas++;
-            } else {
-                valorPendente += valor;
-                qtdPendentes++;
-            }
+            if (registro.pago) { valorPago += valor; qtdPagas++; } 
+            else { valorPendente += valor; qtdPendentes++; }
             custoPorDia[data] = (custoPorDia[data] || 0) + valor;
         }
     });
@@ -503,18 +487,38 @@
       }, { title: 'Funcionários Presentes por Dia', legendDisplay: false });
   }
 
+  /**
+   * MODIFICADO: Esta função agora entende os dois formatos de dados (antigo e novo)
+   * para garantir a compatibilidade com o histórico do sistema.
+   */
   function iterarRegistros(dados, callback) {
       for (const data in dados) {
-        const registrosDoDia = dados[data];
-        if (!registrosDoDia) continue;
-        for (const empId in registrosDoDia) {
-          for (const obNomeCodificado in registrosDoDia[empId]) {
-            for (const funcId in registrosDoDia[empId][obNomeCodificado]) {
-              const registro = registrosDoDia[empId][obNomeCodificado][funcId];
-              callback(data, empId, decodeURIComponent(obNomeCodificado), funcId, registro);
-            }
+          const registrosDoDia = dados[data];
+          if (!registrosDoDia || Object.keys(registrosDoDia).length === 0) continue;
+
+          const primeiroId = Object.keys(registrosDoDia)[0];
+          const éFormatoAntigo = registrosDoDia[primeiroId]?.status !== undefined || registrosDoDia[primeiroId]?.percentual !== undefined;
+
+          if (éFormatoAntigo) {
+              for (const funcId in registrosDoDia) {
+                  const registro = registrosDoDia[funcId];
+                  const funcionario = funcionariosCache[funcId];
+                  if (funcionario) {
+                      const empId = funcionario.empresaId || 'sem_empresa';
+                      const obraNome = funcionario.obra || 'sem_obra';
+                      callback(data, empId, obraNome, funcId, registro);
+                  }
+              }
+          } else {
+              for (const empId in registrosDoDia) {
+                  for (const obNomeCodificado in registrosDoDia[empId]) {
+                      for (const funcId in registrosDoDia[empId][obNomeCodificado]) {
+                          const registro = registrosDoDia[empId][obNomeCodificado][funcId];
+                          callback(data, empId, decodeURIComponent(obNomeCodificado), funcId, registro);
+                      }
+                  }
+              }
           }
-        }
       }
   }
 
@@ -535,32 +539,29 @@
     const ctx = document.getElementById(canvasId).getContext('2d');
     if (charts[canvasId]) charts[canvasId].destroy();
     
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+
     const defaultOptions = {
         responsive: true, maintainAspectRatio: false,
         plugins: {
             legend: { display: customOptions.legendDisplay !== false, labels: { color: 'rgba(255, 255, 255, 0.8)' }},
             title: { display: !!customOptions.title, text: customOptions.title, color: 'rgba(255, 255, 255, 0.9)', font: { size: 14 }},
-            datalabels: {
-                color: '#fff',
-                anchor: 'end',
-                align: 'end',
-                formatter: (value) => value > 0 ? value : ''
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.7)', titleFont: { size: 14 }, bodyFont: { size: 12 }
             }
         },
         scales: { 
             x: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}, 
-            y: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}
-        }
+            y: { beginAtZero: true, ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}
+        },
+        layout: { padding: 10 }
     };
+    
     if (type === 'pie' || type === 'doughnut') {
         delete defaultOptions.scales;
-        defaultOptions.plugins.datalabels = { color: '#1f2937', font: { weight: 'bold' } };
     }
-    if(type === 'line' || type === 'bar') {
-        if (!data.datasets[0].label) data.datasets[0].label = 'Valor';
-        if (!data.datasets[0].backgroundColor) data.datasets[0].backgroundColor = 'rgba(52, 152, 219, 0.7)';
-    }
-
+    
     charts[canvasId] = new Chart(ctx, { type, data, options: defaultOptions });
   }
   
