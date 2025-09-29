@@ -206,6 +206,28 @@
       </div>
       <button id="btnValidarPagamento" class="btn-action success">Marcar Período como Pago</button>
     </div>
+
+    <div class="card">
+      <div class="report-header"><span class="report-icon">👤</span><h2 class="report-title">Dados do Funcionário</h2></div>
+        <div class="form-grid two-cols">
+            <div class="form-group"><label for="dadosEmpresa" class="form-label">Empresa</label><select id="dadosEmpresa" class="form-select empresa-select"></select></div>
+            <div class="form-group"><label for="dadosObra" class="form-label">Obra</label><select id="dadosObra" class="form-select obra-select" disabled></select></div>
+        </div>
+      <button id="btnGerarLista" class="btn-action">Gerar Relatório</button>
+    </div>
+
+    <div class="card">
+      <div class="report-header"><span class="report-icon">⚠️</span><h2 class="report-title">Excluir Registros</h2></div>
+      <div class="form-grid two-cols">
+        <div class="form-group"><label for="excluirEmpresa" class="form-label">Empresa</label><select id="excluirEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="excluirObra" class="form-label">Obra</label><select id="excluirObra" class="form-select obra-select" disabled></select></div>
+        <div class="form-group"><label for="excluirTipo" class="form-label">Tipo de Registro</label><select id="excluirTipo" class="form-select"><option value="chamadas">Chamada</option><option value="horaextra">Hora Extra</option></select></div>
+        <div class="form-group"><label for="excluirDataInicio" class="form-label">Data Início</label><input type="date" id="excluirDataInicio" class="form-input" /></div>
+        <div class="form-group"><label for="excluirDataFim" class="form-label">Data Fim</label><input type="date" id="excluirDataFim" class="form-input" /></div>
+        <div class="form-group"><label for="excluirSenha" class="form-label">Senha</label><input type="password" id="excluirSenha" class="form-input" /></div>
+      </div>
+      <button id="btnExcluir" class="btn-action danger">Excluir Registros</button>
+    </div>
   </div>
 
   <div class="card" id="resultadoCard">
@@ -229,7 +251,8 @@
   const db = getDatabase(app);
   const resultado = document.getElementById('resultado');
   const btnEnviarWhats = document.getElementById('btnEnviarWhats');
-  
+  const SENHA_EXCLUSAO = '1234';
+
   let funcionariosCache = {};
   let empresasCache = {};
   let textoRelatorioAtual = '';
@@ -286,7 +309,6 @@
     });
   }
 
-  // --- Processador Genérico de Dados ---
   async function processarDados(node, inicio, fim, filtro) {
     const snap = await get(ref(db, node));
     const dados = snap.exists() ? snap.val() : {};
@@ -318,8 +340,8 @@
     }
     return agregador;
   }
-  
-  // --- Relatório de Faltas (COMPLETO) ---
+
+  // --- Relatório de Faltas ---
   document.getElementById('btnGerarFaltas').addEventListener('click', async () => {
     const empresaId = document.getElementById('faltasEmpresa').value;
     const obraNome = document.getElementById('faltasObra').value;
@@ -356,7 +378,7 @@
     finally { scrollParaResultado(); }
   });
   
-  // --- Relatório de Pagamento de Diarista (COMPLETO) ---
+  // --- Relatório de Pagamento de Diarista ---
   document.getElementById('btnGerarPagamento').addEventListener('click', async () => {
     const empresaId = document.getElementById('pagamentoEmpresa').value;
     const obraNome = document.getElementById('pagamentoObra').value;
@@ -415,7 +437,7 @@
     finally { scrollParaResultado(); }
   });
 
-  // --- Relatório de Hora Extra (COMPLETO E CORRIGIDO) ---
+  // --- Relatório de Hora Extra ---
   document.getElementById('btnGerarHoraExtra').addEventListener('click', async () => {
     const empresaId = document.getElementById('heEmpresa').value;
     const obraNome = document.getElementById('heObra').value;
@@ -423,7 +445,6 @@
     const fim = document.getElementById('horaExtraFim').value;
     if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa.");
     resultado.textContent = "Gerando...";
-    
     const filtro = {
       empresaId, obraNome,
       callback: (agregador, item) => {
@@ -433,8 +454,9 @@
             agregador[item.funcId] = { nome: func.nome, horas50: 0, horas100: 0, datas: new Set() };
           }
           const qtd = parseInt(item.registro.quantidadeHoras) || 0;
-          if (item.registro.percentual == '50') agregador[item.funcId].horas50 += qtd;
-          if (item.registro.percentual == '100') agregador[item.funcId].horas100 += qtd;
+          const perc = String(item.registro.percentual);
+          if (perc === '50') agregador[item.funcId].horas50 += qtd;
+          if (perc === '100') agregador[item.funcId].horas100 += qtd;
           agregador[item.funcId].datas.add(formatarDataDMY(item.data));
         }
       }
@@ -448,93 +470,13 @@
       } else {
         comHE.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
           const total = item.horas50 + item.horas100;
-          if(total > 0) {
-            texto += `👤 *${item.nome}*\n   Total: *${total}h*\n`;
-            if(item.horas50 > 0) texto += `   - 50%: *${item.horas50}h*\n`;
-            if(item.horas100 > 0) texto += `   - 100%: *${item.horas100}h*\n`;
-            texto += `   (Dias: ${Array.from(item.datas).join(', ')})\n\n`;
-          }
+          texto += `👤 *${item.nome}*\n   Total: *${total}h*\n`;
+          if(item.horas50 > 0) texto += `   - 50%: *${item.horas50}h*\n`;
+          if(item.horas100 > 0) texto += `   - 100%: *${item.horas100}h*\n`;
+          texto += `   (Dias: ${Array.from(item.datas).join(', ')})\n\n`;
         });
       }
       resultado.textContent = texto;
       textoRelatorioAtual = texto;
     } catch(e) { console.error("Erro:", e); resultado.textContent = "Ocorreu um erro."; }
     finally { scrollParaResultado(); }
-  });
-  
-  // --- Lógica de Validar Pagamentos (COMPLETO) ---
-  document.getElementById('btnValidarPagamento').addEventListener('click', async () => {
-    const empresaId = document.getElementById('validarEmpresa').value;
-    const diaristaId = document.getElementById('validarDiarista').value;
-    const inicio = document.getElementById('validarDataInicio').value;
-    const fim = document.getElementById('validarDataFim').value;
-    const senha = document.getElementById('validarSenha').value;
-    if (!inicio || !fim || !empresaId) return showToast("Preencha período e empresa.");
-    if (senha !== "1234") return showToast("Senha incorreta!");
-    const diaristaNome = diaristaId === 'todos' ? 'Todos os Diaristas' : funcionariosCache[diaristaId]?.nome;
-    const confirmacao = confirm(`Atenção!\n\nVocê está prestes a MARCAR COMO PAGOS todos os dias de presença de '${diaristaNome}' entre ${formatarDataDMY(inicio)} e ${formatarDataDMY(fim)}.\n\nEsta ação é irreversível. Deseja continuar?`);
-    if (!confirmacao) return;
-    resultado.textContent = "Validando pagamentos...";
-    let registrosAtualizados = 0;
-    const updates = {};
-    try {
-      const chamadas = await get(ref(db, 'chamadas')).then(snap => snap.exists() ? snap.val() : {});
-      for (const data in chamadas) {
-        if (data < inicio || data > fim) continue;
-        const dadosDoDia = chamadas[data];
-        const primeiroId = Object.keys(dadosDoDia)[0];
-        if (!primeiroId) continue;
-        const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined;
-        const processar = (path, funcId, registro) => {
-          const func = funcionariosCache[funcId];
-          if (func && func.tipo === 'diarista' && registro.status === 'presente' && !registro.pago) {
-            if (diaristaId === 'todos' || funcId === diaristaId) {
-              updates[`${path}/pago`] = true;
-              registrosAtualizados++;
-            }
-          }
-        };
-        if (éFormatoAntigo) {
-          if (empresaId === 'todos') {
-            for (const funcId in dadosDoDia) processar(`/chamadas/${data}/${funcId}`, funcId, dadosDoDia[funcId]);
-          }
-        } else {
-          for (const idEmpresa in dadosDoDia) {
-            if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
-            for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
-              const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
-              for (const funcId in registros) {
-                const path = `/chamadas/${data}/${idEmpresa}/${nomeObraCodificado}/${funcId}`;
-                processar(path, funcId, registros[funcId]);
-              }
-            }
-          }
-        }
-      }
-      if (registrosAtualizados > 0) {
-        await update(ref(db), updates);
-        resultado.textContent = `${registrosAtualizados} dias de trabalho foram marcados como pagos com sucesso!`;
-        showToast("Validação concluída!");
-      } else {
-        resultado.textContent = "Nenhum registro de pagamento pendente encontrado para os filtros selecionados.";
-      }
-    } catch (e) { console.error("Erro:", e); resultado.textContent = "Ocorreu um erro."; }
-    finally { document.getElementById('validarSenha').value = ''; scrollParaResultado(); }
-  });
-  
-  // --- Setup Geral ---
-  document.querySelectorAll('.empresa-select').forEach(s => {
-      const obraSelect = s.closest('.card').querySelector('.obra-select');
-      if (s && obraSelect) configurarFiltroObra(s, obraSelect);
-  });
-  document.getElementById('validarEmpresa').addEventListener('change', (e) => popularDiaristasDropdown(e.target.value));
-  btnEnviarWhats.addEventListener('click', () => {
-    if (!textoRelatorioAtual) { return showToast('Gere um relatório antes de enviar'); }
-    window.open(`https://wa.me/?text=${encodeURIComponent(textoRelatorioAtual)}`, '_blank');
-  });
-
-  carregarDadosIniciais();
-</script>
-
-</body>
-</html>
