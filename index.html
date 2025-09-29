@@ -89,7 +89,7 @@
     flex-direction: column;
     gap: 20px;
     width: 100%;
-    margin-top: 40px; /* Espaço depois do dashboard */
+    margin-top: 40px;
   }
   
   a.button {
@@ -154,7 +154,7 @@
 
   .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr; /* Alterado para uma coluna */
       gap: 10px;
       margin-top: 10px;
   }
@@ -164,50 +164,27 @@
       border-radius: 8px;
   }
   .dashboard-item .value {
-      font-size: 1.5rem;
+      font-size: 2rem; /* Aumentado para dar mais destaque */
       font-weight: 700;
       display: block;
   }
   .dashboard-item .label {
-      font-size: 0.75rem;
+      font-size: 0.85rem; /* Aumentado para melhor leitura */
       color: rgba(255,255,255,0.8);
   }
   
-  /* ESTILOS PARA O PAINEL EXPANSÍVEL */
-  .collapsible-header {
+  .section-container {
+      margin-top: 15px;
+      text-align: left;
+  }
+  .section-container h4 {
     font-size: 0.8rem;
     text-transform: uppercase;
     color: rgba(255,255,255,0.8);
     margin: 0;
     border-top: 1px solid rgba(255,255,255,0.2);
     padding: 15px 5px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
   }
-  .collapsible-header:first-of-type {
-      margin-top: 15px;
-  }
-  .collapsible-header .arrow {
-    transition: transform 0.3s ease;
-    font-size: 1.2em;
-  }
-  .collapsible-header.active .arrow {
-    transform: rotate(180deg);
-  }
-  .collapsible-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    text-align: left;
-    background: rgba(0,0,0,0.1);
-    border-radius: 0 0 8px 8px;
-    padding: 0 5px;
-  }
-  /* FIM DOS ESTILOS EXPANSÍVEIS */
-
   .diarista-item {
       display: flex;
       justify-content: space-between;
@@ -227,6 +204,37 @@
       color: rgba(255,255,255,0.8);
       text-align: center;
       padding: 10px;
+  }
+  
+  /* ESTILOS PARA O PAINEL EXPANSÍVEL */
+  .collapsible-header {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    margin: 0;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding: 15px 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .collapsible-header .arrow {
+    transition: transform 0.3s ease;
+    font-size: 1.2em;
+  }
+  .collapsible-header.active .arrow {
+    transform: rotate(180deg);
+  }
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    text-align: left;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0 0 8px 8px;
+    padding: 0 5px;
   }
   .ausente-item {
       display: flex;
@@ -294,15 +302,18 @@
         <h3 id="dashboard-title">Resumo do dia</h3>
         <div class="dashboard-grid">
             <div class="dashboard-item">
-                <span class="value" id="presentesHoje">--</span>
-                <span class="label">Presentes Hoje</span>
-            </div>
-            <div class="dashboard-item">
-                <span class="value" id="totalFuncionarios">--</span>
-                <span class="label">Colaboradores</span>
+                <span class="value" id="presenca-geral">-- / --</span>
+                <span class="label">Presentes / Total</span>
             </div>
         </div>
         
+        <div class="section-container">
+            <h4>Acompanhamento de Diaristas</h4>
+            <div id="diaristas-lista">
+                <p class="dashboard-empty-message">Calculando...</p>
+            </div>
+        </div>
+
         <div>
             <div class="collapsible-header">
                 <span>Ausentes do Dia</span>
@@ -315,18 +326,6 @@
             </div>
         </div>
         
-        <div>
-            <div class="collapsible-header">
-                <span>Acompanhamento de Diaristas</span>
-                <span class="arrow">▼</span>
-            </div>
-            <div class="collapsible-content">
-                <div id="diaristas-lista" style="padding: 8px 0;">
-                    <p class="dashboard-empty-message">Calculando...</p>
-                </div>
-            </div>
-        </div>
-
         <a href="painel.html" class="link-painel">
           Ver Painel Completo →
         </a>
@@ -388,8 +387,7 @@
             const funcionarios = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
             const empresas = empresasSnap.exists() ? empresasSnap.val() : {};
 
-            document.getElementById('totalFuncionarios').textContent = Object.keys(funcionarios).length;
-
+            const totalFuncionarios = Object.keys(funcionarios).length;
             const chamadasHoje = chamadas[dataISO] || {};
             let presentesHoje = 0;
             let ausentesHoje = [];
@@ -401,9 +399,7 @@
                 if (éFormatoAntigo) {
                     for (const funcId in chamadasHoje) {
                         const registro = chamadasHoje[funcId];
-                        if (registro.status === 'presente') {
-                            presentesHoje++;
-                        }
+                        if (registro.status === 'presente') presentesHoje++;
                         if (registro.status === 'falta') {
                             const funcionario = funcionarios[funcId];
                             if (funcionario) {
@@ -421,9 +417,7 @@
                         for (const obNomeCodificado in chamadasHoje[empId]) {
                             for (const funcId in chamadasHoje[empId][obNomeCodificado]) {
                                 const registro = chamadasHoje[empId][obNomeCodificado][funcId];
-                                if (registro.status === 'presente') {
-                                    presentesHoje++;
-                                }
+                                if (registro.status === 'presente') presentesHoje++;
                                 if (registro.status === 'falta') {
                                     const funcionario = funcionarios[funcId];
                                     const empresa = empresas[empId];
@@ -440,7 +434,8 @@
                     }
                 }
             }
-            document.getElementById('presentesHoje').textContent = presentesHoje;
+            
+            document.getElementById('presenca-geral').textContent = `${presentesHoje} / ${totalFuncionarios}`;
 
             const ausentesDiv = document.getElementById('ausentes-lista');
             ausentesDiv.innerHTML = '';
@@ -523,7 +518,7 @@
 
         } catch (error) {
             console.error("Erro ao atualizar o dashboard:", error);
-            document.getElementById('presentesHoje').textContent = 'Erro';
+            document.getElementById('presenca-geral').textContent = 'Erro';
             document.getElementById('diaristas-lista').innerHTML = '<p class="dashboard-empty-message">Falha ao carregar dados.</p>';
             document.getElementById('ausentes-lista').innerHTML = '<p class="dashboard-empty-message">Falha ao carregar dados.</p>';
         }
@@ -542,7 +537,7 @@
           if (content.style.maxHeight) {
             content.style.maxHeight = null;
           } else {
-            content.style.maxHeight = content.scrollHeight + 16 + "px"; // 16px para o padding
+            content.style.maxHeight = content.scrollHeight + 16 + "px";
           }
         });
       });
