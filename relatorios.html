@@ -309,38 +309,6 @@
     });
   }
 
-  async function processarDados(node, inicio, fim, filtro) {
-    const snap = await get(ref(db, node));
-    const dados = snap.exists() ? snap.val() : {};
-    const agregador = {};
-    for (const data in dados) {
-        if (data < inicio || data > fim) continue;
-        const dadosDoDia = dados[data];
-        const primeiroId = Object.keys(dadosDoDia)[0];
-        if (!primeiroId) continue;
-        const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined || dadosDoDia[primeiroId]?.percentual !== undefined;
-        if (éFormatoAntigo) {
-            if (filtro.empresaId === 'todos') {
-                for (const funcId in dadosDoDia) filtro.callback(agregador, { data, funcId, registro: dadosDoDia[funcId], empresaNome: 'N/A', obraNome: 'Registro Antigo' });
-            }
-        } else {
-            for (const idEmpresa in dadosDoDia) {
-                const deveProcessarEmpresa = filtro.empresaId === 'todos' || idEmpresa === filtro.empresaId;
-                if (!deveProcessarEmpresa) continue;
-                for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
-                    const nomeObra = decodeURIComponent(nomeObraCodificado);
-                    const deveProcessarObra = !filtro.obraNome || nomeObra === filtro.obraNome;
-                    if (!deveProcessarObra) continue;
-                    
-                    const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
-                    for (const funcId in registros) filtro.callback(agregador, { data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
-                }
-            }
-        }
-    }
-    return agregador;
-  }
-
   // --- Relatório de Faltas ---
   document.getElementById('btnGerarFaltas').addEventListener('click', async () => {
     const empresaId = document.getElementById('faltasEmpresa').value;
@@ -349,20 +317,43 @@
     const fim = document.getElementById('faltasDataFim').value;
     if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa.");
     resultado.textContent = "Gerando, por favor aguarde...";
-    const filtro = {
-      empresaId, obraNome,
-      callback: (agregador, item) => {
+    
+    const agregador = {};
+    const processarItem = (item) => {
         const func = funcionariosCache[item.funcId];
         if (func && func.tipo === 'funcionario' && item.registro.status === 'falta') {
           if (!agregador[item.funcId]) agregador[item.funcId] = { nome: func.nome, faltas: [] };
           agregador[item.funcId].faltas.push({ data: formatarDataDMY(item.data), empresa: item.empresaNome, obra: item.obraNome, atestado: item.registro.atestado ? 'Sim' : 'Não' });
         }
-      }
     };
+    
     try {
-      const faltas = await processarDados('chamadas', inicio, fim, filtro);
+      const chamadasSnap = await get(ref(db, 'chamadas'));
+      const chamadas = chamadasSnap.exists() ? chamadasSnap.val() : {};
+
+      for (const data in chamadas) {
+        if (data < inicio || data > fim) continue;
+        const dadosDoDia = chamadas[data];
+        const primeiroId = Object.keys(dadosDoDia)[0];
+        if (!primeiroId) continue;
+        const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined;
+        if (éFormatoAntigo) {
+          if (empresaId === 'todos') for (const funcId in dadosDoDia) processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaNome: 'N/A', obraNome: 'Registro Antigo' });
+        } else {
+          for (const idEmpresa in dadosDoDia) {
+            if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
+            for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
+              const nomeObra = decodeURIComponent(nomeObraCodificado);
+              if (obraNome && nomeObra !== obraNome) continue;
+              const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
+              for (const funcId in registros) processarItem({ data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
+            }
+          }
+        }
+      }
+
       let texto = `📋 *Relatório de Faltas (Funcionários)*\nPeríodo: ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}\n\n`;
-      const comFalta = Object.values(faltas);
+      const comFalta = Object.values(agregador);
       if (comFalta.length === 0) {
         texto += "Nenhuma falta encontrada para os filtros selecionados.";
       } else {
@@ -386,27 +377,50 @@
     const fim = document.getElementById('pagamentoDataFim').value;
     if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa.");
     resultado.textContent = "Gerando...";
-    const filtro = {
-      empresaId, obraNome,
-      callback: (agregador, item) => {
+
+    const agregador = {};
+    const processarItem = (item) => {
         const func = funcionariosCache[item.funcId];
         if (func && func.tipo === 'diarista' && item.registro.status === 'presente') {
-          if (!agregador[item.funcId]) {
+            if (!agregador[item.funcId]) {
             agregador[item.funcId] = {
-              nome: func.nome, diasPendentes: new Set(), diasPagos: new Set(), valorDiaria: parseFloat(func.valorDiaria) || 0,
-              cpf: func.cpf, banco: func.banco, pix: `${func.tipoPix || ''} - ${func.chavePix || ''}`.replace(/^ - $/, '')
+                nome: func.nome, diasPendentes: new Set(), diasPagos: new Set(), valorDiaria: parseFloat(func.valorDiaria) || 0,
+                cpf: func.cpf, banco: func.banco, pix: `${func.tipoPix || ''} - ${func.chavePix || ''}`.replace(/^ - $/, '')
             };
+            }
+            if (item.registro.pago) { agregador[item.funcId].diasPagos.add(formatarDataDMY(item.data)); } 
+            else { agregador[item.funcId].diasPendentes.add(formatarDataDMY(item.data)); }
+        }
+    };
+    
+    try {
+      const chamadasSnap = await get(ref(db, 'chamadas'));
+      const chamadas = chamadasSnap.exists() ? chamadasSnap.val() : {};
+
+      for (const data in chamadas) {
+        if (data < inicio || data > fim) continue;
+        const dadosDoDia = chamadas[data];
+        const primeiroId = Object.keys(dadosDoDia)[0];
+        if (!primeiroId) continue;
+        const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined;
+        if (éFormatoAntigo) {
+          if (empresaId === 'todos') for (const funcId in dadosDoDia) processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaNome: 'N/A', obraNome: 'Registro Antigo' });
+        } else {
+          for (const idEmpresa in dadosDoDia) {
+            if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
+            for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
+              const nomeObra = decodeURIComponent(nomeObraCodificado);
+              if (obraNome && nomeObra !== obraNome) continue;
+              const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
+              for (const funcId in registros) processarItem({ data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
+            }
           }
-          if (item.registro.pago) { agregador[item.funcId].diasPagos.add(formatarDataDMY(item.data)); } 
-          else { agregador[item.funcId].diasPendentes.add(formatarDataDMY(item.data)); }
         }
       }
-    };
-    try {
-      const pagamentos = await processarDados('chamadas', inicio, fim, filtro);
+
       let texto = `💰 *Relatório de Pagamento de Diaristas*\nPeríodo: ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}\n\n`;
-      const paraPagar = Object.values(pagamentos).filter(p => p.diasPendentes.size > 0);
-      const jaPagos = Object.values(pagamentos).filter(p => p.diasPagos.size > 0);
+      const paraPagar = Object.values(agregador).filter(p => p.diasPendentes.size > 0);
+      const jaPagos = Object.values(agregador).filter(p => p.diasPagos.size > 0);
       if (paraPagar.length === 0) { texto += "✅ Nenhum pagamento pendente para os filtros selecionados.\n"; } 
       else {
         texto += "--- PAGAMENTOS PENDENTES ---\n\n";
@@ -445,38 +459,230 @@
     const fim = document.getElementById('horaExtraFim').value;
     if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa.");
     resultado.textContent = "Gerando...";
-    const filtro = {
-      empresaId, obraNome,
-      callback: (agregador, item) => {
+    
+    const agregador = {};
+    const processarItem = (item) => {
         const func = funcionariosCache[item.funcId];
         if (func) {
           if (!agregador[item.funcId]) {
             agregador[item.funcId] = { nome: func.nome, horas50: 0, horas100: 0, datas: new Set() };
           }
           const qtd = parseInt(item.registro.quantidadeHoras) || 0;
-          const perc = String(item.registro.percentual);
-          if (perc === '50') agregador[item.funcId].horas50 += qtd;
-          if (perc === '100') agregador[item.funcId].horas100 += qtd;
+          if (String(item.registro.percentual) === '50') agregador[item.funcId].horas50 += qtd;
+          if (String(item.registro.percentual) === '100') agregador[item.funcId].horas100 += qtd;
           agregador[item.funcId].datas.add(formatarDataDMY(item.data));
         }
-      }
     };
+
     try {
-      const horasExtras = await processarDados('horaextra', inicio, fim, filtro);
+      const heSnap = await get(ref(db, 'horaextra'));
+      const horasExtras = heSnap.exists() ? heSnap.val() : {};
+
+      for (const data in horasExtras) {
+        if (data < inicio || data > fim) continue;
+        const dadosDoDia = horasExtras[data];
+        const primeiroId = Object.keys(dadosDoDia)[0];
+        if (!primeiroId) continue;
+        const éFormatoAntigo = dadosDoDia[primeiroId]?.percentual !== undefined;
+        if (éFormatoAntigo) {
+          if (empresaId === 'todos') for (const funcId in dadosDoDia) processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaNome: 'N/A', obraNome: 'Registro Antigo' });
+        } else {
+          for (const idEmpresa in dadosDoDia) {
+            if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
+            for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
+              const nomeObra = decodeURIComponent(nomeObraCodificado);
+              if (obraNome && nomeObra !== obraNome) continue;
+              const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
+              for (const funcId in registros) processarItem({ data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
+            }
+          }
+        }
+      }
+
       let texto = `⏱️ *Relatório de Horas Extras*\nPeríodo: ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}\n\n`;
-      const comHE = Object.values(horasExtras);
+      const comHE = Object.values(agregador);
       if (comHE.length === 0) {
         texto += "Nenhuma hora extra encontrada para os filtros selecionados.";
       } else {
         comHE.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
           const total = item.horas50 + item.horas100;
-          texto += `👤 *${item.nome}*\n   Total: *${total}h*\n`;
-          if(item.horas50 > 0) texto += `   - 50%: *${item.horas50}h*\n`;
-          if(item.horas100 > 0) texto += `   - 100%: *${item.horas100}h*\n`;
-          texto += `   (Dias: ${Array.from(item.datas).join(', ')})\n\n`;
+          if(total > 0){
+            texto += `👤 *${item.nome}*\n   Total: *${total}h*\n`;
+            if(item.horas50 > 0) texto += `   - 50%: *${item.horas50}h*\n`;
+            if(item.horas100 > 0) texto += `   - 100%: *${item.horas100}h*\n`;
+            texto += `   (Dias: ${Array.from(item.datas).join(', ')})\n\n`;
+          }
         });
       }
       resultado.textContent = texto;
       textoRelatorioAtual = texto;
     } catch(e) { console.error("Erro:", e); resultado.textContent = "Ocorreu um erro."; }
     finally { scrollParaResultado(); }
+  });
+
+  // --- Relatório de Dados do Funcionário ---
+  document.getElementById('btnGerarLista').addEventListener('click', () => {
+      const empresaId = document.getElementById('dadosEmpresa').value;
+      const obraNome = document.getElementById('dadosObra').value;
+      resultado.textContent = "Gerando...";
+      
+      let funcionariosFiltrados = Object.values(funcionariosCache);
+
+      if(empresaId && empresaId !== 'todos') {
+        funcionariosFiltrados = funcionariosFiltrados.filter(f => f.empresaId === empresaId);
+      }
+      if(obraNome) {
+        funcionariosFiltrados = funcionariosFiltrados.filter(f => f.obra === obraNome);
+      }
+      
+      let texto = `👤 *Relatório de Dados de Colaboradores*\n\n`;
+      if(funcionariosFiltrados.length === 0){
+        texto += "Nenhum colaborador encontrado para os filtros selecionados.";
+      } else {
+        const agrupado = {};
+        funcionariosFiltrados.forEach(f => {
+          const empNome = empresasCache[f.empresaId]?.nome || "Sem Empresa";
+          const obrNome = f.obra || "Sem Obra";
+          if(!agrupado[empNome]) agrupado[empNome] = {};
+          if(!agrupado[empNome][obrNome]) agrupado[empNome][obrNome] = [];
+          agrupado[empNome][obrNome].push(f);
+        });
+
+        for(const empNome in agrupado){
+          texto += `🏢 *${empNome}*\n`;
+          for(const obrNome in agrupado[empNome]){
+            texto += ` ﹂ 🏗️ *${obrNome}*\n\n`;
+            agrupado[empNome][obrNome].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(f => {
+              texto += `   • *${f.nome}* (${f.tipo})\n`;
+              texto += `     Função: ${f.funcao || '-'}\n\n`;
+            });
+          }
+        }
+      }
+      resultado.textContent = texto;
+      textoRelatorioAtual = texto;
+      scrollParaResultado();
+  });
+  
+  // --- Lógica de Exclusão ---
+  document.getElementById('btnExcluir').addEventListener('click', async () => {
+    const empresaId = document.getElementById('excluirEmpresa').value;
+    const obraNome = document.getElementById('excluirObra').value;
+    const tipo = document.getElementById('excluirTipo').value;
+    const inicio = document.getElementById('excluirDataInicio').value;
+    const fim = document.getElementById('excluirDataFim').value;
+    const senha = document.getElementById('excluirSenha').value;
+
+    if (!inicio || !fim || !empresaId) return showToast("Preencha data e empresa para excluir.");
+    if (senha !== SENHA_EXCLUSAO) return showToast("Senha incorreta!");
+    
+    const confirmacao = confirm(`ATENÇÃO!\n\nVocê está prestes a excluir PERMANENTEMENTE os registros de '${tipo}' do período de ${formatarDataDMY(inicio)} a ${formatarDataDMY(fim)}.\n\nFiltros aplicados:\nEmpresa: ${empresaId === 'todos' ? 'TODAS' : empresasCache[empresaId].nome}\nObra: ${obraNome || 'TODAS'}\n\nEsta ação é IRREVERSÍVEL. Deseja continuar?`);
+    if (!confirmacao) return;
+    resultado.textContent = "Excluindo registros...";
+    
+    try {
+      const updates = {};
+      const dInicio = new Date(inicio + 'T00:00:00');
+      const dFim = new Date(fim + 'T00:00:00');
+
+      for (let d = dInicio; d <= dFim; d.setDate(d.getDate() + 1)) {
+        const dataISO = d.toISOString().split('T')[0];
+        let path = `/${tipo}/${dataISO}`;
+        if (empresaId !== 'todos') {
+          path += `/${empresaId}`;
+          if (obraNome) path += `/${encodeURIComponent(obraNome)}`;
+        }
+        updates[path] = null;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await update(ref(db), updates);
+        resultado.textContent = "Registros selecionados foram excluídos com sucesso.";
+        showToast("Exclusão concluída!");
+      } else {
+        resultado.textContent = "Nenhum registro para excluir no período/filtro selecionado.";
+      }
+    } catch (e) { console.error("Erro ao excluir:", e); resultado.textContent = "Ocorreu um erro."; }
+    finally { scrollParaResultado(); document.getElementById('excluirSenha').value = ''; }
+  });
+
+  // --- Lógica de Validar Pagamentos ---
+  document.getElementById('btnValidarPagamento').addEventListener('click', async () => {
+    const empresaId = document.getElementById('validarEmpresa').value;
+    const diaristaId = document.getElementById('validarDiarista').value;
+    const inicio = document.getElementById('validarDataInicio').value;
+    const fim = document.getElementById('validarDataFim').value;
+    const senha = document.getElementById('validarSenha').value;
+
+    if (!inicio || !fim || !empresaId) return showToast("Preencha período e empresa.");
+    if (senha !== SENHA_EXCLUSAO) return showToast("Senha incorreta!");
+    
+    const diaristaNome = diaristaId === 'todos' ? 'Todos os Diaristas' : funcionariosCache[diaristaId]?.nome;
+    const confirmacao = confirm(`Atenção!\n\nVocê está prestes a MARCAR COMO PAGOS todos os dias de presença de '${diaristaNome}' entre ${formatarDataDMY(inicio)} e ${formatarDataDMY(fim)}.\n\nEsta ação é irreversível. Deseja continuar?`);
+    if (!confirmacao) return;
+
+    resultado.textContent = "Validando pagamentos...";
+    let registrosAtualizados = 0;
+    const updates = {};
+
+    try {
+      const chamadas = await get(ref(db, 'chamadas')).then(snap => snap.exists() ? snap.val() : {});
+      for (const data in chamadas) {
+        if (data < inicio || data > fim) continue;
+        const dadosDoDia = chamadas[data];
+        const primeiroId = Object.keys(dadosDoDia)[0];
+        if (!primeiroId) continue;
+        const éFormatoAntigo = dadosDoDia[primeiroId]?.status !== undefined;
+        const processar = (path, funcId, registro) => {
+          const func = funcionariosCache[funcId];
+          if (func && func.tipo === 'diarista' && registro.status === 'presente' && !registro.pago) {
+            if (diaristaId === 'todos' || funcId === diaristaId) {
+              updates[`${path}/pago`] = true;
+              registrosAtualizados++;
+            }
+          }
+        };
+        if (éFormatoAntigo) {
+          if (empresaId === 'todos') {
+            for (const funcId in dadosDoDia) processar(`/chamadas/${data}/${funcId}`, funcId, dadosDoDia[funcId]);
+          }
+        } else {
+          for (const idEmpresa in dadosDoDia) {
+            if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
+            for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
+              const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
+              for (const funcId in registros) {
+                const path = `/chamadas/${data}/${idEmpresa}/${nomeObraCodificado}/${funcId}`;
+                processar(path, funcId, registros[funcId]);
+              }
+            }
+          }
+        }
+      }
+      if (registrosAtualizados > 0) {
+        await update(ref(db), updates);
+        resultado.textContent = `${registrosAtualizados} dias de trabalho foram marcados como pagos com sucesso!`;
+        showToast("Validação concluída!");
+      } else {
+        resultado.textContent = "Nenhum registro de pagamento pendente encontrado para os filtros selecionados.";
+      }
+    } catch (e) { console.error("Erro:", e); resultado.textContent = "Ocorreu um erro."; }
+    finally { document.getElementById('validarSenha').value = ''; scrollParaResultado(); }
+  });
+  
+  // --- Setup Geral ---
+  document.querySelectorAll('.empresa-select').forEach(s => {
+      const obraSelect = s.closest('.card').querySelector('.obra-select');
+      if (s && obraSelect) configurarFiltroObra(s, obraSelect);
+  });
+  document.getElementById('validarEmpresa').addEventListener('change', (e) => popularDiaristasDropdown(e.target.value));
+  btnEnviarWhats.addEventListener('click', () => {
+    if (!textoRelatorioAtual) { return showToast('Gere um relatório antes de enviar'); }
+    window.open(`https://wa.me/?text=${encodeURIComponent(textoRelatorioAtual)}`, '_blank');
+  });
+
+  carregarDadosIniciais();
+</script>
+
+</body>
+</html>
