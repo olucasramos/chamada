@@ -4,10 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Painel de Acompanhamento - Controle de Presenças</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   :root {
     --accent: #2ecc71;
     --info: #3498db;
+    --warning: #f59e0b;
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
     --border-radius: 12px;
@@ -28,7 +31,7 @@
   }
   .container {
     width: 100%;
-    max-width: 1200px; /* Layout mais largo para dashboard */
+    max-width: 1200px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -114,6 +117,7 @@
       list-style: none;
       padding: 0;
       font-size: 0.9rem;
+      margin-top: 8px;
   }
   .ranking-list li {
       display: flex;
@@ -123,20 +127,13 @@
   }
   .ranking-list li:last-child { border-bottom: none; }
   .ranking-list .value { font-weight: 600; }
-
-  .chart-placeholder {
-    width: 100%;
-    min-height: 200px;
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    text-align: center;
-    padding: 16px;
-    margin-top: 16px;
+  .ranking-list-placeholder {
+      color: var(--text-secondary);
+      font-style: italic;
+  }
+  canvas {
+      margin-top: 16px;
+      max-height: 250px;
   }
 
 </style>
@@ -158,23 +155,19 @@
           <option value="7dias">Últimos 7 dias</option>
           <option value="mes_atual" selected>Este Mês</option>
           <option value="folha_ponto">Folha de Ponto (26 a 25)</option>
-          <option value="custom">Período Customizado</option>
         </select>
       </div>
       <div class="form-group">
         <label for="filtroEmpresa" class="form-label">Empresa</label>
         <select id="filtroEmpresa" class="form-select">
           <option value="todas">Todas as Empresas</option>
-          </select>
+        </select>
       </div>
       <div class="form-group">
         <label for="filtroObra" class="form-label">Obra</label>
         <select id="filtroObra" class="form-select" disabled>
           <option value="todas">Todas as Obras</option>
-          </select>
-      </div>
-      <div class="form-group">
-        <button id="btnAplicarFiltros" class="btn-action">Aplicar Filtros</button>
+        </select>
       </div>
     </div>
   </div>
@@ -185,41 +178,39 @@
       <h2 class="card-title">Custos com Diaristas</h2>
       <div class="metric-container" style="grid-template-columns: 1fr 1fr; display: grid;">
         <div class="metric-item">
-          <span class="metric-value" id="custo-pago">R$ --</span>
+          <span class="metric-value" id="custo-pago">R$ 0,00</span>
           <span class="metric-label">Valor Total Pago</span>
         </div>
         <div class="metric-item">
-          <span class="metric-value" id="custo-pendente" style="color: #f59e0b;">R$ --</span>
+          <span class="metric-value" id="custo-pendente" style="color: var(--warning);">R$ 0,00</span>
           <span class="metric-label">Valor Total a Pagar</span>
         </div>
       </div>
-      <div class="chart-placeholder">
-          <span>Gráfico de Custo Diário<br>(Requer biblioteca de gráficos)</span>
-      </div>
+      <canvas id="graficoCustoDiario"></canvas>
     </div>
 
     <div class="card">
       <h2 class="card-title">Acompanhamento de Horas Extras</h2>
       <div class="metric-container" style="grid-template-columns: 1fr 1fr 1fr; display: grid;">
           <div class="metric-item">
-              <span class="metric-value" id="he-total">--h</span>
+              <span class="metric-value" id="he-total">0h</span>
               <span class="metric-label">Total de Horas</span>
             </div>
         <div class="metric-item">
-          <span class="metric-value" id="he-50">--h</span>
+          <span class="metric-value" id="he-50">0h</span>
           <span class="metric-label">Horas a 50%</span>
         </div>
         <div class="metric-item">
-          <span class="metric-value" id="he-100">--h</span>
+          <span class="metric-value" id="he-100">0h</span>
           <span class="metric-label">Horas a 100%</span>
         </div>
       </div>
       <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Top 3 com Mais Horas Extras</h3>
       <ul class="ranking-list" id="ranking-he-obras">
-        <li><span>--</span> <span class="value">--h</span></li>
+        <li class="ranking-list-placeholder">Nenhuma obra encontrada.</li>
       </ul>
-      <ul class="ranking-list" id="ranking-he-funcionarios" style="margin-top: 8px;">
-        <li><span>--</span> <span class="value">--h</span></li>
+      <ul class="ranking-list" id="ranking-he-funcionarios">
+        <li class="ranking-list-placeholder">Nenhum funcionário encontrado.</li>
       </ul>
     </div>
 
@@ -227,68 +218,382 @@
       <h2 class="card-title">Controle de Frequência</h2>
       <div class="metric-container">
         <div class="metric-item">
-          <span class="metric-value" id="taxa-assiduidade">--%</span>
+          <span class="metric-value" id="taxa-assiduidade">0%</span>
           <span class="metric-label">Taxa de Assiduidade</span>
         </div>
       </div>
-      <div class="chart-placeholder">
-        <span>Gráfico de Faltas: Com vs. Sem Atestado<br>(Requer biblioteca de gráficos)</span>
-      </div>
+      <canvas id="graficoFaltas"></canvas>
       <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Ranking de Faltas (Sem Atestado)</h3>
       <ul class="ranking-list" id="ranking-faltas-sem-atestado">
-          <li><span>--</span> <span class="value">-- dias</span></li>
+          <li class="ranking-list-placeholder">Nenhuma falta encontrada.</li>
       </ul>
     </div>
 
     <div class="card">
       <h2 class="card-title">Análise de Mão de Obra</h2>
       <h3 style="font-size: 0.9rem; font-weight: 600;">Horas Extras por Função</h3>
-      <div class="chart-placeholder">
-        <span>Gráfico de Horas Extras por Função<br>(Requer biblioteca de gráficos)</span>
-      </div>
+      <canvas id="graficoHEFuncao"></canvas>
       <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Distribuição de Funções em Campo</h3>
-      <div class="chart-placeholder">
-        <span>Gráfico de Distribuição de Funções<br>(Requer biblioteca de gráficos)</span>
-      </div>
+       <canvas id="graficoDistFuncoes"></canvas>
     </div>
 
-    <div class="card" style="grid-column: 1 / -1;"> <h2 class="card-title">Efetivo Diário Presente (Últimos 30 dias)</h2>
-      <div class="chart-placeholder">
-        <span>Gráfico de Linha do Efetivo Diário<br>(Requer biblioteca de gráficos)</span>
-      </div>
+    <div class="card" style="grid-column: 1 / -1;">
+      <h2 class="card-title">Efetivo Diário Presente no Período</h2>
+      <canvas id="graficoEfetivoDiario"></canvas>
     </div>
 
   </div>
 </div>
 
-<footer>
-  <p>Desenvolvido por Lucas Ramos Aragão</p>
-</footer>
-
 <script type="module">
-  // import { db, ref, get } from "./firebase.js";
+  import { db, ref, get } from "./firebase.js";
   
-  // O código JavaScript para popular os dados deste painel entrará aqui.
-  // Será necessário buscar dados de 'empresas', 'funcionarios', 'chamadas' e 'horaextra'.
+  // Cache de dados
+  let empresasCache = {};
+  let funcionariosCache = {};
+  let chamadasCache = {};
+  let horasExtrasCache = {};
+  let charts = {}; // Para guardar instâncias dos gráficos
 
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log("Página do Painel de Acompanhamento carregada.");
-    // Chamar a função inicial para carregar dados e popular os filtros.
-    // carregarFiltrosIniciais();
-    // aplicarFiltros();
+  // Elementos DOM
+  const filtroPeriodo = document.getElementById('filtroPeriodo');
+  const filtroEmpresa = document.getElementById('filtroEmpresa');
+  const filtroObra = document.getElementById('filtroObra');
+
+  // --- FUNÇÕES DE INICIALIZAÇÃO E FILTROS ---
+  
+  async function carregarDadosIniciais() {
+    try {
+      const [empresasSnap, funcionariosSnap, chamadasSnap, heSnap] = await Promise.all([
+        get(ref(db, 'empresas')),
+        get(ref(db, 'funcionarios')),
+        get(ref(db, 'chamadas')),
+        get(ref(db, 'horaextra'))
+      ]);
+      empresasCache = empresasSnap.exists() ? empresasSnap.val() : {};
+      funcionariosCache = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
+      chamadasCache = chamadasSnap.exists() ? chamadasSnap.val() : {};
+      horasExtrasCache = heSnap.exists() ? heSnap.val() : {};
+      
+      popularFiltroEmpresas();
+      aplicarFiltros();
+    } catch (error) {
+      console.error("Erro fatal ao carregar dados:", error);
+      alert("Não foi possível carregar os dados do painel. Verifique a conexão.");
+    }
+  }
+
+  function popularFiltroEmpresas() {
+    filtroEmpresa.innerHTML = '<option value="todas">Todas as Empresas</option>';
+    for (const id in empresasCache) {
+      filtroEmpresa.innerHTML += `<option value="${id}">${empresasCache[id].nome}</option>`;
+    }
+  }
+  
+  function atualizarFiltroObras() {
+      const empresaId = filtroEmpresa.value;
+      filtroObra.innerHTML = '<option value="todas">Todas as Obras</option>';
+      filtroObra.disabled = true;
+      if (empresaId !== 'todas' && empresasCache[empresaId]?.obras) {
+          filtroObra.disabled = false;
+          for (const obraId in empresasCache[empresaId].obras) {
+              const obra = empresasCache[empresaId].obras[obraId];
+              filtroObra.innerHTML += `<option value="${obra.nome}">${obra.nome}</option>`;
+          }
+      }
+  }
+
+  // --- LÓGICA PRINCIPAL DE APLICAÇÃO DE FILTROS ---
+
+  function aplicarFiltros() {
+    const { inicio, fim } = getIntervaloDeDatas();
+    const empresaId = filtroEmpresa.value;
+    const obraNome = filtroObra.value;
+    
+    // Filtra os dados de chamadas e horas extras com base no período e seleções
+    const dadosFiltrados = filtrarDadosPorPeriodo(inicio, fim, empresaId, obraNome);
+    
+    // Atualiza cada card do dashboard
+    atualizarCardCustos(dadosFiltrados.chamadas);
+    atualizarCardHE(dadosFiltrados.horasExtras);
+    atualizarCardFrequencia(dadosFiltrados.chamadas, inicio, fim);
+    atualizarCardMaoDeObra(dadosFiltrados.chamadas, dadosFiltrados.horasExtras);
+    atualizarCardEfetivo(dadosFiltrados.chamadas, inicio, fim);
+  }
+  
+  function getIntervaloDeDatas() {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    let inicio = new Date(hoje);
+    let fim = new Date(hoje);
+
+    switch (filtroPeriodo.value) {
+      case '7dias':
+        inicio.setDate(hoje.getDate() - 6);
+        break;
+      case 'mes_atual':
+        inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+        break;
+      case 'folha_ponto':
+        const diaAtual = hoje.getDate();
+        if (diaAtual >= 26) {
+          inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 26);
+          fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 25);
+        } else {
+          inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 26);
+          fim = new Date(hoje.getFullYear(), hoje.getMonth(), 25);
+        }
+        break;
+    }
+    
+    // Formato YYYY-MM-DD
+    const paraISO = (data) => data.toISOString().split('T')[0];
+    return { inicio: paraISO(inicio), fim: paraISO(fim) };
+  }
+  
+  function filtrarDadosPorPeriodo(inicio, fim, empresaId, obraNome) {
+      const chamadasFiltradas = {};
+      const horasExtrasFiltradas = {};
+
+      for (const data in chamadasCache) {
+          if (data >= inicio && data <= fim) {
+              chamadasFiltradas[data] = filtrarEntradasDoDia(chamadasCache[data], empresaId, obraNome);
+          }
+      }
+      for (const data in horasExtrasCache) {
+          if (data >= inicio && data <= fim) {
+              horasExtrasFiltradas[data] = filtrarEntradasDoDia(horasExtrasCache[data], empresaId, obraNome);
+          }
+      }
+      return { chamadas: chamadasFiltradas, horasExtras: horasExtrasFiltradas };
+  }
+
+  function filtrarEntradasDoDia(dadosDoDia, empresaId, obraNome) {
+      if (empresaId === 'todas') return dadosDoDia;
+      const dadosFiltrados = {};
+      if (dadosDoDia[empresaId]) {
+          if (obraNome === 'todas') {
+              dadosFiltrados[empresaId] = dadosDoDia[empresaId];
+          } else if (dadosDoDia[empresaId][encodeURIComponent(obraNome)]) {
+              dadosFiltrados[empresaId] = {
+                  [encodeURIComponent(obraNome)]: dadosDoDia[empresaId][encodeURIComponent(obraNome)]
+              };
+          }
+      }
+      return dadosFiltrados;
+  }
+  
+  // --- FUNÇÕES DE ATUALIZAÇÃO DOS CARDS ---
+
+  function atualizarCardCustos(chamadas) {
+    let pago = 0, pendente = 0;
+    const custoPorDia = {};
+
+    iterarRegistros(chamadas, (data, empId, obNome, funcId, registro) => {
+        const func = funcionariosCache[funcId];
+        if (func?.tipo === 'diarista' && registro.status === 'presente') {
+            const valor = parseFloat(func.valorDiaria) || 0;
+            if (registro.pago) {
+                pago += valor;
+            } else {
+                pendente += valor;
+            }
+            custoPorDia[data] = (custoPorDia[data] || 0) + valor;
+        }
+    });
+
+    document.getElementById('custo-pago').textContent = `R$ ${pago.toFixed(2)}`;
+    document.getElementById('custo-pendente').textContent = `R$ ${pendente.toFixed(2)}`;
+    
+    const sortedDates = Object.keys(custoPorDia).sort();
+    renderChart('graficoCustoDiario', 'bar', {
+        labels: sortedDates.map(d => d.substring(5).split('-').reverse().join('/')),
+        datasets: [{
+            label: 'Custo Diário (R$)',
+            data: sortedDates.map(d => custoPorDia[d]),
+            backgroundColor: 'rgba(46, 204, 113, 0.7)'
+        }]
+    });
+  }
+
+  function atualizarCardHE(horasExtras) {
+      let total = 0, h50 = 0, h100 = 0;
+      const hePorObra = {}, hePorFunc = {};
+
+      iterarRegistros(horasExtras, (data, empId, obNome, funcId, registro) => {
+          const qtd = parseInt(registro.quantidadeHoras) || 0;
+          total += qtd;
+          if (registro.percentual === '50') h50 += qtd;
+          if (registro.percentual === '100') h100 += qtd;
+          
+          hePorObra[obNome] = (hePorObra[obNome] || 0) + qtd;
+          const nomeFunc = funcionariosCache[funcId]?.nome || 'Desconhecido';
+          hePorFunc[nomeFunc] = (hePorFunc[nomeFunc] || 0) + qtd;
+      });
+
+      document.getElementById('he-total').textContent = `${total}h`;
+      document.getElementById('he-50').textContent = `${h50}h`;
+      document.getElementById('he-100').textContent = `${h100}h`;
+      
+      renderRanking('ranking-he-obras', hePorObra, 'h', 'Nenhuma obra encontrada.');
+      renderRanking('ranking-he-funcionarios', hePorFunc, 'h', 'Nenhum funcionário encontrado.');
+  }
+  
+  function atualizarCardFrequencia(chamadas, inicio, fim) {
+      let faltasComAtestado = 0, faltasSemAtestado = 0, presencas = 0;
+      const faltasPorFunc = {};
+
+      iterarRegistros(chamadas, (data, empId, obNome, funcId, registro) => {
+          if (funcionariosCache[funcId]?.tipo !== 'funcionario') return;
+          if(registro.status === 'presente') presencas++;
+          if(registro.status === 'falta') {
+              if(registro.atestado) faltasComAtestado++;
+              else {
+                  faltasSemAtestado++;
+                  const nomeFunc = funcionariosCache[funcId]?.nome || 'Desconhecido';
+                  faltasPorFunc[nomeFunc] = (faltasPorFunc[nomeFunc] || 0) + 1;
+              }
+          }
+      });
+      
+      const totalDiasPossiveis = Object.keys(funcionariosCache).filter(id => funcionariosCache[id].tipo === 'funcionario').length * diasUteisNoPeriodo(inicio, fim);
+      const taxaAssiduidade = totalDiasPossiveis > 0 ? (presencas / totalDiasPossiveis) * 100 : 0;
+      document.getElementById('taxa-assiduidade').textContent = `${taxaAssiduidade.toFixed(1)}%`;
+      
+      renderRanking('ranking-faltas-sem-atestado', faltasPorFunc, ' dias', 'Nenhuma falta encontrada.');
+      
+      renderChart('graficoFaltas', 'pie', {
+          labels: ['Faltas com Atestado', 'Faltas sem Atestado'],
+          datasets: [{
+              data: [faltasComAtestado, faltasSemAtestado],
+              backgroundColor: ['#3498db', '#e74c3c']
+          }]
+      });
+  }
+
+  function atualizarCardMaoDeObra(chamadas, horasExtras) {
+      const hePorFuncao = {};
+      const distFuncoes = {};
+
+      iterarRegistros(horasExtras, (data, empId, obNome, funcId, registro) => {
+          const func = funcionariosCache[funcId];
+          if(func?.funcao) {
+              hePorFuncao[func.funcao] = (hePorFuncao[func.funcao] || 0) + (parseInt(registro.quantidadeHoras) || 0);
+          }
+      });
+
+      iterarRegistros(chamadas, (data, empId, obNome, funcId, registro) => {
+          const func = funcionariosCache[funcId];
+          if(func?.funcao && registro.status === 'presente') {
+              distFuncoes[func.funcao] = (distFuncoes[func.funcao] || 0) + 1;
+          }
+      });
+      
+      renderChart('graficoHEFuncao', 'bar', {
+        labels: Object.keys(hePorFuncao),
+        datasets: [{ label: 'Horas Extras', data: Object.values(hePorFuncao), backgroundColor: '#8e44ad' }]
+      });
+      renderChart('graficoDistFuncoes', 'doughnut', {
+        labels: Object.keys(distFuncoes),
+        datasets: [{ label: 'Funções', data: Object.values(distFuncoes), backgroundColor: ['#1abc9c', '#f1c40f', '#e67e22', '#34495e', '#95a5a6'] }]
+      });
+  }
+  
+  function atualizarCardEfetivo(chamadas, inicio, fim) {
+      const efetivoPorDia = {};
+      let d = new Date(inicio + 'T12:00:00');
+      let dFim = new Date(fim + 'T12:00:00');
+      while(d <= dFim) {
+          efetivoPorDia[d.toISOString().split('T')[0]] = 0;
+          d.setDate(d.getDate() + 1);
+      }
+
+      iterarRegistros(chamadas, (data, empId, obNome, funcId, registro) => {
+          if(registro.status === 'presente' && efetivoPorDia[data] !== undefined) {
+              efetivoPorDia[data]++;
+          }
+      });
+      
+      const sortedDates = Object.keys(efetivoPorDia).sort();
+      renderChart('graficoEfetivoDiario', 'line', {
+          labels: sortedDates.map(d => d.substring(5).split('-').reverse().join('/')),
+          datasets: [{
+              label: 'Funcionários Presentes',
+              data: sortedDates.map(d => efetivoPorDia[d]),
+              borderColor: '#3498db',
+              tension: 0.1
+          }]
+      });
+  }
+
+  // --- FUNÇÕES UTILITÁRIAS ---
+  
+  function iterarRegistros(dados, callback) {
+      for (const data in dados) {
+          const registrosDoDia = dados[data];
+          if (!registrosDoDia) continue;
+          
+          for(const empId in registrosDoDia) {
+              for (const obNomeCodificado in registrosDoDia[empId]) {
+                  for (const funcId in registrosDoDia[empId][obNomeCodificado]) {
+                      const registro = registrosDoDia[empId][obNomeCodificado][funcId];
+                      callback(data, empId, decodeURIComponent(obNomeCodificado), funcId, registro);
+                  }
+              }
+          }
+      }
+  }
+
+  function renderRanking(elementId, dados, sufixo, mensagemVazia) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+      const ranking = Object.entries(dados).sort(([,a],[,b]) => b - a).slice(0, 3);
+      if(ranking.length === 0) {
+          container.innerHTML = `<li class="ranking-list-placeholder">${mensagemVazia}</li>`;
+          return;
+      }
+      ranking.forEach(([nome, valor]) => {
+          container.innerHTML += `<li><span>${nome}</span><span class="value">${valor}${sufixo}</span></li>`;
+      });
+  }
+  
+  function renderChart(canvasId, type, data) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    if (charts[canvasId]) {
+        charts[canvasId].destroy();
+    }
+    charts[canvasId] = new Chart(ctx, { type, data, options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#fff' } } },
+        scales: { 
+            x: { ticks: { color: '#fff' } }, 
+            y: { ticks: { color: '#fff' } } 
+        }
+    }});
+  }
+  
+  function diasUteisNoPeriodo(inicio, fim) {
+    let count = 0;
+    const curDate = new Date(inicio + 'T12:00:00');
+    const fimDate = new Date(fim + 'T12:00:00');
+    while (curDate <= fimDate) {
+        const dayOfWeek = curDate.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) count++;
+        curDate.setDate(curDate.getDate() + 1);
+    }
+    return count > 0 ? count : 1;
+  }
+  
+  // Event Listeners
+  filtroEmpresa.addEventListener('change', () => {
+    atualizarFiltroObras();
+    aplicarFiltros();
   });
+  filtroPeriodo.addEventListener('change', aplicarFiltros);
+  filtroObra.addEventListener('change', aplicarFiltros);
 
-  // Exemplo de como a função de aplicar filtros seria
-  // async function aplicarFiltros() {
-  //   // 1. Obter valores dos filtros (período, empresa, obra)
-  //   // 2. Definir o intervalo de datas com base na seleção (ex: lógica para "Folha de Ponto")
-  //   // 3. Buscar todos os dados necessários do Firebase
-  //   // 4. Filtrar os dados com base na seleção
-  //   // 5. Calcular cada métrica
-  //   // 6. Atualizar o HTML com os resultados (ex: document.getElementById('custo-pago').textContent = ...)
-  //   // 7. Desenhar os gráficos com uma biblioteca externa
-  // }
-
+  document.addEventListener('DOMContentLoaded', carregarDadosIniciais);
 </script>
 
 </body>
