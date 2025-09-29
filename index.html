@@ -138,8 +138,8 @@
   .btn-container a:nth-child(5) { animation-delay: 0.8s; }
   
   .info-card {
-    padding: 16px; /* Mais fino */
-    background: rgba(0, 0, 0, 0.2); /* Mais escuro */
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     text-align: center;
@@ -155,7 +155,7 @@
   .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px; /* Menor */
+      gap: 10px;
       margin-top: 10px;
   }
   .dashboard-item {
@@ -164,12 +164,12 @@
       border-radius: 8px;
   }
   .dashboard-item .value {
-      font-size: 1.5rem; /* Menor */
+      font-size: 1.5rem;
       font-weight: 700;
       display: block;
   }
   .dashboard-item .label {
-      font-size: 0.75rem; /* Menor */
+      font-size: 0.75rem;
       color: rgba(255,255,255,0.8);
   }
   
@@ -223,6 +223,24 @@
       text-align: right;
   }
   
+  .link-painel {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+  .link-painel:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
   footer {
     position: fixed; bottom: 0; left: 0; width: 100%;
     background: rgba(21, 67, 96, 0.95);
@@ -275,6 +293,11 @@
                 <p class="dashboard-empty-message">Calculando...</p>
             </div>
         </div>
+
+        <a href="painel.html" class="link-painel">
+          Ver Painel Completo →
+        </a>
+
     </div>
 
     <div class="btn-container">
@@ -319,13 +342,14 @@
 
     async function atualizarDashboard() {
         const { dataISO, dataFormatada } = getDataDeHoje();
-        document.getElementById('dashboard-title').textContent = `Resumo de ${dataFormatada}`;
+        // LINHA ALTERADA AQUI
+        document.getElementById('dashboard-title').textContent = `Resumo do dia ${dataFormatada}`;
 
         try {
             const [chamadasSnap, funcionariosSnap, empresasSnap] = await Promise.all([
                 get(ref(db, 'chamadas')),
                 get(ref(db, 'funcionarios')),
-                get(ref(db, 'empresas')) // Adicionado para buscar nomes de empresas
+                get(ref(db, 'empresas'))
             ]);
 
             const chamadas = chamadasSnap.exists() ? chamadasSnap.val() : {};
@@ -336,11 +360,11 @@
 
             const chamadasHoje = chamadas[dataISO] || {};
             let presentesHoje = 0;
-            let ausentesHoje = []; // Array para guardar os ausentes
+            let ausentesHoje = [];
 
             if (Object.keys(chamadasHoje).length > 0) {
                 const primeiroId = Object.keys(chamadasHoje)[0];
-                const éFormatoAntigo = chamadasHoje[primeiroId]?.status !== undefined;
+                const éFormatoAntigo = chamadasHoje[primeiroId]?.status !== undefined || chamadasHoje[primeiroId]?.percentual !== undefined;
 
                 if (éFormatoAntigo) {
                     for (const funcId in chamadasHoje) {
@@ -386,7 +410,6 @@
             }
             document.getElementById('presentesHoje').textContent = presentesHoje;
 
-            // Renderizar a lista de ausentes
             const ausentesDiv = document.getElementById('ausentes-lista');
             ausentesDiv.innerHTML = '';
             if (ausentesHoje.length === 0) {
@@ -400,7 +423,6 @@
                 });
             }
 
-            // LÓGICA ATUALIZADA para Acompanhamento de Diaristas
             const diaristaStats = {};
             for (const id in funcionarios) {
                 if (funcionarios[id].tipo === 'diarista') {
@@ -469,7 +491,6 @@
 
         } catch (error) {
             console.error("Erro ao atualizar o dashboard:", error);
-            // Adicionar mensagens de erro mais claras nos cards
             document.getElementById('presentesHoje').textContent = 'Erro';
             document.getElementById('diaristas-lista').innerHTML = '<p class="dashboard-empty-message">Falha ao carregar dados.</p>';
             document.getElementById('ausentes-lista').innerHTML = '<p class="dashboard-empty-message">Falha ao carregar dados.</p>';
