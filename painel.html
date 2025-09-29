@@ -125,6 +125,10 @@
       color: var(--text-secondary);
       font-style: italic;
   }
+  #custom-date-filters {
+    display: none; /* Começa escondido */
+    grid-column: 1 / -1; /* Ocupa a linha toda */
+  }
   canvas {
       margin-top: 16px;
       max-height: 250px;
@@ -149,6 +153,7 @@
           <option value="7dias">Últimos 7 dias</option>
           <option value="mes_atual" selected>Este Mês</option>
           <option value="folha_ponto">Folha de Ponto (26 a 25)</option>
+          <option value="custom">Período Customizado</option>
         </select>
       </div>
       <div class="form-group">
@@ -162,6 +167,16 @@
         <select id="filtroObra" class="form-select" disabled>
           <option value="todas">Todas as Obras</option>
         </select>
+      </div>
+      <div id="custom-date-filters" class="form-grid">
+        <div class="form-group">
+          <label for="dataInicio" class="form-label">Data Início</label>
+          <input type="date" id="dataInicio" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="dataFim" class="form-label">Data Fim</label>
+          <input type="date" id="dataFim" class="form-input">
+        </div>
       </div>
     </div>
   </div>
@@ -178,6 +193,14 @@
         <div class="metric-item">
           <span class="metric-value" id="custo-pendente" style="color: var(--warning);">R$ 0,00</span>
           <span class="metric-label">Valor Total a Pagar</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value" id="diarias-pagas">0</span>
+          <span class="metric-label">Diárias Pagas (Qtd)</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value" id="diarias-pendentes" style="color: var(--warning);">0</span>
+          <span class="metric-label">Diárias a Pagar (Qtd)</span>
         </div>
       </div>
       <canvas id="graficoCustoDiario"></canvas>
@@ -199,10 +222,7 @@
           <span class="metric-label">Horas a 100%</span>
         </div>
       </div>
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Top 3 com Mais Horas Extras</h3>
-      <ul class="ranking-list" id="ranking-he-obras">
-        <li class="ranking-list-placeholder">Nenhuma obra encontrada.</li>
-      </ul>
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-top: 16px;">Top 3 Funcionários com Mais Horas Extras</h3>
       <ul class="ranking-list" id="ranking-he-funcionarios">
         <li class="ranking-list-placeholder">Nenhum funcionário encontrado.</li>
       </ul>
@@ -248,6 +268,10 @@
   const filtroPeriodo = document.getElementById('filtroPeriodo');
   const filtroEmpresa = document.getElementById('filtroEmpresa');
   const filtroObra = document.getElementById('filtroObra');
+  const customDateFilters = document.getElementById('custom-date-filters');
+  const dataInicioInput = document.getElementById('dataInicio');
+  const dataFimInput = document.getElementById('dataFim');
+
 
   async function carregarDadosIniciais() {
     try {
@@ -291,6 +315,10 @@
 
   function aplicarFiltros() {
     const { inicio, fim } = getIntervaloDeDatas();
+    if (!inicio || !fim) {
+        alert("Por favor, selecione as datas de início e fim para o período customizado.");
+        return;
+    }
     const empresaId = filtroEmpresa.value;
     const obraNome = filtroObra.value;
     
@@ -309,7 +337,13 @@
     let inicio = new Date(hoje);
     let fim = new Date(hoje);
 
-    switch (filtroPeriodo.value) {
+    const periodo = filtroPeriodo.value;
+
+    if (periodo === 'custom') {
+        return { inicio: dataInicioInput.value, fim: dataFimInput.value };
+    }
+
+    switch (periodo) {
       case '7dias':
         inicio.setDate(hoje.getDate() - 6);
         break;
@@ -362,41 +396,48 @@
   }
   
   function atualizarCardCustos(chamadas) {
-    let pago = 0, pendente = 0;
+    let valorPago = 0, valorPendente = 0, qtdPagas = 0, qtdPendentes = 0;
     const custoPorDia = {};
     iterarRegistros(chamadas, (data, empId, obNome, funcId, registro) => {
         const func = funcionariosCache[funcId];
         if (func?.tipo === 'diarista' && registro.status === 'presente') {
             const valor = parseFloat(func.valorDiaria) || 0;
-            if (registro.pago) pago += valor; else pendente += valor;
+            if (registro.pago) {
+                valorPago += valor;
+                qtdPagas++;
+            } else {
+                valorPendente += valor;
+                qtdPendentes++;
+            }
             custoPorDia[data] = (custoPorDia[data] || 0) + valor;
         }
     });
-    document.getElementById('custo-pago').textContent = `R$ ${pago.toFixed(2)}`;
-    document.getElementById('custo-pendente').textContent = `R$ ${pendente.toFixed(2)}`;
+    document.getElementById('custo-pago').textContent = `R$ ${valorPago.toFixed(2)}`;
+    document.getElementById('custo-pendente').textContent = `R$ ${valorPendente.toFixed(2)}`;
+    document.getElementById('diarias-pagas').textContent = qtdPagas;
+    document.getElementById('diarias-pendentes').textContent = qtdPendentes;
+    
     const sortedDates = Object.keys(custoPorDia).sort();
     renderChart('graficoCustoDiario', 'bar', {
         labels: sortedDates.map(d => d.substring(5).split('-').reverse().join('/')),
-        datasets: [{ label: 'Custo Diário (R$)', data: sortedDates.map(d => custoPorDia[d]), backgroundColor: 'rgba(46, 204, 113, 0.7)'}]
-    });
+        datasets: [{ data: sortedDates.map(d => custoPorDia[d]) }]
+    }, { title: 'Custo Diário com Diaristas (R$)' });
   }
 
   function atualizarCardHE(horasExtras) {
       let total = 0, h50 = 0, h100 = 0;
-      const hePorObra = {}, hePorFunc = {};
+      const hePorFunc = {};
       iterarRegistros(horasExtras, (data, empId, obNome, funcId, registro) => {
           const qtd = parseInt(registro.quantidadeHoras) || 0;
           total += qtd;
           if (registro.percentual === '50') h50 += qtd; else h100 += qtd;
-          hePorObra[obNome] = (hePorObra[obNome] || 0) + qtd;
           const nomeFunc = funcionariosCache[funcId]?.nome || 'Desconhecido';
           hePorFunc[nomeFunc] = (hePorFunc[nomeFunc] || 0) + qtd;
       });
       document.getElementById('he-total').textContent = `${total}h`;
       document.getElementById('he-50').textContent = `${h50}h`;
       document.getElementById('he-100').textContent = `${h100}h`;
-      renderRanking('ranking-he-obras', hePorObra, 'h', 'Nenhuma obra encontrada.');
-      renderRanking('ranking-he-funcionarios', hePorFunc, 'h', 'Nenhum funcionário encontrado.');
+      renderRanking('ranking-he-funcionarios', hePorFunc, 'h', 'Nenhum funcionário com HE.');
   }
   
   function atualizarCardFrequencia(chamadas, inicio, fim) {
@@ -419,9 +460,9 @@
       document.getElementById('taxa-assiduidade').textContent = `${taxa.toFixed(1)}%`;
       renderRanking('ranking-faltas-sem-atestado', faltasPorFunc, ' dias', 'Nenhuma falta sem atestado.');
       renderChart('graficoFaltas', 'pie', {
-          labels: ['Faltas com Atestado', 'Faltas sem Atestado'],
+          labels: ['Com Atestado', 'Sem Atestado'],
           datasets: [{ data: [faltasCom, faltasSem], backgroundColor: ['#3498db', '#e74c3c'] }]
-      });
+      }, { title: 'Proporção de Faltas' });
   }
 
   function atualizarCardMaoDeObra(chamadas, horasExtras) {
@@ -436,12 +477,12 @@
       });
       renderChart('graficoHEFuncao', 'bar', {
         labels: Object.keys(hePorFuncao),
-        datasets: [{ label: 'Horas Extras', data: Object.values(hePorFuncao), backgroundColor: '#8e44ad' }]
-      });
+        datasets: [{ data: Object.values(hePorFuncao) }]
+      }, { title: 'Horas Extras por Função', legendDisplay: false });
       renderChart('graficoDistFuncoes', 'doughnut', {
         labels: Object.keys(distFuncoes),
         datasets: [{ data: Object.values(distFuncoes), backgroundColor: ['#1abc9c', '#f1c40f', '#e67e22', '#34495e', '#95a5a6', '#7f8c8d'] }]
-      });
+      }, { title: 'Funções Mais Presentes' });
   }
   
   function atualizarCardEfetivo(chamadas, inicio, fim) {
@@ -458,8 +499,8 @@
       const sortedDates = Object.keys(efetivoPorDia).sort();
       renderChart('graficoEfetivoDiario', 'line', {
           labels: sortedDates.map(d => d.substring(5).split('-').reverse().join('/')),
-          datasets: [{ label: 'Funcionários Presentes', data: sortedDates.map(d => efetivoPorDia[d]), borderColor: '#3498db', tension: 0.1 }]
-      });
+          datasets: [{ data: sortedDates.map(d => efetivoPorDia[d]), borderColor: '#3498db', tension: 0.1 }]
+      }, { title: 'Funcionários Presentes por Dia', legendDisplay: false });
   }
 
   function iterarRegistros(dados, callback) {
@@ -490,19 +531,35 @@
       });
   }
   
-  function renderChart(canvasId, type, data) {
+  function renderChart(canvasId, type, data, customOptions = {}) {
     const ctx = document.getElementById(canvasId).getContext('2d');
     if (charts[canvasId]) charts[canvasId].destroy();
     
     const defaultOptions = {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: 'rgba(255, 255, 255, 0.8)' }}},
+        plugins: {
+            legend: { display: customOptions.legendDisplay !== false, labels: { color: 'rgba(255, 255, 255, 0.8)' }},
+            title: { display: !!customOptions.title, text: customOptions.title, color: 'rgba(255, 255, 255, 0.9)', font: { size: 14 }},
+            datalabels: {
+                color: '#fff',
+                anchor: 'end',
+                align: 'end',
+                formatter: (value) => value > 0 ? value : ''
+            }
+        },
         scales: { 
             x: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}, 
             y: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' }}
         }
     };
-    if (type === 'pie' || type === 'doughnut') delete defaultOptions.scales;
+    if (type === 'pie' || type === 'doughnut') {
+        delete defaultOptions.scales;
+        defaultOptions.plugins.datalabels = { color: '#1f2937', font: { weight: 'bold' } };
+    }
+    if(type === 'line' || type === 'bar') {
+        if (!data.datasets[0].label) data.datasets[0].label = 'Valor';
+        if (!data.datasets[0].backgroundColor) data.datasets[0].backgroundColor = 'rgba(52, 152, 219, 0.7)';
+    }
 
     charts[canvasId] = new Chart(ctx, { type, data, options: defaultOptions });
   }
@@ -518,12 +575,26 @@
     return count > 0 ? count : 1;
   }
   
+  function handlePeriodoChange() {
+      if (filtroPeriodo.value === 'custom') {
+          customDateFilters.style.display = 'grid';
+          const hoje = new Date().toISOString().split('T')[0];
+          if(!dataInicioInput.value) dataInicioInput.value = hoje;
+          if(!dataFimInput.value) dataFimInput.value = hoje;
+      } else {
+          customDateFilters.style.display = 'none';
+      }
+      aplicarFiltros();
+  }
+
   filtroEmpresa.addEventListener('change', () => {
     atualizarFiltroObras();
     aplicarFiltros();
   });
-  filtroPeriodo.addEventListener('change', aplicarFiltros);
+  filtroPeriodo.addEventListener('change', handlePeriodoChange);
   filtroObra.addEventListener('change', aplicarFiltros);
+  dataInicioInput.addEventListener('change', aplicarFiltros);
+  dataFimInput.addEventListener('change', aplicarFiltros);
 
   document.addEventListener('DOMContentLoaded', carregarDadosIniciais);
 </script>
