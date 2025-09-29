@@ -173,18 +173,41 @@
       color: rgba(255,255,255,0.8);
   }
   
-  .section-container {
-      margin-top: 15px;
-      text-align: left;
-  }
-  .section-container h4 {
+  /* ESTILOS PARA O PAINEL EXPANSÍVEL */
+  .collapsible-header {
     font-size: 0.8rem;
     text-transform: uppercase;
     color: rgba(255,255,255,0.8);
-    margin-bottom: 8px;
+    margin: 0;
     border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 15px;
+    padding: 15px 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
   }
+  .collapsible-header:first-of-type {
+      margin-top: 15px;
+  }
+  .collapsible-header .arrow {
+    transition: transform 0.3s ease;
+    font-size: 1.2em;
+  }
+  .collapsible-header.active .arrow {
+    transform: rotate(180deg);
+  }
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    text-align: left;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0 0 8px 8px;
+    padding: 0 5px;
+  }
+  /* FIM DOS ESTILOS EXPANSÍVEIS */
+
   .diarista-item {
       display: flex;
       justify-content: space-between;
@@ -268,7 +291,7 @@
     </h1>
     
     <div id="dashboard" class="info-card">
-        <h3 id="dashboard-title">Resumo do Dia</h3>
+        <h3 id="dashboard-title">Resumo do dia</h3>
         <div class="dashboard-grid">
             <div class="dashboard-item">
                 <span class="value" id="presentesHoje">--</span>
@@ -280,17 +303,27 @@
             </div>
         </div>
         
-        <div class="section-container">
-            <h4>Ausentes do Dia</h4>
-            <div id="ausentes-lista">
-                <p class="dashboard-empty-message">Calculando...</p>
+        <div>
+            <div class="collapsible-header">
+                <span>Ausentes do Dia</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div id="ausentes-lista" style="padding: 8px 0;">
+                    <p class="dashboard-empty-message">Calculando...</p>
+                </div>
             </div>
         </div>
         
-        <div class="section-container">
-            <h4>Acompanhamento de Diaristas</h4>
-            <div id="diaristas-lista">
-                <p class="dashboard-empty-message">Calculando...</p>
+        <div>
+            <div class="collapsible-header">
+                <span>Acompanhamento de Diaristas</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div id="diaristas-lista" style="padding: 8px 0;">
+                    <p class="dashboard-empty-message">Calculando...</p>
+                </div>
             </div>
         </div>
 
@@ -332,7 +365,7 @@
         const curDate = new Date(dataInicio.valueOf());
         while (curDate <= dataFim) {
             const dayOfWeek = curDate.getDay();
-            if (dayOfWeek !== 0 && dayOfWeek !== 6) { // 0=Domingo, 6=Sábado
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
                 count++;
             }
             curDate.setDate(curDate.getDate() + 1);
@@ -342,7 +375,6 @@
 
     async function atualizarDashboard() {
         const { dataISO, dataFormatada } = getDataDeHoje();
-        // LINHA ALTERADA AQUI
         document.getElementById('dashboard-title').textContent = `Resumo do dia ${dataFormatada}`;
 
         try {
@@ -499,5 +531,23 @@
 
     document.addEventListener('DOMContentLoaded', atualizarDashboard);
   </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const collapsibles = document.querySelectorAll('.collapsible-header');
+      collapsibles.forEach(header => {
+        header.addEventListener('click', () => {
+          header.classList.toggle('active');
+          const content = header.nextElementSibling;
+          if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + 16 + "px"; // 16px para o padding
+          }
+        });
+      });
+    });
+  </script>
+
 </body>
 </html>
