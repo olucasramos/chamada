@@ -451,7 +451,7 @@
     finally { scrollParaResultado(); }
   });
 
-  // --- Relatório de Hora Extra ---
+// --- Relatório de Hora Extra ---
   document.getElementById('btnGerarHoraExtra').addEventListener('click', async () => {
     const empresaId = document.getElementById('heEmpresa').value;
     const obraNome = document.getElementById('heObra').value;
@@ -483,17 +483,32 @@
         const dadosDoDia = horasExtras[data];
         const primeiroId = Object.keys(dadosDoDia)[0];
         if (!primeiroId) continue;
+        
         const éFormatoAntigo = dadosDoDia[primeiroId]?.percentual !== undefined;
+        
         if (éFormatoAntigo) {
-          if (empresaId === 'todos') for (const funcId in dadosDoDia) processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaNome: 'N/A', obraNome: 'Registro Antigo' });
+          // CORREÇÃO: Bloco para filtrar dados no formato antigo
+          for (const funcId in dadosDoDia) {
+            const func = funcionariosCache[funcId];
+            if (func) {
+              const correspondeEmpresa = empresaId === 'todos' || func.empresaId === empresaId;
+              const correspondeObra = !obraNome || func.obra === obraNome;
+              if (correspondeEmpresa && correspondeObra) {
+                processarItem({ data, funcId, registro: dadosDoDia[funcId], empresaNome: empresasCache[func.empresaId]?.nome || 'N/A', obraNome: func.obra || 'N/A' });
+              }
+            }
+          }
         } else {
+          // Lógica para o formato novo (que já estava correta)
           for (const idEmpresa in dadosDoDia) {
             if (empresaId !== 'todos' && idEmpresa !== empresaId) continue;
             for (const nomeObraCodificado in dadosDoDia[idEmpresa]) {
-              const nomeObra = decodeURIComponent(nomeObraCodificado);
-              if (obraNome && nomeObra !== obraNome) continue;
+              const nomeObraDecodificado = decodeURIComponent(nomeObraCodificado);
+              if (obraNome && nomeObraDecodificado !== obraNome) continue;
               const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
-              for (const funcId in registros) processarItem({ data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
+              for (const funcId in registros) {
+                processarItem({ data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObraDecodificado });
+              }
             }
           }
         }
