@@ -172,12 +172,12 @@
       font-size: 0.75rem; /* Menor */
       color: rgba(255,255,255,0.8);
   }
-
-  .diaristas-acompanhamento {
+  
+  .section-container {
       margin-top: 15px;
       text-align: left;
   }
-  .diaristas-acompanhamento h4 {
+  .section-container h4 {
     font-size: 0.8rem;
     text-transform: uppercase;
     color: rgba(255,255,255,0.8);
@@ -198,6 +198,29 @@
       background-color: rgba(241, 196, 15, 0.9);
       color: #1f2937;
       font-weight: 600;
+  }
+  .dashboard-empty-message {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      padding: 10px;
+  }
+  .ausente-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: rgba(220, 38, 38, 0.2);
+      border-left: 3px solid #dc2626;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-weight: 500;
+      font-size: 0.9rem;
+  }
+  .ausente-details {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: right;
   }
   
   footer {
@@ -238,10 +261,18 @@
                 <span class="label">Colaboradores</span>
             </div>
         </div>
-        <div class="diaristas-acompanhamento">
+        
+        <div class="section-container">
+            <h4>Ausentes do Dia</h4>
+            <div id="ausentes-lista">
+                <p class="dashboard-empty-message">Calculando...</p>
+            </div>
+        </div>
+        
+        <div class="section-container">
             <h4>Acompanhamento de Diaristas</h4>
             <div id="diaristas-lista">
-                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center; padding: 10px;">Calculando...</p>
+                <p class="dashboard-empty-message">Calculando...</p>
             </div>
         </div>
     </div>
@@ -273,7 +304,6 @@
         return { dataISO: `${yyyy}-${mm}-${dd}`, dataFormatada: `${dd}/${mm}/${yyyy}` };
     }
 
-    // NOVA FUNÇÃO: Conta dias úteis entre duas datas
     function contarDiasUteis(dataInicio, dataFim) {
         let count = 0;
         const curDate = new Date(dataInicio.valueOf());
@@ -292,30 +322,83 @@
         document.getElementById('dashboard-title').textContent = `Resumo de ${dataFormatada}`;
 
         try {
-            const [chamadasSnap, funcionariosSnap] = await Promise.all([
+            const [chamadasSnap, funcionariosSnap, empresasSnap] = await Promise.all([
                 get(ref(db, 'chamadas')),
-                get(ref(db, 'funcionarios'))
+                get(ref(db, 'funcionarios')),
+                get(ref(db, 'empresas')) // Adicionado para buscar nomes de empresas
             ]);
 
             const chamadas = chamadasSnap.exists() ? chamadasSnap.val() : {};
             const funcionarios = funcionariosSnap.exists() ? funcionariosSnap.val() : {};
+            const empresas = empresasSnap.exists() ? empresasSnap.val() : {};
 
             document.getElementById('totalFuncionarios').textContent = Object.keys(funcionarios).length;
 
             const chamadasHoje = chamadas[dataISO] || {};
             let presentesHoje = 0;
+            let ausentesHoje = []; // Array para guardar os ausentes
+
             if (Object.keys(chamadasHoje).length > 0) {
                 const primeiroId = Object.keys(chamadasHoje)[0];
                 const éFormatoAntigo = chamadasHoje[primeiroId]?.status !== undefined;
+
                 if (éFormatoAntigo) {
-                    for (const funcId in chamadasHoje) if (chamadasHoje[funcId].status === 'presente') presentesHoje++;
+                    for (const funcId in chamadasHoje) {
+                        const registro = chamadasHoje[funcId];
+                        if (registro.status === 'presente') {
+                            presentesHoje++;
+                        }
+                        if (registro.status === 'falta') {
+                            const funcionario = funcionarios[funcId];
+                            if (funcionario) {
+                                const empresa = funcionario.empresaId ? empresas[funcionario.empresaId] : null;
+                                ausentesHoje.push({
+                                    nome: funcionario.nome,
+                                    empresa: empresa ? empresa.nome : 'N/A',
+                                    obra: funcionario.obra || 'N/A'
+                                });
+                            }
+                        }
+                    }
                 } else {
-                    for (const empId in chamadasHoje) for (const obNome in chamadasHoje[empId]) for (const funcId in chamadasHoje[empId][obNome]) {
-                        if (chamadasHoje[empId][obNome][funcId].status === 'presente') presentesHoje++;
+                    for (const empId in chamadasHoje) {
+                        for (const obNomeCodificado in chamadasHoje[empId]) {
+                            for (const funcId in chamadasHoje[empId][obNomeCodificado]) {
+                                const registro = chamadasHoje[empId][obNomeCodificado][funcId];
+                                if (registro.status === 'presente') {
+                                    presentesHoje++;
+                                }
+                                if (registro.status === 'falta') {
+                                    const funcionario = funcionarios[funcId];
+                                    const empresa = empresas[empId];
+                                    if (funcionario && empresa) {
+                                        ausentesHoje.push({
+                                            nome: funcionario.nome,
+                                            empresa: empresa.nome,
+                                            obra: decodeURIComponent(obNomeCodificado)
+                                        });
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
             document.getElementById('presentesHoje').textContent = presentesHoje;
+
+            // Renderizar a lista de ausentes
+            const ausentesDiv = document.getElementById('ausentes-lista');
+            ausentesDiv.innerHTML = '';
+            if (ausentesHoje.length === 0) {
+                ausentesDiv.innerHTML = '<p class="dashboard-empty-message">Nenhuma falta registrada hoje.</p>';
+            } else {
+                ausentesHoje.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(ausente => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'ausente-item';
+                    itemDiv.innerHTML = `<span>${ausente.nome}</span><span class="ausente-details">${ausente.empresa} - ${ausente.obra}</span>`;
+                    ausentesDiv.appendChild(itemDiv);
+                });
+            }
 
             // LÓGICA ATUALIZADA para Acompanhamento de Diaristas
             const diaristaStats = {};
@@ -328,7 +411,6 @@
             const sortedDates = Object.keys(chamadas).sort();
             for (const data of sortedDates) {
                 const registrosDoDia = chamadas[data];
-                // Lógica para processar ambos os formatos de dados
                 const processarRegistro = (funcId, registro) => {
                     if (diaristaStats[funcId] && registro.status === 'presente') {
                         if (registro.pago) {
@@ -360,19 +442,18 @@
             const diaristasComPendencia = Object.values(diaristaStats).filter(d => d.diasNaoPagos > 0);
 
             if (diaristasComPendencia.length === 0) {
-                listaDiv.innerHTML = '<p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center; padding: 10px;">Nenhum pagamento pendente.</p>';
+                listaDiv.innerHTML = '<p class="dashboard-empty-message">Nenhum pagamento pendente.</p>';
             } else {
                 diaristasComPendencia.sort((a,b) => b.diasNaoPagos - a.diasNaoPagos).forEach(diarista => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'diarista-item';
 
                     const hoje = new Date();
-                    // O ciclo começa no dia seguinte ao último pagamento, ou no primeiro dia não pago se nunca houve pagamento.
                     const dataInicioCicloStr = diarista.ultimoDiaPago || diarista.primeiroDiaNaoPago;
                     
                     if (dataInicioCicloStr) {
                          const dataInicioCiclo = new Date(dataInicioCicloStr + 'T00:00:00');
-                         if(diarista.ultimoDiaPago) dataInicioCiclo.setDate(dataInicioCiclo.getDate() + 1); // Ciclo começa no dia seguinte
+                         if(diarista.ultimoDiaPago) dataInicioCiclo.setDate(dataInicioCiclo.getDate() + 1);
                          
                          const diasUteisCorridos = contarDiasUteis(dataInicioCiclo, hoje);
                          
@@ -388,6 +469,10 @@
 
         } catch (error) {
             console.error("Erro ao atualizar o dashboard:", error);
+            // Adicionar mensagens de erro mais claras nos cards
+            document.getElementById('presentesHoje').textContent = 'Erro';
+            document.getElementById('diaristas-lista').innerHTML = '<p class="dashboard-empty-message">Falha ao carregar dados.</p>';
+            document.getElementById('ausentes-lista').innerHTML = '<p class="dashboard-empty-message">Falha ao carregar dados.</p>';
         }
     }
 
