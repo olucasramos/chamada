@@ -7,6 +7,7 @@
   <style>
     :root {
       --accent: #2ecc71; /* Verde para botões de ação */
+      --info: #3498db; /* Azul para edição */
       --danger: #dc2626; /* Vermelho para exclusão */
       --text-primary: #ffffff; /* Texto principal branco */
       --text-secondary: rgba(255, 255, 255, 0.7); /* Texto secundário com leve transparência */
@@ -129,12 +130,26 @@
       cursor: pointer;
       transition: var(--transition);
     }
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        width: auto;
+    }
+
 
     .btn-primary {
       background-color: var(--accent);
     }
     .btn-primary:hover {
       background-color: #27ae60;
+    }
+    
+    .btn-info {
+        background-color: var(--info);
+    }
+    .btn-info:hover {
+        background-color: #2980b9;
     }
 
     .btn-secondary {
@@ -234,11 +249,8 @@
   </footer>
 
   <script type="module">
-    // O seu JavaScript permanece o mesmo, ele não precisa de alterações.
-    // Cole aqui o script que estava no final do seu arquivo anterior.
     import { db, ref, set, get, update, remove } from "./firebase.js";
 
-    // Elementos DOM
     const formEmpresa = document.getElementById('formEmpresa');
     const formTitle = document.getElementById('formTitle');
     const btnSalvarEmpresa = document.getElementById('btnSalvarEmpresa');
@@ -250,31 +262,17 @@
     let empresasCache = {};
     let editandoEmpresaId = null;
     
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => toast.classList.add('show'), 100);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-      }, 3000);
+    function showToast(message) {
+      alert(message);
     }
     
-    function setLoadingState(element, loading) {
-      if (loading) {
-        element.disabled = true;
-        element.textContent = 'Salvando...';
-      } else {
-        element.disabled = false;
-        // O texto original será restaurado no HTML
-      }
+    function setLoadingState(element, loading, originalText = 'Salvar') {
+        element.disabled = loading;
+        element.textContent = loading ? 'Salvando...' : originalText;
     }
 
     function formatarCNPJ(cnpj) {
-      return cnpj.replace(/\D/g, '')
+      return (cnpj || '').replace(/\D/g, '')
                  .replace(/(\d{2})(\d)/, '$1.$2')
                  .replace(/(\d{3})(\d)/, '$1.$2')
                  .replace(/(\d{3})(\d)/, '$1/$2')
@@ -299,7 +297,7 @@
         preencherSelectEmpresas();
       } catch (error) {
         console.error('Erro ao carregar empresas:', error);
-        showToast('Erro ao carregar empresas', 'error');
+        showToast('Erro ao carregar empresas');
       }
     }
 
@@ -314,11 +312,11 @@
 
     async function salvarEmpresa(e) {
       e.preventDefault();
-      setLoadingState(btnSalvarEmpresa, true);
+      setLoadingState(btnSalvarEmpresa, true, 'Salvar Empresa');
       try {
         const nomeEmpresa = document.getElementById('nomeEmpresa').value.trim();
         if (!nomeEmpresa) {
-          showToast('O nome da empresa é obrigatório.', 'error');
+          showToast('O nome da empresa é obrigatório.');
           return;
         }
         const dados = {
@@ -350,10 +348,9 @@
         await carregarEmpresas();
       } catch (error) {
         console.error('Erro ao salvar empresa:', error);
-        showToast('Erro ao salvar empresa', 'error');
+        showToast('Erro ao salvar empresa');
       } finally {
-        setLoadingState(btnSalvarEmpresa, false);
-        btnSalvarEmpresa.textContent = 'Salvar Empresa';
+        setLoadingState(btnSalvarEmpresa, false, 'Salvar Empresa');
       }
     }
     
@@ -372,7 +369,7 @@
     }
 
     async function excluirEmpresa(id, nome) {
-        if (!confirm(`Tem certeza que deseja excluir a empresa "${nome}" e todas as suas obras?`)) return;
+        if (!confirm(`Tem certeza que deseja excluir a empresa "${nome}" e todas as suas obras? Esta ação não pode ser desfeita.`)) return;
         try {
             await remove(ref(db, `empresas/${id}`));
             showToast(`Empresa "${nome}" excluída!`);
@@ -380,25 +377,25 @@
             await carregarEmpresas();
         } catch (error) {
             console.error('Erro ao excluir empresa:', error);
-            showToast('Erro ao excluir empresa', 'error');
+            showToast('Erro ao excluir empresa');
         }
     }
 
     async function adicionarObra(e) {
         e.preventDefault();
         const btn = document.getElementById('btnSalvarObra');
-        setLoadingState(btn, true);
+        setLoadingState(btn, true, 'Adicionar Obra');
         try {
             const empresaId = selectEmpresa.value;
             const nomeObra = document.getElementById('nomeObra').value.trim();
             if (!empresaId || !nomeObra) {
-                showToast('Selecione a empresa e digite o nome da obra.', 'error');
+                showToast('Selecione a empresa e digite o nome da obra.');
                 return;
             }
             const obras = empresasCache[empresaId]?.obras || {};
             const obraExistente = Object.values(obras).some(obra => (obra.nome || '').toLowerCase() === nomeObra.toLowerCase());
             if (obraExistente) {
-                showToast(`A obra "${nomeObra}" já existe.`, 'error');
+                showToast(`A obra "${nomeObra}" já existe.`);
                 return;
             }
             await set(ref(db, `empresas/${empresaId}/obras/${Date.now()}`), { nome: nomeObra });
@@ -407,22 +404,97 @@
             await carregarEmpresas();
         } catch (error) {
             console.error('Erro ao adicionar obra:', error);
-            showToast('Erro ao adicionar obra', 'error');
+            showToast('Erro ao adicionar obra');
         } finally {
-            setLoadingState(btn, false);
-            btn.textContent = 'Adicionar Obra';
+            setLoadingState(btn, false, 'Adicionar Obra');
+        }
+    }
+    
+    // NOVA FUNÇÃO PARA EDITAR NOME DA OBRA E MIGRAR DADOS
+    async function editarObra(empresaId, obraId, nomeAntigo) {
+        const nomeNovo = prompt(`Digite o novo nome para a obra "${nomeAntigo}":`, nomeAntigo);
+        if (!nomeNovo || nomeNovo.trim() === '' || nomeNovo.trim() === nomeAntigo) {
+            showToast("Edição cancelada ou nome inválido.");
+            return;
+        }
+
+        const nomeNovoTrim = nomeNovo.trim();
+        if (Object.values(empresasCache[empresaId].obras).some(o => o.nome === nomeNovoTrim)) {
+            showToast("Já existe uma obra com este nome.");
+            return;
+        }
+
+        if (!confirm(`ATENÇÃO: Você está prestes a renomear a obra "${nomeAntigo}" para "${nomeNovoTrim}".\n\nIsso atualizará TODOS os registros de funcionários, chamadas e horas extras associados. A operação pode levar alguns instantes e não pode ser desfeita.\n\nDeseja continuar?`)) {
+            return;
+        }
+
+        try {
+            alert("Iniciando a atualização. Por favor, aguarde a mensagem de conclusão e não feche a página.");
+
+            const updates = {};
+            // 1. Renomeia a obra na lista de empresas
+            updates[`/empresas/${empresaId}/obras/${obraId}/nome`] = nomeNovoTrim;
+
+            // 2. Atualiza funcionários associados
+            const funcSnap = await get(ref(db, 'funcionarios'));
+            if (funcSnap.exists()) {
+                const funcionarios = funcSnap.val();
+                for (const funcId in funcionarios) {
+                    if (funcionarios[funcId].empresaId === empresaId && funcionarios[funcId].obra === nomeAntigo) {
+                        updates[`/funcionarios/${funcId}/obra`] = nomeNovoTrim;
+                    }
+                }
+            }
+            
+            // 3. Migra dados de chamadas
+            const nomeAntigoCodificado = encodeURIComponent(nomeAntigo);
+            const nomeNovoCodificado = encodeURIComponent(nomeNovoTrim);
+            const chamadasSnap = await get(ref(db, 'chamadas'));
+            if (chamadasSnap.exists()) {
+                const chamadas = chamadasSnap.val();
+                for (const data in chamadas) {
+                    const path = `${data}/${empresaId}/${nomeAntigoCodificado}`;
+                    if (chamadas[data]?.[empresaId]?.[nomeAntigoCodificado]) {
+                        updates[`/chamadas/${data}/${empresaId}/${nomeNovoCodificado}`] = chamadas[data][empresaId][nomeAntigoCodificado];
+                        updates[`/chamadas/${path}`] = null; // Remove o antigo
+                    }
+                }
+            }
+
+            // 4. Migra dados de horas extras
+            const heSnap = await get(ref(db, 'horaextra'));
+            if (heSnap.exists()) {
+                const horasExtras = heSnap.val();
+                for (const data in horasExtras) {
+                     const path = `${data}/${empresaId}/${nomeAntigoCodificado}`;
+                    if (horasExtras[data]?.[empresaId]?.[nomeAntigoCodificado]) {
+                        updates[`/horaextra/${data}/${empresaId}/${nomeNovoCodificado}`] = horasExtras[data][empresaId][nomeAntigoCodificado];
+                        updates[`/horaextra/${path}`] = null; // Remove o antigo
+                    }
+                }
+            }
+
+            // Executa todas as atualizações de uma vez
+            await update(ref(db), updates);
+            
+            showToast("Obra renomeada e todos os dados foram atualizados com sucesso!");
+            await carregarEmpresas(); // Recarrega a lista
+
+        } catch (error) {
+            console.error("Erro ao renomear obra e migrar dados:", error);
+            showToast("Ocorreu um erro grave durante a atualização. Verifique os dados.");
         }
     }
 
-    async function excluirObra(empresaId, obraId, nomeEmpresa, nomeObra) {
-        if (!confirm(`Tem certeza que deseja excluir a obra "${nomeObra}"?`)) return;
+    async function excluirObra(empresaId, obraId, nomeObra) {
+        if (!confirm(`Tem certeza que deseja excluir a obra "${nomeObra}"? Esta ação não pode ser desfeita.`)) return;
         try {
             await remove(ref(db, `empresas/${empresaId}/obras/${obraId}`));
             showToast(`Obra "${nomeObra}" excluída!`);
             await carregarEmpresas();
         } catch (error) {
             console.error('Erro ao excluir obra:', error);
-            showToast('Erro ao excluir obra', 'error');
+            showToast('Erro ao excluir obra');
         }
     }
 
@@ -448,7 +520,10 @@
                 .map(([obraId, obra]) => `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span>• ${obra.nome}</span>
-                        <button onclick="excluirObra('${empresaId}', '${obraId}', '${empresa.nome}', '${obra.nome}')" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;">Excluir</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="editarObra('${empresaId}', '${obraId}', '${obra.nome}')" class="btn-sm btn-info">Editar</button>
+                            <button onclick="excluirObra('${empresaId}', '${obraId}', '${obra.nome}')" class="btn-sm" style="background:var(--danger);">Excluir</button>
+                        </div>
                     </div>
                 `).join('');
         }
@@ -457,7 +532,7 @@
           <h2 class="card-title" style="font-size: 1.1rem;">${empresa.nome}</h2>
           <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">CNPJ: ${empresa.cnpj || '-'}</p>
           <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-            <button onclick="editarEmpresa('${empresaId}')" class="btn btn-secondary" style="width: auto; padding: 8px 16px; margin-top:0;">Editar</button>
+            <button onclick="editarEmpresa('${empresaId}')" class="btn btn-secondary" style="width: auto; padding: 8px 16px; margin-top:0;">Editar Empresa</button>
             <button onclick="excluirEmpresa('${empresaId}', '${empresa.nome}')" class="btn" style="background:var(--danger); width: auto; padding: 8px 16px;">Excluir Empresa</button>
           </div>
           <hr class="divider">
@@ -476,8 +551,10 @@
     });
     btnLimparForm.addEventListener('click', limparFormulario);
 
+    // Tornar funções globais para serem acessadas pelo onclick
     window.editarEmpresa = editarEmpresa;
     window.excluirEmpresa = excluirEmpresa;
+    window.editarObra = editarObra;
     window.excluirObra = excluirObra;
 
     carregarEmpresas();
