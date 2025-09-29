@@ -194,7 +194,7 @@
         </div>
         <button id="btnGerarHoraExtra" class="btn-action">Gerar Relatório</button>
     </div>
-
+    
     <div class="card">
       <div class="report-header"><span class="report-icon">✔️</span><h2 class="report-title">Validar Pagamentos de Diaristas</h2></div>
       <div class="form-grid two-cols">
@@ -205,6 +205,28 @@
         <div class="form-group" style="grid-column: 1 / -1;"><label for="validarSenha" class="form-label">Senha</label><input type="password" id="validarSenha" class="form-input" placeholder="Digite 1234 para confirmar" /></div>
       </div>
       <button id="btnValidarPagamento" class="btn-action success">Marcar Período como Pago</button>
+    </div>
+    
+    <div class="card">
+      <div class="report-header"><span class="report-icon">👤</span><h2 class="report-title">Dados do Funcionário</h2></div>
+        <div class="form-grid two-cols">
+            <div class="form-group"><label for="dadosEmpresa" class="form-label">Empresa</label><select id="dadosEmpresa" class="form-select empresa-select"></select></div>
+            <div class="form-group"><label for="dadosObra" class="form-label">Obra</label><select id="dadosObra" class="form-select obra-select" disabled></select></div>
+        </div>
+      <button id="btnGerarLista" class="btn-action">Gerar Relatório</button>
+    </div>
+
+    <div class="card">
+      <div class="report-header"><span class="report-icon">⚠️</span><h2 class="report-title">Excluir Registros</h2></div>
+      <div class="form-grid two-cols">
+        <div class="form-group"><label for="excluirEmpresa" class="form-label">Empresa</label><select id="excluirEmpresa" class="form-select empresa-select"></select></div>
+        <div class="form-group"><label for="excluirObra" class="form-label">Obra</label><select id="excluirObra" class="form-select obra-select" disabled></select></div>
+        <div class="form-group"><label for="excluirTipo" class="form-label">Tipo de Registro</label><select id="excluirTipo" class="form-select"><option value="chamadas">Chamada</option><option value="horaextra">Hora Extra</option></select></div>
+        <div class="form-group"><label for="excluirDataInicio" class="form-label">Data Início</label><input type="date" id="excluirDataInicio" class="form-input" /></div>
+        <div class="form-group"><label for="excluirDataFim" class="form-label">Data Fim</label><input type="date" id="excluirDataFim" class="form-input" /></div>
+        <div class="form-group"><label for="excluirSenha" class="form-label">Senha</label><input type="password" id="excluirSenha" class="form-input" /></div>
+      </div>
+      <button id="btnExcluir" class="btn-action danger">Excluir Registros</button>
     </div>
   </div>
 
@@ -256,7 +278,11 @@
   }
 
   function popularEmpresasDropdown(selectEl) {
-    selectEl.innerHTML = `<option value="todos">Todas</option>`;
+    const temOpcaoTodos = selectEl.id !== 'dadosEmpresa'; // 'Dados do Funcionário' não tem 'todas'
+    selectEl.innerHTML = `<option value="todos">${temOpcaoTodos ? 'Todas' : 'Selecione'}</option>`;
+    if (selectEl.id === 'dadosEmpresa') {
+        selectEl.innerHTML = '<option value="">Todas</option>';
+    }
     for (const id in empresasCache) {
       selectEl.innerHTML += `<option value="${id}">${empresasCache[id].nome}</option>`;
     }
@@ -265,7 +291,9 @@
   function popularDiaristasDropdown(empresaId = 'todos') {
       const selectEl = document.getElementById('validarDiarista');
       selectEl.innerHTML = `<option value="todos">Todos os Diaristas</option>`;
-      Object.entries(funcionariosCache).forEach(([id, func]) => {
+      Object.entries(funcionariosCache)
+        .sort(([,a],[,b]) => a.nome.localeCompare(b.nome))
+        .forEach(([id, func]) => {
           if (func.tipo === 'diarista' && (empresaId === 'todos' || func.empresaId === empresaId)) {
               selectEl.innerHTML += `<option value="${id}">${func.nome}</option>`;
           }
@@ -275,7 +303,10 @@
   function configurarFiltroObra(empresaSelect, obraSelect) {
     empresaSelect.addEventListener('change', () => {
       const empresaId = empresaSelect.value;
-      obraSelect.innerHTML = `<option value="">Todas</option>`;
+      const temOpcaoTodos = obraSelect.id !== 'dadosObra';
+      obraSelect.innerHTML = `<option value="">${temOpcaoTodos ? 'Todas' : 'Selecione'}</option>`;
+      if(obraSelect.id === 'dadosObra') obraSelect.innerHTML = '<option value="">Todas</option>';
+      
       obraSelect.disabled = true;
       if (empresaId && empresaId !== 'todos' && empresasCache[empresaId]?.obras) {
         const obras = empresasCache[empresaId].obras;
@@ -307,6 +338,7 @@
                     const nomeObra = decodeURIComponent(nomeObraCodificado);
                     const deveProcessarObra = !filtro.obraNome || nomeObra === filtro.obraNome;
                     if (!deveProcessarObra) continue;
+                    
                     const registros = dadosDoDia[idEmpresa][nomeObraCodificado];
                     for (const funcId in registros) filtro.callback(agregador, { data, funcId, registro: registros[funcId], empresaNome: empresasCache[idEmpresa]?.nome, obraNome: nomeObra });
                 }
@@ -315,7 +347,7 @@
     }
     return agregador;
   }
-
+  
   // --- Relatório de Faltas ---
   document.getElementById('btnGerarFaltas').addEventListener('click', async () => {
     const empresaId = document.getElementById('faltasEmpresa').value;
@@ -456,6 +488,13 @@
     finally { scrollParaResultado(); }
   });
   
+  // --- Relatório de Dados do Funcionário ---
+  document.getElementById('btnGerarLista').addEventListener('click', () => {
+      // Implementar a lógica completa para este relatório se necessário
+      showToast("Função 'Dados do Funcionário' a ser implementada.");
+      scrollParaResultado();
+  });
+
   // --- Lógica de Exclusão ---
   document.getElementById('btnExcluir').addEventListener('click', async () => {
     // ...código de exclusão aqui...
