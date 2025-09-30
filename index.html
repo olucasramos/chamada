@@ -160,7 +160,7 @@
       border-radius: 8px;
   }
   .dashboard-item .value {
-      font-size: 2rem;
+      font-size: 1.8rem; /* ALTERAÇÃO AQUI: Fonte diminuída */
       font-weight: 700;
       display: block;
   }
@@ -189,10 +189,11 @@
       margin-top: 8px;
   }
   
-  /* ALTERAÇÃO AQUI: limitando a altura da lista de diaristas */
-  #diaristas-lista.list-container {
-      max-height: 150px; /* Altura máxima para exibir uns 3 itens */
-      overflow-y: auto; /* Adiciona barra de rolagem se a lista for maior */
+  /* ALTERAÇÃO AQUI: Estilo de rolagem aplicado diretamente à lista de diaristas */
+  #diaristas-lista {
+      max-height: 150px;
+      overflow-y: auto;
+      padding-top: 8px;
   }
 
   .diarista-item {
@@ -315,7 +316,7 @@
         
         <div class="section-container">
             <h4>Acompanhamento de Diaristas</h4>
-            <div id="diaristas-lista" class="list-container">
+            <div id="diaristas-lista">
                 <p class="dashboard-empty-message">Calculando...</p>
             </div>
         </div>
