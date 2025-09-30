@@ -182,12 +182,17 @@
     padding: 15px 5px;
   }
 
-  /* NOVO ESTILO PARA O CARD INTERNO DAS LISTAS */
   .list-container {
       background-color: rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       padding: 8px;
       margin-top: 8px;
+  }
+  
+  /* ALTERAÇÃO AQUI: limitando a altura da lista de diaristas */
+  #diaristas-lista.list-container {
+      max-height: 150px; /* Altura máxima para exibir uns 3 itens */
+      overflow-y: auto; /* Adiciona barra de rolagem se a lista for maior */
   }
 
   .diarista-item {
