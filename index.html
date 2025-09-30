@@ -132,10 +132,6 @@
   .button-icon { display: inline-block; margin-right: 12px; font-size: 1.4em; vertical-align: middle; }
   
   .btn-container a { animation: fadeInUp 0.8s ease-out 0.4s both; }
-  .btn-container a:nth-child(2) { animation-delay: 0.5s; }
-  .btn-container a:nth-child(3) { animation-delay: 0.6s; }
-  .btn-container a:nth-child(4) { animation-delay: 0.7s; }
-  .btn-container a:nth-child(5) { animation-delay: 0.8s; }
   
   .info-card {
     padding: 16px;
@@ -154,7 +150,7 @@
 
   .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr; /* Alterado para uma coluna */
+      grid-template-columns: 1fr;
       gap: 10px;
       margin-top: 10px;
   }
@@ -164,12 +160,12 @@
       border-radius: 8px;
   }
   .dashboard-item .value {
-      font-size: 2rem; /* Aumentado para dar mais destaque */
+      font-size: 2rem;
       font-weight: 700;
       display: block;
   }
   .dashboard-item .label {
-      font-size: 0.85rem; /* Aumentado para melhor leitura */
+      font-size: 0.85rem;
       color: rgba(255,255,255,0.8);
   }
   
@@ -185,6 +181,15 @@
     border-top: 1px solid rgba(255,255,255,0.2);
     padding: 15px 5px;
   }
+
+  /* NOVO ESTILO PARA O CARD INTERNO DAS LISTAS */
+  .list-container {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 8px;
+  }
+
   .diarista-item {
       display: flex;
       justify-content: space-between;
@@ -193,6 +198,7 @@
       margin-bottom: 4px;
       font-weight: 500;
       font-size: 0.9rem;
+      background-color: rgba(0,0,0,0.1);
   }
   .diarista-item.alerta {
       background-color: rgba(241, 196, 15, 0.9);
@@ -206,7 +212,6 @@
       padding: 10px;
   }
   
-  /* ESTILOS PARA O PAINEL EXPANSÍVEL */
   .collapsible-header {
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -232,9 +237,6 @@
     overflow: hidden;
     transition: max-height 0.3s ease-out;
     text-align: left;
-    background: rgba(0,0,0,0.1);
-    border-radius: 0 0 8px 8px;
-    padding: 0 5px;
   }
   .ausente-item {
       display: flex;
@@ -242,7 +244,6 @@
       align-items: center;
       padding: 8px;
       background: rgba(220, 38, 38, 0.2);
-      border-left: 3px solid #dc2626;
       border-radius: 6px;
       margin-bottom: 4px;
       font-weight: 500;
@@ -309,7 +310,7 @@
         
         <div class="section-container">
             <h4>Acompanhamento de Diaristas</h4>
-            <div id="diaristas-lista">
+            <div id="diaristas-lista" class="list-container">
                 <p class="dashboard-empty-message">Calculando...</p>
             </div>
         </div>
@@ -320,7 +321,7 @@
                 <span class="arrow">▼</span>
             </div>
             <div class="collapsible-content">
-                <div id="ausentes-lista" style="padding: 8px 0;">
+                <div id="ausentes-lista" class="list-container">
                     <p class="dashboard-empty-message">Calculando...</p>
                 </div>
             </div>
@@ -537,7 +538,7 @@
           if (content.style.maxHeight) {
             content.style.maxHeight = null;
           } else {
-            content.style.maxHeight = content.scrollHeight + 16 + "px";
+            content.style.maxHeight = content.scrollHeight + "px";
           }
         });
       });
